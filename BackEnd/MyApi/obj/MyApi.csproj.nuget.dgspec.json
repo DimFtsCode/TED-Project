@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\desktop\\ΤΕΔ\\Project\\backend\\myapi\\MyApi.csproj": {}
+    "D:\\desktop\\ΤΕΔ\\Project\\BackEnd\\MyApi\\MyApi.csproj": {}
   },
   "projects": {
-    "D:\\desktop\\ΤΕΔ\\Project\\backend\\myapi\\MyApi.csproj": {
+    "D:\\desktop\\ΤΕΔ\\Project\\BackEnd\\MyApi\\MyApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\desktop\\ΤΕΔ\\Project\\backend\\myapi\\MyApi.csproj",
+        "projectUniqueName": "D:\\desktop\\ΤΕΔ\\Project\\BackEnd\\MyApi\\MyApi.csproj",
         "projectName": "MyApi",
-        "projectPath": "D:\\desktop\\ΤΕΔ\\Project\\backend\\myapi\\MyApi.csproj",
+        "projectPath": "D:\\desktop\\ΤΕΔ\\Project\\BackEnd\\MyApi\\MyApi.csproj",
         "packagesPath": "C:\\Users\\dimitrios\\.nuget\\packages\\",
-        "outputPath": "D:\\desktop\\ΤΕΔ\\Project\\backend\\myapi\\obj\\",
+        "outputPath": "D:\\desktop\\ΤΕΔ\\Project\\BackEnd\\MyApi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\dimitrios\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -48,6 +48,26 @@
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[8.0.6, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.7, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.7, )"
+            },
+            "Microsoft.EntityFrameworkCore.Sqlite": {
+              "target": "Package",
+              "version": "[8.0.7, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.7, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",

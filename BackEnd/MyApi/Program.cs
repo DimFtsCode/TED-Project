@@ -1,8 +1,14 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MyApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Προσθήκη της υπηρεσίας του DbContext
+builder.Services.AddDbContext<WordsContext>(options =>
+    options.UseSqlite("Data Source=words.db"));
 
 // Προσθήκη υπηρεσιών στο container
 builder.Services.AddControllers();
