@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import './App.css';
+import Register from './Register'; // Import the Register component
 
 function App() {
   const [data, setData] = useState([]);
@@ -11,7 +13,7 @@ function App() {
   }, []);
 
   const fetchData = () => {
-    axios.get('http://localhost:5297/api/sample')
+    axios.get('http://localhost:5297/api/words')
       .then(response => {
         setData(response.data);
       })
@@ -21,7 +23,7 @@ function App() {
   };
 
   const addWord = () => {
-    axios.post('http://localhost:5297/api/sample', JSON.stringify(newWord), {
+    axios.post('http://localhost:5297/api/words', JSON.stringify(newWord), {
       headers: {
         'Content-Type': 'application/json'
       }
@@ -36,7 +38,7 @@ function App() {
   };
 
   const removeWord = (word) => {
-    axios.delete(`http://localhost:5297/api/sample/${word}`)
+    axios.delete(`http://localhost:5297/api/words/${word}`)
       .then(response => {
         setData(response.data);
       })
@@ -46,25 +48,43 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <p>Data from SKata:</p>
-        <ul>
-          {data.map((item, index) => (
-            <li key={index}>
-              {item} <button onClick={() => removeWord(item)}>Remove</button>
-            </li>
-          ))}
-        </ul>
-        <input 
-          type="text" 
-          value={newWord} 
-          onChange={(e) => setNewWord(e.target.value)} 
-          placeholder="Add a new word" 
-        />
-        <button onClick={addWord}>Add Word</button>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <header className="App-header">
+          <nav>
+            <ul>
+              <li><Link to="/">Home</Link></li>
+              <li><Link to="/register">Register</Link></li>
+            </ul>
+          </nav>
+          <Routes>
+            <Route 
+              path="/" 
+              element={
+                <div>
+                  <p>Data from SKata:</p>
+                  <ul>
+                    {data.map((item, index) => (
+                      <li key={index}>
+                        {item} <button onClick={() => removeWord(item)}>Remove</button>
+                      </li>
+                    ))}
+                  </ul>
+                  <input 
+                    type="text" 
+                    value={newWord} 
+                    onChange={(e) => setNewWord(e.target.value)} 
+                    placeholder="Add a new word" 
+                  />
+                  <button onClick={addWord}>Add Word</button>
+                </div>
+              } 
+            />
+            <Route path="/register" element={<Register />} />
+          </Routes>
+        </header>
+      </div>
+    </Router>
   );
 }
 

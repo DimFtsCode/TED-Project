@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyApi.Data;
 
@@ -10,9 +11,11 @@ using MyApi.Data;
 namespace MyApi.Migrations
 {
     [DbContext(typeof(WordsContext))]
-    partial class WordsContextModelSnapshot : ModelSnapshot
+    [Migration("20240721155151_InitialSetup")]
+    partial class InitialSetup
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.7");
