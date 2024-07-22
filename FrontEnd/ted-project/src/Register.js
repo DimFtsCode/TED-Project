@@ -46,6 +46,7 @@ const Register = () => {
             alert(response.data);
         } catch (error) {
             console.error(error);
+            alert('Error during registration');
         }
     };
 

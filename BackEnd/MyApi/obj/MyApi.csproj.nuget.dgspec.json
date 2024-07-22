@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\desktop\\ΤΕΔ\\Project\\backend\\myapi\\MyApi.csproj": {}
+    "D:\\desktop\\ΤΕΔ\\Project\\backend\\MyAPi\\MyApi.csproj": {}
   },
   "projects": {
-    "D:\\desktop\\ΤΕΔ\\Project\\backend\\myapi\\MyApi.csproj": {
+    "D:\\desktop\\ΤΕΔ\\Project\\backend\\MyAPi\\MyApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\desktop\\ΤΕΔ\\Project\\backend\\myapi\\MyApi.csproj",
+        "projectUniqueName": "D:\\desktop\\ΤΕΔ\\Project\\backend\\MyAPi\\MyApi.csproj",
         "projectName": "MyApi",
-        "projectPath": "D:\\desktop\\ΤΕΔ\\Project\\backend\\myapi\\MyApi.csproj",
+        "projectPath": "D:\\desktop\\ΤΕΔ\\Project\\backend\\MyAPi\\MyApi.csproj",
         "packagesPath": "C:\\Users\\dimitrios\\.nuget\\packages\\",
-        "outputPath": "D:\\desktop\\ΤΕΔ\\Project\\backend\\myapi\\obj\\",
+        "outputPath": "D:\\desktop\\ΤΕΔ\\Project\\backend\\MyAPi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\dimitrios\\AppData\\Roaming\\NuGet\\NuGet.Config",

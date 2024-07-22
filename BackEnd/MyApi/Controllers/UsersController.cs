@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MyApi.Data;
 using MyApi.Models;
+using System.IO;
 using System.Linq;
 
 namespace MyApi.Controllers
@@ -22,6 +23,15 @@ namespace MyApi.Controllers
             if (!user.IsValid())
             {
                 return BadRequest("Passwords do not match");
+            }
+
+            if (user.Photo != null)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    user.Photo.CopyTo(memoryStream);
+                    user.PhotoData = memoryStream.ToArray();
+                }
             }
 
             _context.Users.Add(user);
