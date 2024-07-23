@@ -1,1 +1,119 @@
+# General
+*.log
+*.tmp
+*.tmp_proj
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vs/
+.vscode/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+[Tt]est[Rr]esult*/
+[Tt]est[Rr]esults/
+build/
+[Bb]uild[Ll]og.*
+*.[Oo]tf
+*.[Tt]tf
+*.[Ee]ot
+*.[Ww]off
+*.[Ww]off2
+*.svg
+
+# Visual Studio Code
+.history/
+.settings/
+*.code-workspace
+
+# Rider
+.idea/
+
+# User-specific files
+*.rsuser
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.usertasks
+*.cache
+*.csproj.DotSettings.user
+
+# Mono Auto Generated Files
+mono_crash.*
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows shortcuts
+*.lnk
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# ASP.NET Core
+wwwroot/
+!wwwroot/**/*.webmanifest
+!wwwroot/**/*.json
+!wwwroot/**/*.ico
+!wwwroot/**/*.png
+!wwwroot/**/*.svg
+!wwwroot/**/*.jpg
+!wwwroot/**/*.jpeg
+!wwwroot/**/*.gif
+!wwwroot/**/*.css
+!wwwroot/**/*.js
+!wwwroot/**/*.wasm
+!wwwroot/service-worker.js
+!wwwroot/manifest.json
+!wwwroot/**/*.html
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+**/Properties/launchSettings.json
+
+# .NET Core build directories
+**/bin/Debug/netcoreapp*/
+**/bin/Release/netcoreapp*/
+
+# Entity Framework Core
+**/Migrations/*.Designer.cs
+**/*.db-shm
+**/*.db-wal
+**/*.jfm
+
+# Node.js
 FrontEnd/ted-project/node_modules/
+
+# SQLite databases
+# *.db
+# *.db3
+# *.sqlite
+# *.sqlite3
+
+# Environment files
+appsettings.json
+appsettings.*.json
+
+# Exclude build outputs and intermediate files
+BackEnd/MyApi/obj/
