@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\desktop\\ΤΕΔ\\Project\\backend\\MyAPi\\MyApi.csproj": {}
+    "D:\\desktop\\TED\\Project\\backend\\myapi\\MyApi.csproj": {}
   },
   "projects": {
-    "D:\\desktop\\ΤΕΔ\\Project\\backend\\MyAPi\\MyApi.csproj": {
+    "D:\\desktop\\TED\\Project\\backend\\myapi\\MyApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\desktop\\ΤΕΔ\\Project\\backend\\MyAPi\\MyApi.csproj",
+        "projectUniqueName": "D:\\desktop\\TED\\Project\\backend\\myapi\\MyApi.csproj",
         "projectName": "MyApi",
-        "projectPath": "D:\\desktop\\ΤΕΔ\\Project\\backend\\MyAPi\\MyApi.csproj",
+        "projectPath": "D:\\desktop\\TED\\Project\\backend\\myapi\\MyApi.csproj",
         "packagesPath": "C:\\Users\\dimitrios\\.nuget\\packages\\",
-        "outputPath": "D:\\desktop\\ΤΕΔ\\Project\\backend\\MyAPi\\obj\\",
+        "outputPath": "D:\\desktop\\TED\\Project\\backend\\myapi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\dimitrios\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -68,6 +68,10 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[8.0.7, )"
+            },
+            "Microsoft.Extensions.Logging.Console": {
+              "target": "Package",
+              "version": "[8.0.0, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",

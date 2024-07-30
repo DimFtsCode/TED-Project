@@ -1,14 +1,16 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MyApi.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Προσθήκη της υπηρεσίας του DbContext
-builder.Services.AddDbContext<WordsContext>(options =>
-    options.UseSqlite("Data Source=words.db"));
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite("Data Source=database.db"));
 
 // Προσθήκη υπηρεσιών στο container
 builder.Services.AddControllers();
@@ -17,9 +19,20 @@ builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
-        builder => builder.WithOrigins("http://localhost:3000")
+        builder => builder.WithOrigins("http://localhost:3000", "https://localhost:3000")
                           .AllowAnyMethod()
-                          .AllowAnyHeader());
+                          .AllowAnyHeader()
+                          .AllowCredentials());
+});
+
+// Προσθήκη καταγραφής
+builder.Services.AddLogging(configure => configure.AddConsole());
+
+// Ρύθμιση των ακροατών (listeners)
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5297); // HTTP
+    options.ListenAnyIP(7176, listenOptions => listenOptions.UseHttps()); // HTTPS
 });
 
 var app = builder.Build();
@@ -34,6 +47,9 @@ app.UseRouting();
 
 // Χρήση της CORS policy
 app.UseCors("AllowReactApp");
+
+// Χρήση HTTPS redirection
+app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

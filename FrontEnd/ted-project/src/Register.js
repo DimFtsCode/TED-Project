@@ -1,7 +1,9 @@
 import axios from 'axios';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
+    const navigate = useNavigate(); 
     const [user, setUser] = useState({
         firstName: '',
         lastName: '',
@@ -12,7 +14,9 @@ const Register = () => {
         photo: null,
         dateOfBirth: '',
         address: ''
+        // admin: false
     });
+    const [error, setError] = useState(''); // Νέα κατάσταση για αποθήκευση μηνύματος σφάλματος
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -34,19 +38,27 @@ const Register = () => {
 
         const formData = new FormData();
         for (let key in user) {
-            formData.append(key, user[key]);
+            if (key === 'admin') {
+                formData.append(key, user[key] ? '1' : '0'); // append as string '1' or '0'
+            } else {
+                formData.append(key, user[key]);
+            }
         }
 
+        console.log('Form data:', ...formData); // Log the form data for debugging
+
         try {
-            const response = await axios.post('http://localhost:5297/api/users/register', formData, {
+            const response = await axios.post('https://localhost:7176/api/users/register', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
-                }
+                },
+                withCredentials: true
             });
             alert(response.data);
+            navigate("/"); // Πλοήγηση στην αρχική σελίδα μετά την επιτυχή εγγραφή
         } catch (error) {
             console.error(error);
-            alert('Error during registration');
+            setError(error.response.data); // Ενημέρωση της κατάστασης με το μήνυμα σφάλματος
         }
     };
 
@@ -62,6 +74,7 @@ const Register = () => {
             <input type="date" name="dateOfBirth" value={user.dateOfBirth} onChange={handleChange} required />
             <input type="text" name="address" value={user.address} onChange={handleChange} placeholder="Address" required />
             <button type="submit">Register</button>
+            {error && <p style={{ color: 'red' }}>{error}</p>} {/* Προβολή μηνύματος σφάλματος */}
         </form>
     );
 };
