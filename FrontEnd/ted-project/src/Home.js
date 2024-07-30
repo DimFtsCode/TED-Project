@@ -1,10 +1,12 @@
-// Home.js
-import React, { useState } from 'react';
+// src/Home.js
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { UserContext } from './UserContext';
 
 const Home = () => {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+  const { login } = useContext(UserContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -15,6 +17,11 @@ const Home = () => {
     try {
       const response = await axios.post('https://localhost:7176/api/users/login', { email, password });
       alert('Login successful!');
+      const userData = {
+        email: response.data.email,
+        role: response.data.isAdmin ? 'admin' : 'user',
+      };
+      login(userData);
       if (response.data.isAdmin) {
         navigate('/admin');
       } else {
@@ -30,7 +37,6 @@ const Home = () => {
     <div className="container mt-5">
       <h1>Home Page</h1>
       <p>Welcome to the Home Page!</p>
-      <p>Skata Polla</p>
 
       <form onSubmit={handleSubmit} className="mt-4">
         <div className="form-group">
