@@ -1,10 +1,6 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using MyApi.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using MyApi.Data;
+using MyApi.Services; // Προσθήκη του σωστού using
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +9,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=database.db"));
 
 // Προσθήκη υπηρεσιών στο container
+builder.Services.AddScoped<UserService>(); // Προσθήκη του UserService
 builder.Services.AddControllers();
 
 // Προσθήκη CORS policy
@@ -24,9 +21,6 @@ builder.Services.AddCors(options =>
                           .AllowAnyHeader()
                           .AllowCredentials());
 });
-
-// Προσθήκη καταγραφής
-builder.Services.AddLogging(configure => configure.AddConsole());
 
 // Ρύθμιση των ακροατών (listeners)
 builder.WebHost.ConfigureKestrel(options =>

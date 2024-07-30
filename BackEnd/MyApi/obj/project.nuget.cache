@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "dCdxjW5IWI7Juvq5IJpqNsa609mXtIUK9Z+LzB8dDM5rq3Qfn0RsK0VMlW4lhRD5yjtcpQxPaV8VrorRPk+eMA==",
+  "dgSpecHash": "qNtuaOHNSWzu2nFxg6jBoIotSuha+YwUZibxLXWnaPTRZk8YBkvT47KWK1AP91FzGZoYxp3zTxjqcT9jBn3ygA==",
   "success": true,
   "projectFilePath": "D:\\desktop\\TED\\Project\\backend\\myapi\\MyApi.csproj",
   "expectedPackageFiles": [
@@ -39,6 +39,7 @@
     "C:\\Users\\dimitrios\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512",
     "C:\\Users\\dimitrios\\.nuget\\packages\\microsoft.openapi\\1.4.3\\microsoft.openapi.1.4.3.nupkg.sha512",
     "C:\\Users\\dimitrios\\.nuget\\packages\\mono.texttemplating\\2.2.1\\mono.texttemplating.2.2.1.nupkg.sha512",
+    "C:\\Users\\dimitrios\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
     "C:\\Users\\dimitrios\\.nuget\\packages\\sqlitepclraw.bundle_e_sqlite3\\2.1.6\\sqlitepclraw.bundle_e_sqlite3.2.1.6.nupkg.sha512",
     "C:\\Users\\dimitrios\\.nuget\\packages\\sqlitepclraw.core\\2.1.6\\sqlitepclraw.core.2.1.6.nupkg.sha512",
     "C:\\Users\\dimitrios\\.nuget\\packages\\sqlitepclraw.lib.e_sqlite3\\2.1.6\\sqlitepclraw.lib.e_sqlite3.2.1.6.nupkg.sha512",

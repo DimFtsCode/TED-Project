@@ -1,10 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
-using MyApi.Data;
 using MyApi.Models;
+using MyApi.Services;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.Extensions.Logging;
-using System;
+using Newtonsoft.Json;
+using System.Xml.Serialization;
+using System.Xml;
 
 namespace MyApi.Controllers
 {
@@ -12,12 +16,12 @@ namespace MyApi.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly UserService _userService;
         private readonly ILogger<UsersController> _logger;
 
-        public UsersController(AppDbContext context, ILogger<UsersController> logger)
+        public UsersController(UserService userService, ILogger<UsersController> logger)
         {
-            _context = context;
+            _userService = userService;
             _logger = logger;
         }
 
@@ -32,12 +36,12 @@ namespace MyApi.Controllers
                 return BadRequest("Passwords do not match");
             }
 
-            if (_context.Users.Any(u => u.Email == user.Email))
+            if (string.IsNullOrEmpty(user.Email) || _userService.IsEmailInUse(user.Email))
             {
                 _logger.LogWarning("Email already in use: {Email}", user.Email);
                 return BadRequest("Email is already in use");
             }
-            
+
             if (user.Photo != null)
             {
                 using (var memoryStream = new MemoryStream())
@@ -47,20 +51,13 @@ namespace MyApi.Controllers
                 }
             }
 
-            // Ορίστε την τιμή του admin σε false για νέους χρήστες
             user.Admin = false;
 
             _logger.LogInformation("User data after setting admin to false: {@User}", user);
 
             try
             {
-                using (var transaction = _context.Database.BeginTransaction())
-                {
-                    _context.Users.Add(user);
-                    _context.SaveChanges();
-                    transaction.Commit();
-                }
-                
+                _userService.AddUser(user);
                 _logger.LogInformation("User registered successfully: {@User}", user);
                 return Ok("User registered successfully");
             }
@@ -74,7 +71,7 @@ namespace MyApi.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest loginRequest)
         {
-            var user = _context.Users.SingleOrDefault(u => u.Email == loginRequest.Email);
+            var user = _userService.GetAllUsers().SingleOrDefault(u => u.Email == loginRequest.Email);
 
             if (user == null || user.Password != loginRequest.Password)
             {
@@ -90,7 +87,79 @@ namespace MyApi.Controllers
         [HttpGet]
         public IActionResult GetAllUsers()
         {
-            return Ok(_context.Users.ToList());
+            return Ok(_userService.GetAllUsers());
         }
+
+        [HttpGet("{id}")]
+        public IActionResult GetUserById(int id)
+        {
+            var user = _userService.GetUserById(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(user);
+        }
+
+        [HttpPost("export")]
+        public IActionResult ExportUsers([FromQuery] string format, [FromBody] List<int> userIds)
+        {
+            var users = _userService.GetAllUsers()
+                .Where(u => userIds.Contains(u.UserId))
+                .Select(u => new ExportUser
+                {
+                    UserId = u.UserId,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Email = u.Email,
+                    PhoneNumber = u.PhoneNumber,
+                    DateOfBirth = u.DateOfBirth,
+                    Address = u.Address,
+                    Admin = u.Admin
+                })
+                .ToList();
+
+            if (format.ToLower() == "json")
+            {
+                var json = JsonConvert.SerializeObject(users, Newtonsoft.Json.Formatting.Indented);
+                return File(Encoding.UTF8.GetBytes(json), "application/json", "users.json");
+            }
+            else if (format.ToLower() == "xml")
+            {
+                var xmlSerializer = new XmlSerializer(typeof(List<ExportUser>));
+                using (var memoryStream = new MemoryStream())
+                {
+                    var xmlWriterSettings = new XmlWriterSettings
+                    {
+                        Indent = true,
+                        IndentChars = "  ",
+                        NewLineOnAttributes = false
+                    };
+
+                    using (var xmlWriter = XmlWriter.Create(memoryStream, xmlWriterSettings))
+                    {
+                        xmlSerializer.Serialize(xmlWriter, users);
+                    }
+
+                    return File(memoryStream.ToArray(), "application/xml", "users.xml");
+                }
+            }
+
+            return BadRequest("Invalid format specified.");
+        }
+    }
+
+    public class ExportUser
+    {
+        public int UserId { get; set; }
+        public string? FirstName { get; set; } = string.Empty;
+        public string? LastName { get; set; } = string.Empty;
+        public string? Email { get; set; } = string.Empty;
+        public string? PhoneNumber { get; set; } = string.Empty;
+        public DateTime DateOfBirth { get; set; }
+        public string? Address { get; set; } = string.Empty;
+        public bool Admin { get; set; }
     }
 }
