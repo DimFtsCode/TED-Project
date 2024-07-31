@@ -41,30 +41,35 @@ const Header = () => {
               </button>
               <div className="collapse navbar-collapse justify-content-center" id="navbarNav">
                 <ul className="navbar-nav">
-                  {!user && (
-                    <>
-                      <li className="nav-item">
-                        <Link className="nav-link" to="/register">Register</Link>
-                      </li>
-                    </>
-                  )}
                   {user && user.role === 'admin' && (
                     <>
                       <li className="nav-item">
                         <Link className="nav-link" to="/admin">Admin Dashboard</Link>
-                      </li>
-                      <li className="nav-item">
-                        <button className="nav-link btn" onClick={handleLogout}>Logout</button>
                       </li>
                     </>
                   )}
                   {user && user.role === 'user' && (
                     <>
                       <li className="nav-item">
-                        <Link className="nav-link" to="/user">User Dashboard</Link>
+                        <Link className="nav-link" to="/user">Home</Link>
                       </li>
                       <li className="nav-item">
-                        <button className="nav-link btn" onClick={handleLogout}>Logout</button>
+                        <Link className="nav-link" to="">Network</Link>
+                      </li>
+                      <li className="nav-item">
+                        <Link className="nav-link" to="">Jobs</Link>
+                      </li>
+                      <li className="nav-item">
+                        <Link className="nav-link" to="">Discussions</Link>
+                      </li>
+                      <li className="nav-item">
+                        <Link className="nav-link" to="">Notifications</Link>
+                      </li>
+                      <li className="nav-item">
+                        <Link className="nav-link" to="">Profile</Link>
+                      </li>
+                      <li className="nav-item">
+                        <Link className="nav-link" to="">Settings</Link>
                       </li>
                     </>
                   )}
@@ -72,6 +77,16 @@ const Header = () => {
               </div>
             </nav>
           </div>
+          {!user && (
+            <div className="col-2 text-end">
+              <Link className="btn btn-link nav-link" to="/register" style={{ fontWeight: 'bold' }}>Register</Link>
+            </div>
+          )}
+          {user && (
+            <div className="col-2 text-end">
+              <button className="btn btn-link nav-link" onClick={handleLogout} style={{ fontWeight: 'bold' }}>Logout</button>
+            </div>
+          )}
         </div>
       </div>
     </header>

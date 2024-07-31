@@ -29,6 +29,10 @@ namespace MyApi.Migrations
                     b.Property<bool>("Admin")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Biography")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ConfirmPassword")
                         .HasColumnType("TEXT");
 

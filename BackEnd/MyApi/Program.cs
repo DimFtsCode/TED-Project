@@ -1,6 +1,9 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using MyApi.Data;
-using MyApi.Services; // Προσθήκη του σωστού using
+using MyApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +12,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=database.db"));
 
 // Προσθήκη υπηρεσιών στο container
-builder.Services.AddScoped<UserService>(); // Προσθήκη του UserService
+builder.Services.AddScoped<UserService>();
 builder.Services.AddControllers();
 
 // Προσθήκη CORS policy

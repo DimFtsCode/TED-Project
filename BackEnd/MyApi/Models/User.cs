@@ -1,5 +1,7 @@
+// User.cs
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MyApi.Models
@@ -23,6 +25,8 @@ namespace MyApi.Models
         public string? Address { get; set; }
 
         public bool Admin { get; set; } // Νέα ιδιότητα για την ένδειξη αν ο χρήστης είναι διαχειριστής
+
+        public List<string> Biography { get; set; } = new List<string>(); // Νέα ιδιότητα για την βιογραφία
 
         public bool IsValid()
         {

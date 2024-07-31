@@ -59,13 +59,20 @@ namespace MyApi.Controllers
             {
                 _userService.AddUser(user);
                 _logger.LogInformation("User registered successfully: {@User}", user);
-                return Ok("User registered successfully");
+                return Ok(new { userId = user.UserId, email = user.Email }); 
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while registering user: {@User}", user);
                 return StatusCode(500, "Internal server error");
             }
+        }
+
+        [HttpPost("check-email")]
+        public IActionResult CheckEmail([FromBody] CheckEmailRequest request)
+        {
+            var userExists = _userService.IsEmailInUse(request.Email);
+            return Ok(new { exists = userExists });
         }
 
         [HttpPost("login")]
@@ -81,7 +88,7 @@ namespace MyApi.Controllers
 
             _logger.LogInformation("User logged in successfully: {@User}", user);
 
-            return Ok(new { isAdmin = user.Admin });
+            return Ok(new { isAdmin = user.Admin, userId = user.UserId });
         }
 
         [HttpGet]
@@ -117,7 +124,8 @@ namespace MyApi.Controllers
                     PhoneNumber = u.PhoneNumber,
                     DateOfBirth = u.DateOfBirth,
                     Address = u.Address,
-                    Admin = u.Admin
+                    Admin = u.Admin,
+                    Biography = u.Biography?.ToList() // Ensure the biography is copied as a new list
                 })
                 .ToList();
 
@@ -149,6 +157,33 @@ namespace MyApi.Controllers
 
             return BadRequest("Invalid format specified.");
         }
+
+        [HttpPost("register-bio")]
+        public IActionResult RegisterBio([FromBody] RegisterBioRequest request)
+        {
+            var user = _userService.GetUserById(request.UserId);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            if (user.Biography == null)
+            {
+                user.Biography = new List<string>();
+            }
+
+            user.Biography.AddRange(request.Bio);
+            try
+            {
+                _userService.UpdateUser(user);
+                return Ok("Biography updated successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while updating biography for user: {UserId}", user.UserId);
+                return StatusCode(500, "Internal server error");
+            }
+        }
     }
 
     public class ExportUser
@@ -161,5 +196,12 @@ namespace MyApi.Controllers
         public DateTime DateOfBirth { get; set; }
         public string? Address { get; set; } = string.Empty;
         public bool Admin { get; set; }
+        public List<string>? Biography { get; set; } = new List<string>();
     }
+
+    public class CheckEmailRequest
+    {
+        public string Email { get; set; }
+    }
+
 }
