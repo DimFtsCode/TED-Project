@@ -1,0 +1,11 @@
+/* src/user/User.css */
+.sidebar .nav-link-custom {
+    color: black !important;
+    font-weight: bold !important;
+    text-align: center !important;
+  }
+  
+  .sidebar .nav-link-custom .fa-icon {
+    margin-right: 8px !important;
+  }
+  

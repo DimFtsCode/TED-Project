@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { UserContext } from './UserContext';
+import { Modal, Button } from 'react-bootstrap';
 
 const RegisterBio = () => {
     const navigate = useNavigate();
@@ -11,6 +12,8 @@ const RegisterBio = () => {
     const [educationList, setEducationList] = useState([]);
     const [jobList, setJobList] = useState([]);
     const [error, setError] = useState('');
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [userName, setUserName] = useState('');
 
     const handleEducationChange = (e) => {
         setEducation(e.target.value);
@@ -34,6 +37,26 @@ const RegisterBio = () => {
         }
     };
 
+    const handleEditEducation = (index) => {
+        const item = educationList[index];
+        setEducation(item);
+        setEducationList(educationList.filter((_, i) => i !== index));
+    };
+
+    const handleDeleteEducation = (index) => {
+        setEducationList(educationList.filter((_, i) => i !== index));
+    };
+
+    const handleEditJob = (index) => {
+        const item = jobList[index];
+        setJob(item);
+        setJobList(jobList.filter((_, i) => i !== index));
+    };
+
+    const handleDeleteJob = (index) => {
+        setJobList(jobList.filter((_, i) => i !== index));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         
@@ -46,15 +69,20 @@ const RegisterBio = () => {
         console.log("Biography List:", formattedBioList);
 
         try {
-            const response = await axios.post('https://localhost:7176/api/users/register-bio', 
+            const response = await axios.post('https://localhost:7176/api/userbio/register-bio', 
                 { userId: user.userId, bio: formattedBioList }, 
                 { withCredentials: true });
-            alert(response.data);
-            navigate("/user");
+            setUserName(response.data.firstName);  // Set the user's name for the modal
+            setShowSuccessModal(true);    // Show the success modal
         } catch (error) {
             console.error(error);
             setError(error.response.data);
         }
+    };
+
+    const handleCloseSuccessModal = () => {
+        setShowSuccessModal(false);
+        navigate("/user");
     };
 
     return (
@@ -78,17 +106,37 @@ const RegisterBio = () => {
                 <h4>Biography List</h4>
                 <ul className="list-group">
                     {educationList.map((item, index) => (
-                        <li key={index} className="list-group-item">
-                            <strong>Education {index + 1}:</strong> {item}
+                        <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                            <span><strong>Education {index + 1}:</strong> {item}</span>
+                            <span>
+                                <button className="btn btn-sm btn-warning me-2" onClick={() => handleEditEducation(index)}>Edit</button>
+                                <button className="btn btn-sm btn-danger" onClick={() => handleDeleteEducation(index)}>Delete</button>
+                            </span>
                         </li>
                     ))}
                     {jobList.map((item, index) => (
-                        <li key={index} className="list-group-item">
-                            <strong>Job {index + 1}:</strong> {item}
+                        <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                            <span><strong>Job {index + 1}:</strong> {item}</span>
+                            <span>
+                                <button className="btn btn-sm btn-warning me-2" onClick={() => handleEditJob(index)}>Edit</button>
+                                <button className="btn btn-sm btn-danger" onClick={() => handleDeleteJob(index)}>Delete</button>
+                            </span>
                         </li>
                     ))}
                 </ul>
             </div>
+
+            <Modal show={showSuccessModal} onHide={handleCloseSuccessModal} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title style={{ color: 'green' }}>Biography Created</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>{userName}, your biography has been created successfully.</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="primary" onClick={handleCloseSuccessModal}>
+                        OK
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

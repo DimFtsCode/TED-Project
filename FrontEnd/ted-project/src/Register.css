@@ -1,0 +1,102 @@
+/* Register.css */
+.register-container {
+    margin-top: 2rem;
+    padding: 2rem;
+    background-image: url('./images/register.jpg'); /* Add background image */
+    background-size: cover; /* Cover the entire container */
+    background-position: center; /* Center the background image */
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center align the content */
+    color: #fff; /* Adjust text color for readability */
+    margin-bottom: 2rem;
+  }
+  
+  .register-container h2 {
+    text-align: center;
+    color: #007bff;
+    margin-bottom: 1.5rem;
+    background: rgba(255, 255, 255, 0.8); /* Add background to header text */
+    padding: 0.5rem;
+    border-radius: 5px;
+  }
+  
+  .register-form {
+    width: 100%; /* Ensure the form takes up the full width of the container */
+    max-width: 800px; /* Optional: limit the max width */
+    display: flex;
+    flex-direction: column;
+    background: #ffffff; /* Add solid background to the form */
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  
+  .form-group .col-md-4 {
+    flex: 0 0 48%; /* Adjust width of form elements */
+    max-width: 48%;
+  }
+  
+  .form-group .col-md-2 {
+    display: none; /* Hide the empty column */
+  }
+  
+  .register-container .form-label {
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .register-container .form-control {
+    margin-bottom: 1rem;
+  }
+  
+  .register-container .btn-container {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+  }
+  
+  .register-container .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    padding: 0.75rem 1.5rem; /* Increased padding for a slightly larger button */
+    width: auto;
+    font-size: 1rem; /* Adjust the font size if needed */
+  }
+  
+  .register-container .text-danger {
+    color: #ff0000;
+    text-align: center;
+    margin-top: 1rem;
+  }
+  
+  .register-container .modal-header {
+    background-color: #f8f9fa;
+  }
+  
+  .register-container .modal-title {
+    font-weight: bold;
+  }
+  
+  .register-container .modal-body {
+    font-size: 1rem;
+  }
+  
+  .register-container .modal-footer .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+  }
+  
+  .register-container .modal-footer .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+  }
+  

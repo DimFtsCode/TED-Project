@@ -1,9 +1,12 @@
-// src/User.js
 import React, { useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { UserContext } from '../UserContext';
 import useIdleTimer from '../hooks/useIdleTimer';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Container, Row, Col, Nav } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser, faNetworkWired } from '@fortawesome/free-solid-svg-icons';
+import './User.css'; 
+//npm install @fortawesome/react-fontawesome @fortawesome/free-solid-svg-icons @fortawesome/fontawesome-svg-core --legacy-peer-deps
 
 const User = () => {
   const navigate = useNavigate();
@@ -23,9 +26,25 @@ const User = () => {
   };
 
   return (
-    <div>
-      <h1>User Page</h1>
-      <p>Welcome to the User Page!</p>
+    <Container fluid>
+      <Row>
+        <Col md={2} className="bg-light sidebar">
+          <Nav className="flex-column">
+            <Nav.Link as={Link} to="/user/profile" className="nav-link-custom">
+              <FontAwesomeIcon icon={faUser} className="me-2" />
+              Profile
+            </Nav.Link>
+            <Nav.Link as={Link} to="/user/network" className="nav-link-custom">
+              <FontAwesomeIcon icon={faNetworkWired} className="me-2" />
+              Network
+            </Nav.Link>
+          </Nav>
+        </Col>
+        <Col md={10}>
+          <h1>User Page</h1>
+          <p>Welcome to the User Page!</p>
+        </Col>
+      </Row>
 
       <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Header closeButton>
@@ -38,7 +57,7 @@ const User = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-    </div>
+    </Container>
   );
 };
 

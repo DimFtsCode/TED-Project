@@ -7,6 +7,8 @@ import RegisterBio from './RegisterBio';
 import Layout from './Layout';
 import Admin from './admin/Admin';
 import User from './user/User';
+import UserProfile from './user/UserProfile';
+import UserNetwork from './user/UserNetwork';
 import Header from './Header';
 import Footer from './Footer';
 import { UserProvider } from './UserContext';
@@ -28,7 +30,9 @@ function App() {
                 <Route path="register" element={<Register />} />
                 <Route path="register-bio" element={<ProtectedRoute><RegisterBio /></ProtectedRoute>} />
                 <Route path="admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-                <Route path="user" element={<ProtectedRoute><User /></ProtectedRoute>} />
+                <Route path="/user" element={<ProtectedRoute><User /></ProtectedRoute>} />
+                <Route path="/user/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
+                <Route path="/user/network" element={<ProtectedRoute><UserNetwork /></ProtectedRoute>} />
                 <Route path="/user/:userId" element={<ProtectedRoute><UserDetail /></ProtectedRoute>} />
               </Route>
             </Routes>

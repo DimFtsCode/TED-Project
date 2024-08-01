@@ -1,25 +1,37 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../UserContext';
 import useIdleTimer from '../hooks/useIdleTimer';
-import { Table, Button, Modal, Form, Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Tabs, Tab, FormControl, Button, Modal } from 'react-bootstrap';
+import UserTable from './UserTable';
+import EditUserModal from './EditUserModal';
+import PaginationComponent from './PaginationComponent';
 
 const Admin = () => {
     const navigate = useNavigate();
     const { logout } = useContext(UserContext);
     const [users, setUsers] = useState([]);
-    const [selectedUsers, setSelectedUsers] = useState([]);
+    const [selectedAllUsers, setSelectedAllUsers] = useState([]);
+    const [selectedAdminUsers, setSelectedAdminUsers] = useState([]);
+    const [selectedNonAdminUsers, setSelectedNonAdminUsers] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [selectAll, setSelectAll] = useState(false);
+    const [selectAllAll, setSelectAllAll] = useState(false);
+    const [selectAllAdmins, setSelectAllAdmins] = useState(false);
+    const [selectAllNonAdmins, setSelectAllNonAdmins] = useState(false);
+    const [key, setKey] = useState('all');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editUser, setEditUser] = useState(null);
 
     useIdleTimer(() => {
         setShowModal(true);
         setTimeout(() => {
             logout();
             navigate('/');
-        }, 5000); // 5 δευτερόλεπτα
-    }, 300000); // 5 λεπτά
+        }, 5000); // 5 seconds
+    }, 300000); // 5 minutes
 
     useEffect(() => {
         fetchUsers();
@@ -34,27 +46,27 @@ const Admin = () => {
         }
     };
 
-    const handleSelectUser = (userId) => {
-        setSelectedUsers(prevState => 
-            prevState.includes(userId) 
-                ? prevState.filter(id => id !== userId) 
+    const handleSelectUser = (userId, selectedUsers, setSelectedUsers) => {
+        setSelectedUsers(prevState =>
+            prevState.includes(userId)
+                ? prevState.filter(id => id !== userId)
                 : [...prevState, userId]
         );
     };
 
-    const handleSelectAll = () => {
+    const handleSelectAll = (selectAll, setSelectAll, filteredUsers, setSelectedUsers) => {
         if (selectAll) {
             setSelectedUsers([]);
         } else {
-            const allUserIds = users.map(user => user.userId);
+            const allUserIds = filteredUsers.map(user => user.userId);
             setSelectedUsers(allUserIds);
         }
         setSelectAll(!selectAll);
     };
 
-    const exportData = async (format) => {
+    const exportData = async (format, selectedUsers) => {
         try {
-            const response = await axios.post(`https://localhost:7176/api/users/export?format=${format}`, selectedUsers, {
+            const response = await axios.post(`https://localhost:7176/api/userexport/export?format=${format}`, selectedUsers, {
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -71,11 +83,53 @@ const Admin = () => {
         } catch (error) {
             console.error('Error exporting data:', error);
         }
-    }
+    };
 
     const handleCloseModal = () => {
         setShowModal(false);
     };
+
+    const handlePageChange = (newPage) => {
+        setCurrentPage(newPage);
+    };
+
+    const handleEditChange = (e) => {
+        const { name, value } = e.target;
+        if (name === 'biography') {
+            setEditUser({ ...editUser, [name]: value.split('\n') });
+        } else {
+            setEditUser({ ...editUser, [name]: value });
+        }
+    };
+
+    const handleSaveEditUser = async () => {
+        try {
+            await axios.put(`https://localhost:7176/api/users/${editUser.userId}`, editUser);
+            setShowEditModal(false);
+            setEditUser(null);
+            fetchUsers();
+        } catch (error) {
+            console.error('Error updating user:', error);
+        }
+    };
+
+    const handleDeleteUser = async (userId) => {
+        try {
+            await axios.delete(`https://localhost:7176/api/users/${userId}`);
+            fetchUsers();
+        } catch (error) {
+            console.error('Error deleting user:', error);
+        }
+    };
+
+    const renderPagination = (filteredUsers) => (
+        <PaginationComponent 
+            totalItems={filteredUsers.length}
+            currentPage={currentPage}
+            rowsPerPage={rowsPerPage}
+            handlePageChange={handlePageChange}
+        />
+    );
 
     return (
         <Container>
@@ -86,46 +140,72 @@ const Admin = () => {
             </Row>
             <Row>
                 <Col>
-                    <Table striped bordered hover>
-                        <thead>
-                            <tr>
-                                <th>
-                                    <Form.Check 
-                                        type="checkbox"
-                                        checked={selectAll}
-                                        onChange={handleSelectAll}
-                                    />
-                                </th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {users.map(user => (
-                                <tr key={user.userId}>
-                                    <td>
-                                        <Form.Check
-                                            type="checkbox"
-                                            checked={selectedUsers.includes(user.userId)}
-                                            onChange={() => handleSelectUser(user.userId)}
-                                        />
-                                    </td>
-                                    <td>{user.firstName} {user.lastName}</td>
-                                    <td>{user.email}</td>
-                                    <td>
-                                        <Link to={`/user/${user.userId}`} className="btn btn-info">View</Link>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </Table>
+                    <Tabs activeKey={key} onSelect={(k) => setKey(k)} className="mb-3">
+                        <Tab eventKey="all" title="All Users">
+                            <UserTable 
+                                users={users} 
+                                selectedUsers={selectedAllUsers} 
+                                setSelectedUsers={setSelectedAllUsers} // Add this line
+                                handleSelectUser={handleSelectUser} 
+                                handleSelectAll={handleSelectAll} 
+                                selectAll={selectAllAll} 
+                                setSelectAll={setSelectAllAll} 
+                                setEditUser={setEditUser} 
+                                setShowEditModal={setShowEditModal} 
+                                handleDeleteUser={handleDeleteUser}
+                                currentPage={currentPage}
+                                rowsPerPage={rowsPerPage}
+                                renderPagination={renderPagination}
+                            />
+                        </Tab>
+                        <Tab eventKey="admins" title="Admins">
+                            <UserTable 
+                                users={users.filter(user => user.admin === true)} 
+                                selectedUsers={selectedAdminUsers} 
+                                setSelectedUsers={setSelectedAdminUsers} // Add this line
+                                handleSelectUser={handleSelectUser} 
+                                handleSelectAll={handleSelectAll} 
+                                selectAll={selectAllAdmins} 
+                                setSelectAll={setSelectAllAdmins} 
+                                setEditUser={setEditUser} 
+                                setShowEditModal={setShowEditModal} 
+                                handleDeleteUser={handleDeleteUser}
+                                currentPage={currentPage}
+                                rowsPerPage={rowsPerPage}
+                                renderPagination={renderPagination}
+                            />
+                        </Tab>
+                        <Tab eventKey="nonAdmins" title="Non-Admins">
+                            <UserTable 
+                                users={users.filter(user => user.admin === false)} 
+                                selectedUsers={selectedNonAdminUsers} 
+                                setSelectedUsers={setSelectedNonAdminUsers} // Add this line
+                                handleSelectUser={handleSelectUser} 
+                                handleSelectAll={handleSelectAll} 
+                                selectAll={selectAllNonAdmins} 
+                                setSelectAll={setSelectAllNonAdmins} 
+                                setEditUser={setEditUser} 
+                                setShowEditModal={setShowEditModal} 
+                                handleDeleteUser={handleDeleteUser}
+                                currentPage={currentPage}
+                                rowsPerPage={rowsPerPage}
+                                renderPagination={renderPagination}
+                            />
+                        </Tab>
+                    </Tabs>
                 </Col>
             </Row>
             <Row className="my-3">
+                <Col md="auto">
+                    <FormControl as="select" value={rowsPerPage} onChange={(e) => setRowsPerPage(Number(e.target.value))}>
+                        <option value={10}>10</option>
+                        <option value={25}>25</option>
+                        <option value={50}>50</option>
+                    </FormControl>
+                </Col>
                 <Col>
-                    <Button variant="primary" onClick={() => exportData('json')}>Export JSON</Button>
-                    <Button variant="secondary" onClick={() => exportData('xml')} className="ms-2">Export XML</Button>
+                    <Button variant="primary" onClick={() => exportData('json', key === 'all' ? selectedAllUsers : key === 'admins' ? selectedAdminUsers : key === 'nonAdmins' ? selectedNonAdminUsers : [])}>Export JSON</Button>
+                    <Button variant="secondary" onClick={() => exportData('xml', key === 'all' ? selectedAllUsers : key === 'admins' ? selectedAdminUsers : key === 'nonAdmins' ? selectedNonAdminUsers : [])} className="ms-2">Export XML</Button>
                 </Col>
             </Row>
 
@@ -140,6 +220,14 @@ const Admin = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
+
+            <EditUserModal 
+                showEditModal={showEditModal}
+                setShowEditModal={setShowEditModal}
+                editUser={editUser}
+                handleEditChange={handleEditChange}
+                handleSaveEditUser={handleSaveEditUser}
+            />
         </Container>
     );
 };
