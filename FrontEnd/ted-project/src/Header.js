@@ -1,4 +1,3 @@
-// src/Header.js
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -54,7 +53,7 @@ const Header = () => {
                         <Link className="nav-link" to="/user">Home</Link>
                       </li>
                       <li className="nav-item">
-                        <Link className="nav-link" to="">Network</Link>
+                        <Link className="nav-link" to="/user/network">Network</Link>
                       </li>
                       <li className="nav-item">
                         <Link className="nav-link" to="">Jobs</Link>
@@ -63,13 +62,13 @@ const Header = () => {
                         <Link className="nav-link" to="">Discussions</Link>
                       </li>
                       <li className="nav-item">
-                        <Link className="nav-link" to="">Notifications</Link>
+                        <Link className="nav-link" to="/user/notifications">Notifications</Link>
                       </li>
                       <li className="nav-item">
                         <Link className="nav-link" to="">Profile</Link>
                       </li>
                       <li className="nav-item">
-                        <Link className="nav-link" to="">Settings</Link>
+                        <Link className="nav-link" to="/user/settings">Settings</Link>
                       </li>
                     </>
                   )}

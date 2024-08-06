@@ -4,7 +4,7 @@ import { Table, Button, Form } from 'react-bootstrap';
 const UserTable = ({
     users, 
     selectedUsers, 
-    setSelectedUsers, // Add this line
+    setSelectedUsers, 
     handleSelectUser, 
     handleSelectAll, 
     selectAll, 

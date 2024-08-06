@@ -55,15 +55,39 @@ const UserDetail = () => {
                                 <ListGroup.Item><strong>Address:</strong> {user.address || 'Not Provided'}</ListGroup.Item>
                                 <ListGroup.Item><strong>Password:</strong> {user.password}</ListGroup.Item>
                                 <ListGroup.Item>
-                                    <strong>Biography:</strong>
-                                    {user.biography && user.biography.length > 0 ? (
+                                    <strong>Education:</strong>
+                                    {user.education && user.education.length > 0 ? (
                                         <ul>
-                                            {user.biography.map((item, index) => (
-                                                <li key={index}>{item}</li>
+                                            {user.education.map((item, index) => (
+                                                <li key={index}>{item.degree}, {item.institution} ({item.startDate} - {item.endDate})</li>
                                             ))}
                                         </ul>
                                     ) : (
-                                        <p>No biography provided.</p>
+                                        <p>No education details provided.</p>
+                                    )}
+                                </ListGroup.Item>
+                                <ListGroup.Item>
+                                    <strong>Jobs:</strong>
+                                    {user.jobs && user.jobs.length > 0 ? (
+                                        <ul>
+                                            {user.jobs.map((item, index) => (
+                                                <li key={index}>{item.position}, {item.company} ({item.startDate} - {item.endDate})</li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p>No job details provided.</p>
+                                    )}
+                                </ListGroup.Item>
+                                <ListGroup.Item>
+                                    <strong>Skills:</strong>
+                                    {user.skills && user.skills.length > 0 ? (
+                                        <ul>
+                                            {user.skills.map((item, index) => (
+                                                <li key={index}>{item.skillName} ({item.proficiency})</li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p>No skill details provided.</p>
                                     )}
                                 </ListGroup.Item>
                             </ListGroup>

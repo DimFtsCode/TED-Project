@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using MyApi.Data;
 using MyApi.Models;
 using System.Collections.Generic;
@@ -14,55 +15,75 @@ namespace MyApi.Services
             _context = context;
         }
 
-        public List<User> GetAllUsers()
+        public User? GetUserByEmailAndPassword(string email, string password)
         {
-            return _context.Users.ToList() ?? new List<User>();
+            return _context.Users.SingleOrDefault(u => u.Email == email && u.Password == password);
+        }
+
+        public bool IsEmailInUse(string? email)
+        {
+            if (email == null)
+            {
+                return false;
+            }
+
+            return _context.Users.Any(u => u.Email == email);
+        }
+
+        public IEnumerable<User> GetAllUsers()
+        {
+            return _context.Users
+                .Include(u => u.Education)
+                .Include(u => u.Jobs)
+                .Include(u => u.Skills)
+                .ToList();
         }
 
         public User? GetUserById(int id)
         {
-            return _context.Users.SingleOrDefault(u => u.UserId == id);
+            return _context.Users
+                .Include(u => u.Education)
+                .Include(u => u.Jobs)
+                .Include(u => u.Skills)
+                .SingleOrDefault(u => u.UserId == id);
         }
 
-        public void AddUser(User user)
+        public void UpdateUser(User updatedUser)
         {
-            _context.Users.Add(user);
-            _context.SaveChanges();
-        }
+            var existingUser = _context.Users
+                .Include(u => u.Education)
+                .Include(u => u.Jobs)
+                .Include(u => u.Skills)
+                .SingleOrDefault(u => u.UserId == updatedUser.UserId);
 
-        public void UpdateUser(User user)
-        {
-            var existingUser = _context.Users.SingleOrDefault(u => u.UserId == user.UserId);
             if (existingUser != null)
             {
-                existingUser.FirstName = user.FirstName;
-                existingUser.LastName = user.LastName;
-                existingUser.Email = user.Email;
-                existingUser.PhoneNumber = user.PhoneNumber;
-                existingUser.Password = user.Password;
-                existingUser.ConfirmPassword = user.ConfirmPassword;
-                existingUser.PhotoData = user.PhotoData;
-                existingUser.DateOfBirth = user.DateOfBirth;
-                existingUser.Address = user.Address;
-                existingUser.Admin = user.Admin;
+                _context.Entry(existingUser).CurrentValues.SetValues(updatedUser);
+
+                // Clear and update education
+                existingUser.Education.Clear();
+                existingUser.Education.AddRange(updatedUser.Education);
+
+                // Clear and update jobs
+                existingUser.Jobs.Clear();
+                existingUser.Jobs.AddRange(updatedUser.Jobs);
+
+                // Clear and update skills
+                existingUser.Skills.Clear();
+                existingUser.Skills.AddRange(updatedUser.Skills);
 
                 _context.SaveChanges();
             }
         }
 
-        public void UpdateUserBiography(int userId, List<string> bio)
+        public void DeleteUser(int id)
         {
-            var user = GetUserById(userId);
+            var user = _context.Users.SingleOrDefault(u => u.UserId == id);
             if (user != null)
             {
-                user.Biography = bio; // Αντικατάσταση της υπάρχουσας λίστας
+                _context.Users.Remove(user);
                 _context.SaveChanges();
             }
-        }
-
-        public bool IsEmailInUse(string email)
-        {
-            return _context.Users.Any(u => u.Email == email);
         }
     }
 }

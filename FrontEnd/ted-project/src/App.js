@@ -7,8 +7,10 @@ import RegisterBio from './RegisterBio';
 import Layout from './Layout';
 import Admin from './admin/Admin';
 import User from './user/User';
+import UserSettings from './user/UserSettings';
 import UserProfile from './user/UserProfile';
 import UserNetwork from './user/UserNetwork';
+import UserNotifications from './user/UserNotifications';
 import Header from './Header';
 import Footer from './Footer';
 import { UserProvider } from './UserContext';
@@ -34,6 +36,8 @@ function App() {
                 <Route path="/user/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
                 <Route path="/user/network" element={<ProtectedRoute><UserNetwork /></ProtectedRoute>} />
                 <Route path="/user/:userId" element={<ProtectedRoute><UserDetail /></ProtectedRoute>} />
+                <Route path="/user/settings" element={<ProtectedRoute><UserSettings/></ProtectedRoute>} />
+                <Route path="/user/notifications" element={<ProtectedRoute><UserNotifications/></ProtectedRoute>} />
               </Route>
             </Routes>
           </main>

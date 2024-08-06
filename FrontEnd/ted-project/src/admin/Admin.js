@@ -95,16 +95,68 @@ const Admin = () => {
 
     const handleEditChange = (e) => {
         const { name, value } = e.target;
-        if (name === 'biography') {
-            setEditUser({ ...editUser, [name]: value.split('\n') });
+        const [field, index, key] = name.split('-');
+    
+        if (['education', 'skills', 'jobs', 'publicFields'].includes(field)) {
+            if (field === 'publicFields') {
+                const fieldName = value;
+                const updatedFields = editUser.publicFields.includes(fieldName)
+                    ? editUser.publicFields.filter(field => field !== fieldName)
+                    : [...editUser.publicFields, fieldName];
+                setEditUser({ ...editUser, publicFields: updatedFields });
+            } else {
+                const updatedItems = [...editUser[field]];
+                updatedItems[index] = {
+                    ...updatedItems[index],
+                    [key]: value
+                };
+    
+                // Επικύρωση ημερομηνιών
+                if (key === 'startDate' || key === 'endDate') {
+                    const startDate = new Date(updatedItems[index].startDate);
+                    const endDate = new Date(updatedItems[index].endDate);
+    
+                    if (startDate > endDate) {
+                        alert('Η ημερομηνία έναρξης πρέπει να είναι πριν από την ημερομηνία λήξης');
+                        return;
+                    }
+                }
+    
+                setEditUser({ ...editUser, [field]: updatedItems });
+            }
         } else {
             setEditUser({ ...editUser, [name]: value });
         }
     };
+    
+    
+    
+    
+    
 
     const handleSaveEditUser = async () => {
         try {
-            await axios.put(`https://localhost:7176/api/users/${editUser.userId}`, editUser);
+            const formattedUser = {
+                ...editUser,
+                education: editUser.education.map(({ degree, institution, startDate, endDate }) => ({
+                    degree,
+                    institution,
+                    startDate: new Date(startDate).toISOString(),
+                    endDate: new Date(endDate).toISOString(),
+                })),
+                jobs: editUser.jobs.map(({ position, company, startDate, endDate }) => ({
+                    position,
+                    company,
+                    startDate: new Date(startDate).toISOString(),
+                    endDate: new Date(endDate).toISOString(),
+                })),
+                skills: editUser.skills.map(({ skillName, proficiency }) => ({
+                    skillName,
+                    proficiency,
+                })),
+            };
+    
+            await axios.put(`https://localhost:7176/api/users/${editUser.userId}`, formattedUser);
             setShowEditModal(false);
             setEditUser(null);
             fetchUsers();
@@ -112,6 +164,7 @@ const Admin = () => {
             console.error('Error updating user:', error);
         }
     };
+    
 
     const handleDeleteUser = async (userId) => {
         try {
@@ -121,6 +174,7 @@ const Admin = () => {
             console.error('Error deleting user:', error);
         }
     };
+    
 
     const renderPagination = (filteredUsers) => (
         <PaginationComponent 
