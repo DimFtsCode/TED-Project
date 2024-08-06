@@ -16,9 +16,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<UserRegistrationService>();
 builder.Services.AddScoped<UserBioService>();
 builder.Services.AddScoped<UserExportService>();
-
-// builder.Services.AddScoped<FriendshipService>();
-// builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<UserNetworkService>();
 builder.Services.AddControllers();
 
 // Προσθήκη CORS policy

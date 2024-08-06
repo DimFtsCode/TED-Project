@@ -20,7 +20,7 @@ const UserNotifications = () => {
     try {
       const response = await axios.get(`https://localhost:7176/api/usernetwork/${currentUser.userId}/requests`);
       console.log("Connection Requests Response:", response.data); // Εκτύπωση της απάντησης
-      setConnectionRequests(response.data.result); // Χρήση του πεδίου result
+      setConnectionRequests(response.data); // Χρήση του response.data
     } catch (error) {
       console.error('Error fetching connection requests:', error);
       setError('Error fetching connection requests.');
@@ -39,17 +39,19 @@ const UserNotifications = () => {
 
   const handleAcceptRequest = async (requestId) => {
     try {
-      await axios.post(`https://localhost:7176/api/connectionrequests/${requestId}/accept`);
+      const response = await axios.post(`https://localhost:7176/api/usernetwork/connectionrequests/${requestId}/accept`);
+      console.log(response.data); // Εκτύπωση της απάντησης
       fetchConnectionRequests();
     } catch (error) {
       console.error('Error accepting connection request:', error);
       setError('Error accepting connection request.');
     }
   };
-
+  
   const handleRejectRequest = async (requestId) => {
     try {
-      await axios.post(`https://localhost:7176/api/connectionrequests/${requestId}/reject`);
+      const response = await axios.post(`https://localhost:7176/api/usernetwork/connectionrequests/${requestId}/reject`);
+      console.log(response.data); // Εκτύπωση της απάντησης
       fetchConnectionRequests();
     } catch (error) {
       console.error('Error rejecting connection request:', error);

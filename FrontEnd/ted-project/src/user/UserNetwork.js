@@ -25,6 +25,7 @@ const UserNetwork = () => {
   const fetchFriends = async () => {
     try {
       const response = await axios.get(`https://localhost:7176/api/usernetwork/${currentUser.userId}/friends`);
+      console.log("Friends Response:", response.data); // Εκτύπωση της απάντησης
       setFriends(response.data);
     } catch (error) {
       console.error('Error fetching friends:', error);
@@ -39,6 +40,7 @@ const UserNetwork = () => {
       const response = await axios.get('https://localhost:7176/api/usernetwork/search', {
         params: { query: searchTerm },
       });
+      console.log("Search Results:", response.data); // Εκτύπωση της απάντησης αναζήτησης
       setSearchResults(response.data);
       setCurrentPage(1); // Reset to first page on new search
     } catch (error) {
@@ -49,14 +51,13 @@ const UserNetwork = () => {
 
   const handleConnect = async (friendId) => {
     try {
-        await axios.post(`https://localhost:7176/api/usernetwork/${currentUser.userId}/sendrequest/${friendId}`);
-        alert('Connection request sent!');
+      await axios.post(`https://localhost:7176/api/usernetwork/${currentUser.userId}/sendrequest/${friendId}`);
+      alert('Connection request sent!');
     } catch (error) {
-        console.error('Error connecting to user:', error);
-        setError('Error connecting to user.');
+      console.error('Error connecting to user:', error);
+      setError('Error connecting to user.');
     }
   };
-
 
   const handleViewProfile = (userId) => {
     // Logic to view user profile
@@ -106,14 +107,15 @@ const UserNetwork = () => {
                 </tr>
               </thead>
               <tbody>
-                {friends.map((friend) => (
-                  <tr key={friend.userId}>
+                {friends.map((friend, index) => (
+                  <tr key={index}>
                     <td>{friend.firstName}</td>
                     <td>{friend.lastName}</td>
                     <td>{friend.email}</td>
                     <td>
                       <Button variant="primary" onClick={() => handleViewProfile(friend.userId)}>View Profile</Button>
                       <Button variant="secondary" onClick={() => handleStartChat(friend.userId)} className="ml-2">Chat</Button>
+                      <Button variant="success" onClick={() => handleConnect(friend.userId)} className="ml-2">Connect</Button>
                     </td>
                   </tr>
                 ))}
