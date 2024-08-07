@@ -31,7 +31,7 @@ namespace MyApi.Models
         public List<Job> Jobs { get; set; } = new List<Job>();
         public List<Skill> Skills { get; set; } = new List<Skill>();
 
-        public bool IsValid()
+        public bool IsValid() // currently always returns true, will be updated in the future
         {
             return Password == Password;
         }
