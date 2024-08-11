@@ -31,7 +31,9 @@ namespace MyApi.Models
         public List<Job> Jobs { get; set; } = new List<Job>();
         public List<Skill> Skills { get; set; } = new List<Skill>();
 
-        public bool IsValid() // currently always returns true, will be updated in the future
+        public List<Message> SentMessages { get; set; } = new List<Message>(); // One-to-Many relationship with Message
+
+        public bool IsValid()
         {
             return Password == Password;
         }

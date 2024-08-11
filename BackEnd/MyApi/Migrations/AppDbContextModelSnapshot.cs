@@ -65,6 +65,24 @@ namespace MyApi.Migrations
                     b.ToTable("Friendships");
                 });
 
+            modelBuilder.Entity("MyApi.Models.Discussion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Participants")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Discussions");
+                });
+
             modelBuilder.Entity("MyApi.Models.Education", b =>
                 {
                     b.Property<int>("EducationId")
@@ -129,6 +147,36 @@ namespace MyApi.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Jobs");
+                });
+
+            modelBuilder.Entity("MyApi.Models.Message", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("DiscussionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SenderName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DiscussionId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("MyApi.Models.Skill", b =>
@@ -259,6 +307,21 @@ namespace MyApi.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MyApi.Models.Message", b =>
+                {
+                    b.HasOne("MyApi.Models.Discussion", null)
+                        .WithMany("Messages")
+                        .HasForeignKey("DiscussionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyApi.Models.User", null)
+                        .WithMany("SentMessages")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("MyApi.Models.Skill", b =>
                 {
                     b.HasOne("MyApi.Models.User", null)
@@ -268,11 +331,18 @@ namespace MyApi.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MyApi.Models.Discussion", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
             modelBuilder.Entity("MyApi.Models.User", b =>
                 {
                     b.Navigation("Education");
 
                     b.Navigation("Jobs");
+
+                    b.Navigation("SentMessages");
 
                     b.Navigation("Skills");
                 });

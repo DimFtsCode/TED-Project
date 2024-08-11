@@ -1,13 +1,13 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Form, Button, Container, Alert, Modal, Card, Row, Col, InputGroup } from 'react-bootstrap';
-import { UserContext } from '../UserContext';
+import { Container, Row, Col, Card, Form, Button, Alert, InputGroup, Modal } from 'react-bootstrap';
+import { UserContext } from '../UserContext'; // Προσθήκη του UserContext
 
 const UserSettings = () => {
-    const { user } = useContext(UserContext); // Assuming UserContext provides user information
-    const navigate = useNavigate(); // useNavigate hook for navigation
-    const [email, setEmail] = useState(user.email);
+    const { user: currentUser } = useContext(UserContext); // Λήψη του τρέχοντος χρήστη από το context
+    const navigate = useNavigate(); // Χρήση του useNavigate για πλοήγηση
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [emailError, setEmailError] = useState('');
@@ -36,13 +36,16 @@ const UserSettings = () => {
     const handleEmailSubmit = async (e) => {
         e.preventDefault();
 
+        if (!currentUser || !currentUser.userId) {
+            setEmailError('User is not defined.');
+            return;
+        }
+
         try {
-            await axios.put(`https://localhost:7176/api/usersettings/${user.userId}/email`, { email });
+            await axios.put(`https://localhost:7176/api/usersettings/${currentUser.userId}/email`, { email });
             setShowSuccessModal(true);
             setEmailError(''); // Clear error on success
-            setTimeout(() => {
-                navigate(`/user/${user.userId}`); // Redirect to user page
-            }, 2000);
+            navigate(`/user/${currentUser.userId}`); // Redirect to user page
         } catch (error) {
             console.error(error);
             const errorMessage = extractErrorMessage(error);
@@ -60,13 +63,16 @@ const UserSettings = () => {
             return;
         }
 
+        if (!currentUser || !currentUser.userId) {
+            setPasswordError('User is not defined.');
+            return;
+        }
+
         try {
-            await axios.put(`https://localhost:7176/api/usersettings/${user.userId}/password`, { password, confirmPassword });
+            await axios.put(`https://localhost:7176/api/usersettings/${currentUser.userId}/password`, { password });
             setShowSuccessModal(true);
             setPasswordError(''); // Clear error on success
-            setTimeout(() => {
-                navigate(`/user`); // Redirect to user page
-            }, 2000);
+            navigate(`/user/${currentUser.userId}`); // Redirect to user page
         } catch (error) {
             console.error(error);
             const errorMessage = extractErrorMessage(error);

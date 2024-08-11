@@ -1,19 +1,23 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Container, Row, Col, Nav, Form, FormControl, Button, Table, Pagination, Card } from 'react-bootstrap';
+import { Container, Row, Col, Nav, Form, FormControl, Button, Table, Pagination, Card, Modal } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faNetworkWired } from '@fortawesome/free-solid-svg-icons';
-import './User.css';
 import { UserContext } from '../UserContext';
 
 const UserNetwork = () => {
+  const navigate = useNavigate();
   const { user: currentUser } = useContext(UserContext);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [error, setError] = useState('');
   const [friends, setFriends] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [message, setMessage] = useState('');
+  const [selectedFriendId, setSelectedFriendId] = useState(null);
   const resultsPerPage = 10;
 
   useEffect(() => {
@@ -25,10 +29,8 @@ const UserNetwork = () => {
   const fetchFriends = async () => {
     try {
       const response = await axios.get(`https://localhost:7176/api/usernetwork/${currentUser.userId}/friends`);
-      console.log("Friends Response:", response.data); // Εκτύπωση της απάντησης
       setFriends(response.data);
     } catch (error) {
-      console.error('Error fetching friends:', error);
       setError('Error fetching friends.');
     }
   };
@@ -37,15 +39,13 @@ const UserNetwork = () => {
     e.preventDefault();
     setError('');
     try {
-      const response = await axios.get('https://localhost:7176/api/usernetwork/search', {
-        params: { query: searchTerm },
-      });
-      console.log("Search Results:", response.data); // Εκτύπωση της απάντησης αναζήτησης
-      setSearchResults(response.data);
-      setCurrentPage(1); // Reset to first page on new search
+        const response = await axios.get(`https://localhost:7176/api/usernetwork/${currentUser.userId}/search`, {
+            params: { query: searchTerm },
+        });
+        setSearchResults(response.data);
+        setCurrentPage(1); // Reset to first page on new search
     } catch (error) {
-      console.error('Error searching users:', error);
-      setError('No users found.');
+        setError('No users found.');
     }
   };
 
@@ -54,19 +54,57 @@ const UserNetwork = () => {
       await axios.post(`https://localhost:7176/api/usernetwork/${currentUser.userId}/sendrequest/${friendId}`);
       alert('Connection request sent!');
     } catch (error) {
-      console.error('Error connecting to user:', error);
       setError('Error connecting to user.');
     }
   };
 
   const handleViewProfile = (userId) => {
-    // Logic to view user profile
-    console.log(`View profile of user ${userId}`);
+    navigate(`/network/user/${userId}`);
   };
 
-  const handleStartChat = (userId) => {
-    // Logic to start chat with user
-    console.log(`Start chat with user ${userId}`);
+  const handleChatClick = (friendId) => {
+    setSelectedFriendId(friendId);
+    setShowChatModal(true);
+  };
+
+  const handleCloseChatModal = () => {
+    setShowChatModal(false);
+    setMessage('');
+  };
+
+  const handleSendMessage = async () => {
+    try {
+      if (!currentUser || !currentUser.userId) {
+        alert('User is not logged in');
+        return;
+      }
+      const response = await axios.post(`https://localhost:7176/api/discussions`, {
+        participants: [currentUser.userId, selectedFriendId]
+      });
+      const discussionId = response.data.id;
+      await axios.post(`https://localhost:7176/api/messages/send`, {
+        text: message,
+        senderId: currentUser.userId,
+        discussionId: discussionId,
+        timestamp: new Date().toISOString()
+      });
+      setMessage('');
+      setShowChatModal(false);
+      navigate('/user/discussion');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Failed to send message');
+    }
+  };
+
+  const handleDeleteFriend = async (friendId) => {
+    try {
+      await axios.delete(`https://localhost:7176/api/usernetwork/${currentUser.userId}/friends/${friendId}`);
+      setFriends(friends.filter(friend => friend.userId !== friendId));
+      alert('Friend deleted successfully!');
+    } catch (error) {
+      setError('Error deleting friend.');
+    }
   };
 
   // Calculate the current page results
@@ -114,8 +152,8 @@ const UserNetwork = () => {
                     <td>{friend.email}</td>
                     <td>
                       <Button variant="primary" onClick={() => handleViewProfile(friend.userId)}>View Profile</Button>
-                      <Button variant="secondary" onClick={() => handleStartChat(friend.userId)} className="ml-2">Chat</Button>
-                      <Button variant="success" onClick={() => handleConnect(friend.userId)} className="ml-2">Connect</Button>
+                      <Button variant="info" onClick={() => handleChatClick(friend.userId)} className="ml-2">Chat</Button>
+                      <Button variant="danger" onClick={() => handleDeleteFriend(friend.userId)} className="ml-2">Block</Button>
                     </td>
                   </tr>
                 ))}
@@ -139,7 +177,6 @@ const UserNetwork = () => {
                       <Card.Title>{user.firstName} {user.lastName}</Card.Title>
                       <Card.Text>Email: {user.email}</Card.Text>
                       <Button variant="primary" onClick={() => handleViewProfile(user.userId)}>View Profile</Button>
-                      <Button variant="secondary" onClick={() => handleStartChat(user.userId)} className="ml-2">Chat</Button>
                       <Button variant="success" onClick={() => handleConnect(user.userId)} className="ml-2">Connect</Button>
                     </Card.Body>
                   </Card>
@@ -156,6 +193,35 @@ const UserNetwork = () => {
           </Container>
         </Col>
       </Row>
+
+      {/* Chat Modal */}
+      <Modal show={showChatModal} onHide={handleCloseChatModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Send Message</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group controlId="messageText">
+              <Form.Label>Message</Form.Label>
+              <Form.Control 
+                as="textarea" 
+                rows={3} 
+                value={message} 
+                onChange={(e) => setMessage(e.target.value)} 
+                placeholder="Enter your message here" 
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseChatModal}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleSendMessage}>
+            Send Message
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };

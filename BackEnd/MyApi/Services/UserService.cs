@@ -85,5 +85,24 @@ namespace MyApi.Services
                 _context.SaveChanges();
             }
         }
+
+
+        public (string? FirstName, string? LastName)? GetUserNamesById(int id)
+        {
+            var user = _context.Users
+                .Where(u => u.UserId == id)
+                .Select(u => new { u.FirstName, u.LastName })
+                .SingleOrDefault();
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            return (user.FirstName, user.LastName);
+        }
     }
+
+    
+
 }
