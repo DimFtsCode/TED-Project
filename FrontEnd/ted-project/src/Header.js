@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import logo from './images/logo.jpg';
+import transparent_logo from './images/transparent-logo.png';
 import { UserContext } from './UserContext';
 
 const Header = () => {
@@ -14,26 +15,20 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-light">
-      <div className="container">
-        <div className="row align-items-center">
-          <div className="col-1">
-            {!user ? (
-              <Link className="navbar-brand" to="/"><strong>Business</strong></Link>
-            ) : (
-              <strong>Business</strong>
-            )}
-          </div>
+    <header className="container-fluid">
+        <div className="row align-items-center d-flex justify-content-between">
           <div className="col-1">
             {!user ? (
               <Link className="navbar-brand" to="/">
-                <img src={logo} alt="Logo" className="img-fluid" />
+                <img src={transparent_logo} alt="Logo" className="img-fluid" />
               </Link>
             ) : (
-              <img src={logo} alt="Logo" className="img-fluid" />
+              <Link className="navbar-brand" to="/user">
+                <img src={transparent_logo} alt="Logo" className="img-fluid" />
+              </Link>
             )}
           </div>
-          <div className="col-8">
+          <div className="col justify-content-center">
             <nav className="navbar navbar-expand-lg navbar-light">
               <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
@@ -77,16 +72,15 @@ const Header = () => {
             </nav>
           </div>
           {!user && (
-            <div className="col-2 text-end">
-              <Link className="btn btn-link nav-link" to="/register" style={{ fontWeight: 'bold' }}>Register</Link>
+            <div className="col-auto d-flex justify-content-end" >
+              <Link className="btn btn-link nav-link" to="/register" style={{ fontWeight: 'bold', fontSize: '1.25rem'}}>Register</Link>
             </div>
           )}
           {user && (
-            <div className="col-2 text-end">
-              <button className="btn btn-link nav-link" onClick={handleLogout} style={{ fontWeight: 'bold' }}>Logout</button>
+            <div className="col-auto d-flex justify-content-end">
+              <button className="btn btn-link nav-link" onClick={handleLogout} style={{ fontWeight: 'bold', fontSize: '1.25rem' }}>Logout</button>
             </div>
           )}
-        </div>
       </div>
     </header>
   );
