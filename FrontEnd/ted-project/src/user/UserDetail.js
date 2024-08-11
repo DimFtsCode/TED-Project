@@ -37,6 +37,10 @@ const UserDetail = () => {
         setShowModal(false);
     };
 
+    const handleSettingsClick = () => {
+        navigate(`/user/settings`);
+    };
+
     if (!user) return <div>Loading...</div>;
 
     return (
@@ -91,6 +95,9 @@ const UserDetail = () => {
                                     )}
                                 </ListGroup.Item>
                             </ListGroup>
+                            <Button variant="primary" onClick={handleSettingsClick} className="mt-3">
+                                Go to User Settings
+                            </Button>
                         </Card.Body>
                     </Card>
                 </Col>

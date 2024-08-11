@@ -15,15 +15,15 @@ namespace MyApi.Controllers
             _userNetworkService = userNetworkService;
         }
 
-        [HttpGet("search")]
-        public async Task<IActionResult> SearchUsers([FromQuery] string query)
+        [HttpGet("{userId}/search")]
+        public async Task<IActionResult> SearchUsers(int userId, [FromQuery] string query)
         {
             if (string.IsNullOrEmpty(query))
             {
                 return BadRequest("Query parameter is required.");
             }
 
-            var users = await _userNetworkService.SearchUsersAsync(query);
+            var users = await _userNetworkService.SearchUsersAsync(query, userId);
 
             if (users == null || users.Count == 0)
             {
@@ -75,7 +75,6 @@ namespace MyApi.Controllers
             }
         }
 
-
         [HttpGet("{userId}/requests")]
         public async Task<IActionResult> GetConnectionRequests(int userId)
         {
@@ -95,6 +94,19 @@ namespace MyApi.Controllers
             }
 
             return Ok(friends);
+        }
+
+        [HttpDelete("{userId}/friends/{friendId}")]
+        public async Task<IActionResult> RemoveFriend(int userId, int friendId)
+        {
+            var result = await _userNetworkService.RemoveFriendAsync(userId, friendId);
+            
+            if (result)
+            {
+                return Ok("Friend removed successfully.");
+            }
+            
+            return NotFound("Friendship not found.");
         }
 
     }

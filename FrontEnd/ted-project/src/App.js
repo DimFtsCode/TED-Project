@@ -10,6 +10,8 @@ import User from './user/User';
 import UserSettings from './user/UserSettings';
 import UserProfile from './user/UserProfile';
 import UserNetwork from './user/UserNetwork';
+import UserNetworkProfile from './user/UserNetworkProfile';
+
 import UserNotifications from './user/UserNotifications';
 import Header from './Header';
 import Footer from './Footer';
@@ -17,7 +19,8 @@ import { UserProvider } from './UserContext';
 import ProtectedRoute from './ProtectedRoute';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import UserDetail from './admin/UserDetail';
+import UserDetail from './user/UserDetail';
+import UserDiscussion from './user/UserDiscussion';
 
 function App() {
   return (
@@ -35,9 +38,11 @@ function App() {
                 <Route path="/user" element={<ProtectedRoute><User /></ProtectedRoute>} />
                 <Route path="/user/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
                 <Route path="/user/network" element={<ProtectedRoute><UserNetwork /></ProtectedRoute>} />
+                <Route path="/network/user/:userId" element={<ProtectedRoute><UserNetworkProfile /></ProtectedRoute>} />
                 <Route path="/user/:userId" element={<ProtectedRoute><UserDetail /></ProtectedRoute>} />
                 <Route path="/user/settings" element={<ProtectedRoute><UserSettings/></ProtectedRoute>} />
                 <Route path="/user/notifications" element={<ProtectedRoute><UserNotifications/></ProtectedRoute>} />
+                <Route path="/user/discussion" element={<ProtectedRoute><UserDiscussion/></ProtectedRoute>} />
               </Route>
             </Routes>
           </main>

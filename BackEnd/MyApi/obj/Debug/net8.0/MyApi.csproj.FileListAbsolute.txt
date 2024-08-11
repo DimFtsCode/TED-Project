@@ -292,3 +292,4 @@ D:\desktop\TED\Project\backend\myapi\obj\Debug\net8.0\MyApi.pdb
 D:\desktop\TED\Project\backend\myapi\obj\Debug\net8.0\MyApi.genruntimeconfig.cache
 D:\desktop\TED\Project\backend\myapi\obj\Debug\net8.0\ref\MyApi.dll
 D:\desktop\TED\Project\backend\myapi\bin\Debug\net8.0\Newtonsoft.Json.dll
+D:\desktop\TED\Project\backend\myapi\bin\Debug\net8.0\System.Net.WebSockets.WebSocketProtocol.dll

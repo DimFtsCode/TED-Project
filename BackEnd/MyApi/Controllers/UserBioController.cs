@@ -3,6 +3,8 @@ using MyApi.Models;
 using MyApi.Services;
 using Microsoft.Extensions.Logging;
 using System;
+using System.IO;
+using System.Text.Json;
 
 namespace MyApi.Controllers
 {
@@ -36,5 +38,24 @@ namespace MyApi.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+        [HttpPost("update-bio")]
+        public IActionResult UpdateBio([FromBody] UserBioRequest request)
+        {
+            _logger.LogInformation("Received bio update request.");
+
+            try
+            {
+                _userBioService.UpdateUserBio(request);
+                _logger.LogInformation("User bio updated successfully.");
+                return Ok(new { message = "User bio updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while updating user bio.");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
     }
 }

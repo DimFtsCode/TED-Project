@@ -67,5 +67,19 @@ namespace MyApi.Controllers
             _userService.DeleteUser(id);
             return NoContent();
         }
+
+
+        [HttpGet("{id}/names")]
+        public IActionResult GetUserNamesById(int id)
+        {
+            var result = _userService.GetUserNamesById(id);
+            if (result == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(new { FirstName = result?.FirstName, LastName = result?.LastName });
+        }
+
     }
 }

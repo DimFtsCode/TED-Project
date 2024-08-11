@@ -16,14 +16,23 @@ namespace MyApi.Services
             _context = context;
         }
 
-        public async Task<List<User>> SearchUsersAsync(string query)
+        public async Task<List<User>> SearchUsersAsync(string query, int currentUserId)
         {
+            // Ανάκτηση των IDs των φίλων του τρέχοντος χρήστη
+            var friendIds = await _context.Friendships
+                .Where(f => f.UserId == currentUserId && f.IsAccepted)
+                .Select(f => f.FriendId)
+                .ToListAsync();
+
             return await _context.Users
-                .Where(u => (u.FirstName != null && u.FirstName.Contains(query)) ||
+                .Where(u => u.UserId != currentUserId && // Φιλτράρει τον εαυτό
+                            !friendIds.Contains(u.UserId) && // Φιλτράρει τους ήδη φίλους
+                            ((u.FirstName != null && u.FirstName.Contains(query)) ||
                             (u.LastName != null && u.LastName.Contains(query)) ||
-                            (u.Email != null && u.Email.Contains(query)))
+                            (u.Email != null && u.Email.Contains(query))))
                 .ToListAsync();
         }
+
 
         public async Task SendConnectionRequestAsync(int senderId, int receiverId)
         {
@@ -102,6 +111,21 @@ namespace MyApi.Services
             }
 
             return friendships.Select(f => f.Friend).ToList();
+        }
+        public async Task<bool> RemoveFriendAsync(int userId, int friendId)
+        {
+            var friendship = await _context.Friendships
+                .FirstOrDefaultAsync(f => (f.UserId == userId && f.FriendId == friendId) || 
+                                           (f.UserId == friendId && f.FriendId == userId));
+
+            if (friendship != null)
+            {
+                _context.Friendships.Remove(friendship);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+
+            return false;
         }
 
     }

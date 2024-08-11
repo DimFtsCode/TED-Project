@@ -59,13 +59,13 @@ const Header = () => {
                         <Link className="nav-link" to="">Jobs</Link>
                       </li>
                       <li className="nav-item">
-                        <Link className="nav-link" to="">Discussions</Link>
+                        <Link className="nav-link" to="/user/discussion">Discussions</Link>
                       </li>
                       <li className="nav-item">
                         <Link className="nav-link" to="/user/notifications">Notifications</Link>
                       </li>
                       <li className="nav-item">
-                        <Link className="nav-link" to="">Profile</Link>
+                        <Link className="nav-link" to="/user/profile">Profile</Link>
                       </li>
                       <li className="nav-item">
                         <Link className="nav-link" to="/user/settings">Settings</Link>

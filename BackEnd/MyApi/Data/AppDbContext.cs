@@ -16,13 +16,17 @@ namespace MyApi.Data
         public DbSet<Skill> Skills { get; set; }
         public DbSet<ConnectionRequest> ConnectionRequests { get; set; }
         public DbSet<Friendship> Friendships { get; set; }
+        public DbSet<Discussion> Discussions { get; set; }
+        public DbSet<Message> Messages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
+            // Ignoring the Network property in User
             modelBuilder.Entity<User>().Ignore(u => u.Network);
 
+            // Relationships
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Education)
                 .WithOne()
@@ -64,6 +68,17 @@ namespace MyApi.Data
                 .WithMany()
                 .HasForeignKey(cr => cr.ReceiverId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // New relationships for chat functionality
+            modelBuilder.Entity<Message>()
+                .HasOne<User>() // Αφαιρούμε την πλοηγητική ιδιότητα `Sender`
+                .WithMany(u => u.SentMessages)
+                .HasForeignKey(m => m.SenderId);
+
+            modelBuilder.Entity<Message>()
+                .HasOne<Discussion>() // Αφαιρούμε την πλοηγητική ιδιότητα `Discussion`
+                .WithMany(d => d.Messages)
+                .HasForeignKey(m => m.DiscussionId);
         }
     }
 }
