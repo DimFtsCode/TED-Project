@@ -4,6 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { Modal, Button } from 'react-bootstrap';
 import { UserContext } from './UserContext';
 import './Register.css'; // Import the custom CSS file
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import { enUS } from 'date-fns/locale';
+
 
 const Register = () => {
   const navigate = useNavigate();
@@ -16,7 +20,7 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     photo: null,
-    dateOfBirth: '',
+    dateOfBirth: null, 
     address: '',
     isFirstNamePublic: false,
     isLastNamePublic: false,
@@ -51,24 +55,26 @@ const Register = () => {
         setError('Passwords do not match');
         return;
     }
-
     const formData = new FormData();
     const publicFields = [];
-
     // Append user data to formData and collect public fields
     for (let key in user) {
-        if (
-            key !== 'confirmPassword' &&
-            key !== 'isFirstNamePublic' &&
-            key !== 'isLastNamePublic' &&
-            key !== 'isEmailPublic' &&
-            key !== 'isPhoneNumberPublic' &&
-            key !== 'isDateOfBirthPublic' &&
-            key !== 'isAddressPublic' &&
-            user[key]
-        ) {
-            formData.append(key, user[key]);
+      if (
+        key !== 'confirmPassword' &&
+        key !== 'isFirstNamePublic' &&
+        key !== 'isLastNamePublic' &&
+        key !== 'isEmailPublic' &&
+        key !== 'isPhoneNumberPublic' &&
+        key !== 'isDateOfBirthPublic' &&
+        key !== 'isAddressPublic' &&
+        user[key]
+      ) {
+        if (key === 'dateOfBirth') {
+          formData.append(key, user[key].toISOString());
+        } else {
+          formData.append(key, user[key]);
         }
+      }
     }
 
     // Collect public fields based on user input
@@ -105,14 +111,17 @@ const Register = () => {
 
         setShowSuccessModal(true);
     } catch (error) {
-        console.error(error);
-        setError(error.response.data.message); // Ensure the correct message is displayed
-        if (error.response && error.response.data && error.response.data.includes('Email is already in use')) {
-            setShowEmailModal(true);
-        } else {
-            setError('An error occurred during registration. Please try again.');
-        }
+      console.error(error);
+  
+      const errorMessage = error.response?.data?.message || error.response?.data;
+  
+      if (typeof errorMessage === 'string' && errorMessage.includes('Email is already in use')) {
+          setShowEmailModal(true);
+      } else {
+          setError('An error occurred during registration. Please try again.');
+      }
     }
+  
   };
 
 
@@ -133,16 +142,6 @@ const Register = () => {
         console.error('User ID is undefined');
         return;
     }
-
-    const userBioData = {
-        userId: user.userId,
-        educations: [{ degree: '', institution: '', startDate: new Date(), endDate: new Date(), isPublic: false }],
-        jobs: [{ position: '', company: '', startDate: new Date(), endDate: new Date(), isPublic: false }],
-        skills: [{ skillName: '', proficiency: '', isPublic: false }]
-    };
-
-    console.log('User Bio Data:', userBioData);
-
     try {
         await axios.post('https://localhost:7176/api/userbio/register-bio', userBioData, { withCredentials: true });
         setShowSuccessModal(false);
@@ -151,14 +150,6 @@ const Register = () => {
         console.error('Error registering bio:', error);
     }
   };
-
-
-
-
-
-
-
-  
 
   return (
     <div className="register-container container mt-5">
@@ -218,15 +209,35 @@ const Register = () => {
         </div>
         <div className="form-group mb-3">
           <div className="row">
-            <div className="col-md-6">
-              <label htmlFor="dateOfBirth" className="form-label">Date of Birth*</label>
-              <input type="date" className="form-control" id="dateOfBirth" name="dateOfBirth" value={user.dateOfBirth} onChange={handleChange} required />
+            <div className="col-md-4">
+            <label htmlFor="dateOfBirth" className="form-label">Date of Birth*</label>
+            <DatePicker
+                selected={user.dateOfBirth}
+                onChange={(date) => setUser({ ...user, dateOfBirth: date })}
+                dateFormat="MM/dd/yyyy"
+                className="form-control"
+                id="dateOfBirth"
+                name="dateOfBirth"
+                placeholderText="Select your date of birth"
+                required
+                locale={enUS}
+                showYearDropdown        // Προσθέτει dropdown για επιλογή έτους
+                showMonthDropdown       // Προσθέτει dropdown για επιλογή μήνα
+                dropdownMode="select"   // Καθορίζει ότι το dropdown θα λειτουργεί με επιλογή
+            />
               <div className="form-check">
-                <input className="form-check-input" type="checkbox" id="isDateOfBirthPublic" name="isDateOfBirthPublic" checked={user.isDateOfBirthPublic} onChange={handleChange} />
+                <input 
+                  className="form-check-input" 
+                  type="checkbox" 
+                  id="isDateOfBirthPublic" 
+                  name="isDateOfBirthPublic" 
+                  checked={user.isDateOfBirthPublic} 
+                  onChange={handleChange} 
+                />
                 <label className="form-check-label" htmlFor="isDateOfBirthPublic">Public</label>
               </div>
             </div>
-            <div className="col-md-6">
+            <div className="col-md-4">
               <label htmlFor="address" className="form-label">Address</label>
               <input type="text" className="form-control" id="address" name="address" value={user.address} onChange={handleChange} placeholder="Address" />
               <div className="form-check">

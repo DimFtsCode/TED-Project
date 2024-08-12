@@ -1,15 +1,38 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { UserContext } from './UserContext';
 import { Modal, Button } from 'react-bootstrap';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import { enUS } from 'date-fns/locale';
 
 const RegisterBio = () => {
     const navigate = useNavigate();
     const { user } = useContext(UserContext);
-    const [education, setEducation] = useState({ degree: '', institution: '', startDate: '', endDate: '', isPublic: false });
-    const [job, setJob] = useState({ position: '', company: '', startDate: '', endDate: '', isPublic: false });
-    const [skill, setSkill] = useState({ skillName: '', proficiency: '', isPublic: false });
+    const [enums, setEnums] = useState({ Degree: [], EducationLevel: [], JobIndustry: [], JobLevel: [], JobPosition: [], SkillCategory: [] });
+    const [education, setEducation] = useState({
+        degree: enums.Degree[0] || '',
+        level: enums.EducationLevel[0] || '',
+        institution: '',
+        startDate: null,  // Τώρα αποθηκεύεται ως Date object
+        endDate: null,    // Τώρα αποθηκεύεται ως Date object
+        isPublic: false
+    });
+    const [job, setJob] = useState({
+        position: enums.JobPosition[0] || '',
+        industry: enums.JobIndustry[0] || '',
+        level: enums.JobLevel[0] || '',
+        company: '',
+        startDate: null,  // Τώρα αποθηκεύεται ως Date object
+        endDate: null,    // Τώρα αποθηκεύεται ως Date object
+        isPublic: false
+    });
+    const [skill, setSkill] = useState({
+        skillName: enums.SkillCategory[0] || '', 
+        proficiency: '', 
+        isPublic: false
+    });
     const [educationList, setEducationList] = useState([]);
     const [jobList, setJobList] = useState([]);
     const [skillList, setSkillList] = useState([]);
@@ -17,14 +40,35 @@ const RegisterBio = () => {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [userName, setUserName] = useState('');
 
+    useEffect(() => {
+        const fetchEnums = async () => {
+            try {
+                const response = await axios.get('https://localhost:7176/api/enum/all-enums');
+                setEnums(response.data);
+            } catch (error) {
+                console.error('Error fetching enums:', error);
+            }
+        };
+
+        fetchEnums();
+    }, []);
+
     const handleEducationChange = (e) => {
         const { name, value, type, checked } = e.target;
         setEducation({ ...education, [name]: type === 'checkbox' ? checked : value });
     };
 
+    const handleEducationDateChange = (date, name) => {
+        setEducation({ ...education, [name]: date });
+    };
+
     const handleJobChange = (e) => {
         const { name, value, type, checked } = e.target;
         setJob({ ...job, [name]: type === 'checkbox' ? checked : value });
+    };
+
+    const handleJobDateChange = (date, name) => {
+        setJob({ ...job, [name]: date });
     };
 
     const handleSkillChange = (e) => {
@@ -33,31 +77,31 @@ const RegisterBio = () => {
     };
 
     const handleAddEducation = () => {
-        if (new Date(education.startDate) > new Date(education.endDate)) {
+        if (education.startDate > education.endDate) {
             setError('The start date must be before the end date.');
             return;
         }
-        if (education.degree.trim() && education.institution.trim() && education.startDate && education.endDate) {
+        if (education.degree && education.level && education.institution.trim() && education.startDate && education.endDate) {
             setEducationList([...educationList, education]);
-            setEducation({ degree: '', institution: '', startDate: '', endDate: '' });
+            setEducation({ degree: '', level: '', institution: '', startDate: null, endDate: null, isPublic: false });
             setError('');  // Clear error
         }
     };
 
     const handleAddJob = () => {
-        if (new Date(job.startDate) > new Date(job.endDate)) {
+        if (job.startDate > job.endDate) {
             setError('The start date must be before the end date.');
             return;
         }
-        if (job.position.trim() && job.company.trim() && job.startDate && job.endDate) {
+        if (job.position && job.industry && job.level && job.company.trim() && job.startDate && job.endDate) {
             setJobList([...jobList, job]);
-            setJob({ position: '', company: '', startDate: '', endDate: '' });
+            setJob({ position: '', industry: '', level: '', company: '', startDate: null, endDate: null, isPublic: false });
             setError('');  // Clear error
         }
     };
 
     const handleAddSkill = () => {
-        if (skill.skillName.trim() && skill.proficiency.trim()) {
+        if (skill.skillName && skill.proficiency.trim()) {
             setSkillList([...skillList, skill]);
             setSkill({ skillName: '', proficiency: '', isPublic: false });
         }
@@ -96,10 +140,23 @@ const RegisterBio = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
     
+        // Μορφοποίηση των ημερομηνιών
+        const formattedEducation = educationList.map(ed => ({
+            ...ed,
+            startDate: ed.startDate ? ed.startDate.toISOString().split('T')[0] : null,
+            endDate: ed.endDate ? ed.endDate.toISOString().split('T')[0] : null,
+        }));
+    
+        const formattedJobs = jobList.map(job => ({
+            ...job,
+            startDate: job.startDate ? job.startDate.toISOString().split('T')[0] : null,
+            endDate: job.endDate ? job.endDate.toISOString().split('T')[0] : null,
+        }));
+    
         const bioData = {
             userId: user.userId,
-            educations: educationList,
-            jobs: jobList,
+            educations: formattedEducation,
+            jobs: formattedJobs,
             skills: skillList
         };
     
@@ -113,10 +170,11 @@ const RegisterBio = () => {
             setShowSuccessModal(true);    // Show the success modal
         } catch (error) {
             console.error(error);
-            setError(error.response.data);
+            // Χειρισμός σφάλματος, έλεγχος εάν είναι αντικείμενο ή string
+            setError(typeof error.response.data === 'string' ? error.response.data : 'An error occurred during registration. Please try again.');
         }
     };
-     
+    
 
     const handleCloseSuccessModal = () => {
         setShowSuccessModal(false);
@@ -127,56 +185,292 @@ const RegisterBio = () => {
         <div className="container mt-5">
             <h2>Write your <strong>Biography</strong> here.</h2>
             <form onSubmit={handleSubmit} className="mt-4">
-                <div className="mb-3">
-                    <label htmlFor="degree" className="form-label">Degree</label>
-                    <input type="text" className="form-control" id="degree" name="degree" value={education.degree} onChange={handleEducationChange} placeholder="Degree" />
-                    <label htmlFor="institution" className="form-label">Institution</label>
-                    <input type="text" className="form-control" id="institution" name="institution" value={education.institution} onChange={handleEducationChange} placeholder="Institution" />
-                    <label htmlFor="startDate" className="form-label">Start Date</label>
-                    <input type="date" className="form-control" id="startDate" name="startDate" value={education.startDate} onChange={handleEducationChange} />
-                    <label htmlFor="endDate" className="form-label">End Date</label>
-                    <input type="date" className="form-control" id="endDate" name="endDate" value={education.endDate} onChange={handleEducationChange} />
-                    <div className="form-check">
-                        <input className="form-check-input" type="checkbox" id="educationIsPublic" name="isPublic" checked={education.isPublic} onChange={handleEducationChange} />
+                {/* Education Section */}
+                <fieldset className="border p-3 mb-4">
+                    <legend className="w-auto px-2">Education</legend>
+                    
+                    <div className="row mb-3">
+                        <div className="col-md-6">
+                            <label htmlFor="degree" className="form-label">Degree</label>
+                            <select 
+                                className="form-select" 
+                                id="degree" 
+                                name="degree" 
+                                value={education.degree} 
+                                onChange={handleEducationChange}
+                            >
+                                <option value="" disabled hidden>Select Degree</option>
+                                {Object.values(enums.Degree).map(degree => (
+                                    <option key={degree} value={degree}>
+                                        {degree}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="col-md-6">
+                            <label htmlFor="level" className="form-label">Education Level</label>
+                            <select 
+                                className="form-select" 
+                                id="level" 
+                                name="level" 
+                                value={education.level} 
+                                onChange={handleEducationChange}
+                            >
+                                <option value="" disabled hidden>Select Education Level</option>
+                                {Object.values(enums.EducationLevel).map(level => (
+                                    <option key={level} value={level}>
+                                        {level}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="mb-3">
+                        <label htmlFor="institution" className="form-label">Institution</label>
+                        <input 
+                            type="text" 
+                            className="form-control w-50"  
+                            id="institution" 
+                            name="institution" 
+                            value={education.institution} 
+                            onChange={handleEducationChange}  
+                        />
+                    </div>
+
+                    <div className="row">
+                        <div className="col-md-6 mb-3">
+                            <label htmlFor="startDate" className="form-label">Start Date</label>
+                            <DatePicker 
+                                selected={education.startDate} 
+                                onChange={(date) => handleEducationDateChange(date, 'startDate')} 
+                                dateFormat="MM/dd/yyyy"
+                                className="form-control" 
+                                placeholderText="Select Start Date"
+                                locale={enUS}
+                                showYearDropdown        // Προσθέτει dropdown για επιλογή έτους
+                                showMonthDropdown       // Προσθέτει dropdown για επιλογή μήνα
+                                dropdownMode="select"
+                            />
+                        </div>
+                        <div className="col-md-6 mb-3">
+                            <label htmlFor="endDate" className="form-label">End Date</label>
+                            <DatePicker 
+                                selected={education.endDate} 
+                                onChange={(date) => handleEducationDateChange(date, 'endDate')} 
+                                dateFormat="MM/dd/yyyy"
+                                className="form-control" 
+                                placeholderText="Select End Date"
+                                locale={enUS}
+                                showYearDropdown        // Προσθέτει dropdown για επιλογή έτους
+                                showMonthDropdown       // Προσθέτει dropdown για επιλογή μήνα
+                                dropdownMode="select"
+                                
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-check mb-3">
+                        <input 
+                            className="form-check-input" 
+                            type="checkbox" 
+                            id="educationIsPublic" 
+                            name="isPublic" 
+                            checked={education.isPublic} 
+                            onChange={handleEducationChange} 
+                        />
                         <label className="form-check-label" htmlFor="educationIsPublic">Public</label>
                     </div>
-                    <button type="button" className="btn btn-secondary mt-2" onClick={handleAddEducation}>Add to Education</button>
-                </div>
-                <div className="mb-3">
-                    <label htmlFor="position" className="form-label">Position</label>
-                    <input type="text" className="form-control" id="position" name="position" value={job.position} onChange={handleJobChange} placeholder="Position" />
-                    <label htmlFor="company" className="form-label">Company</label>
-                    <input type="text" className="form-control" id="company" name="company" value={job.company} onChange={handleJobChange} placeholder="Company" />
-                    <label htmlFor="jobStartDate" className="form-label">Start Date</label>
-                    <input type="date" className="form-control" id="jobStartDate" name="startDate" value={job.startDate} onChange={handleJobChange} />
-                    <label htmlFor="jobEndDate" className="form-label">End Date</label>
-                    <input type="date" className="form-control" id="jobEndDate" name="endDate" value={job.endDate} onChange={handleJobChange} />
-                    <div className="form-check">
-                        <input className="form-check-input" type="checkbox" id="jobIsPublic" name="isPublic" checked={job.isPublic} onChange={handleJobChange} />
+                    <button type="button" className="btn btn-secondary" onClick={handleAddEducation}>Add to Education</button>
+                </fieldset>
+
+
+                {/* Job Section */}
+                <fieldset className="border p-3 mb-4">
+                    <legend className="w-auto px-2">Job</legend>
+
+                    <div className="row mb-3">
+                        <div className="col-md-6">
+                            <label htmlFor="industry" className="form-label">Industry</label>
+                            <select 
+                                className="form-select" 
+                                id="industry" 
+                                name="industry" 
+                                value={job.industry} 
+                                onChange={handleJobChange}
+                            >
+                                <option value="" disabled hidden>Select Industry</option>
+                                {Object.values(enums.JobIndustry).map(industry => (
+                                    <option key={industry} value={industry}>
+                                        {industry}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="col-md-6">
+                            <label htmlFor="company" className="form-label">Company</label>
+                            <input 
+                                type="text" 
+                                className="form-control" 
+                                id="company" 
+                                name="company" 
+                                value={job.company} 
+                                onChange={handleJobChange} 
+                                placeholder="Company" 
+                            />
+                        </div>
+                    </div>
+
+                    <div className="row mb-3">
+                        <div className="col-md-6">
+                            <label htmlFor="position" className="form-label">Position</label>
+                            <select 
+                                className="form-select" 
+                                id="position" 
+                                name="position" 
+                                value={job.position} 
+                                onChange={handleJobChange}
+                            >
+                                <option value="" disabled hidden>Select Position</option>
+                                {Object.values(enums.JobPosition).map(position => (
+                                    <option key={position} value={position}>
+                                        {position}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="col-md-6">
+                            <label htmlFor="level" className="form-label">Job Level</label>
+                            <select 
+                                className="form-select" 
+                                id="level" 
+                                name="level" 
+                                value={job.level} 
+                                onChange={handleJobChange}
+                            >
+                                <option value="" disabled hidden>Select Job Level</option>
+                                {Object.values(enums.JobLevel).map(level => (
+                                    <option key={level} value={level}>
+                                        {level}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="row">
+                        <div className="col-md-6 mb-3">
+                            <label htmlFor="jobStartDate" className="form-label">Start Date</label>
+                            <DatePicker 
+                                selected={job.startDate} 
+                                onChange={(date) => handleJobDateChange(date, 'startDate')} 
+                                dateFormat="MM/dd/yyyy"
+                                className="form-control" 
+                                placeholderText="Select Start Date"
+                                locale={enUS}
+                                showYearDropdown        // Προσθέτει dropdown για επιλογή έτους
+                                showMonthDropdown       // Προσθέτει dropdown για επιλογή μήνα
+                                dropdownMode="select"
+                            />
+                        </div>
+                        <div className="col-md-6 mb-3">
+                            <label htmlFor="jobEndDate" className="form-label">End Date</label>
+                            <DatePicker 
+                                selected={job.endDate} 
+                                onChange={(date) => handleJobDateChange(date, 'endDate')} 
+                                dateFormat="MM/dd/yyyy"
+                                className="form-control" 
+                                placeholderText="Select End Date"
+                                locale={enUS}
+                                showYearDropdown        // Προσθέτει dropdown για επιλογή έτους
+                                showMonthDropdown       // Προσθέτει dropdown για επιλογή μήνα
+                                dropdownMode="select"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-check mb-3">
+                        <input 
+                            className="form-check-input" 
+                            type="checkbox" 
+                            id="jobIsPublic" 
+                            name="isPublic" 
+                            checked={job.isPublic} 
+                            onChange={handleJobChange} 
+                        />
                         <label className="form-check-label" htmlFor="jobIsPublic">Public</label>
                     </div>
-                    <button type="button" className="btn btn-secondary mt-2" onClick={handleAddJob}>Add to Jobs</button>
-                </div>
-                <div className="mb-3">
-                    <label htmlFor="skillName" className="form-label">Skill Name</label>
-                    <input type="text" className="form-control" id="skillName" name="skillName" value={skill.skillName} onChange={handleSkillChange} placeholder="Skill Name" />
-                    <label htmlFor="proficiency" className="form-label">Proficiency</label>
-                    <input type="text" className="form-control" id="proficiency" name="proficiency" value={skill.proficiency} onChange={handleSkillChange} placeholder="Proficiency" />
-                    <div className="form-check">
-                        <input className="form-check-input" type="checkbox" id="skillIsPublic" name="isPublic" checked={skill.isPublic} onChange={handleSkillChange} />
+                    <button type="button" className="btn btn-secondary" onClick={handleAddJob}>Add to Jobs</button>
+                </fieldset>
+
+                {/* Skill Section */}
+                <fieldset className="border p-3 mb-4">
+                    <legend className="w-auto px-2">Skill</legend>
+
+                    <div className="row">
+                        <div className="col-md-6 mb-3">
+                            <label htmlFor="skillName" className="form-label">Skill Name</label>
+                            <select 
+                                className="form-select" 
+                                id="skillName" 
+                                name="skillName" 
+                                value={skill.skillName} 
+                                onChange={handleSkillChange}
+                            >
+                                <option value="" disabled hidden>Select Skill Category</option>
+                                {Object.values(enums.SkillCategory).map(skillName => (
+                                    <option key={skillName} value={skillName}>
+                                        {skillName}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="col-md-6 mb-3">
+                            <label htmlFor="proficiency" className="form-label">Proficiency</label>
+                            <input 
+                                type="text" 
+                                className="form-control" 
+                                id="proficiency" 
+                                name="proficiency" 
+                                value={skill.proficiency} 
+                                onChange={handleSkillChange} 
+                                placeholder="Proficiency" 
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-check mb-3">
+                        <input 
+                            className="form-check-input" 
+                            type="checkbox" 
+                            id="skillIsPublic" 
+                            name="isPublic" 
+                            checked={skill.isPublic} 
+                            onChange={handleSkillChange} 
+                        />
                         <label className="form-check-label" htmlFor="skillIsPublic">Public</label>
                     </div>
-                    <button type="button" className="btn btn-secondary mt-2" onClick={handleAddSkill}>Add to Skills</button>
+                    <button type="button" className="btn btn-secondary" onClick={handleAddSkill}>Add to Skills</button>
+                </fieldset>
+
+
+                {/* Submit Section */}
+                <div className="d-grid">
+                    <button type="submit" className="btn btn-primary btn-block">Submit</button>
                 </div>
-                <button type="submit" className="btn btn-primary">Submit</button>
                 {error && <p className="text-danger mt-2">{error}</p>}
             </form>
+
             <div className="mt-4">
                 <h4>Biography List</h4>
                 <ul className="list-group">
                     {educationList.map((item, index) => (
                         <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-                            <span><strong>Education {index + 1}:</strong> {item.degree}, {item.institution}, {item.startDate} - {item.endDate} {item.isPublic && <span className="badge bg-primary ms-2">Public</span>}</span>
+                            <span><strong>Education {index + 1}:</strong> {item.degree}, {item.institution}, {item.startDate.toDateString()} - {item.endDate.toDateString()} {item.isPublic && <span className="badge bg-primary ms-2">Public</span>}</span>
                             <span>
                                 <button className="btn btn-sm btn-warning me-2" onClick={() => handleEditEducation(index)}>Edit</button>
                                 <button className="btn btn-sm btn-danger" onClick={() => handleDeleteEducation(index)}>Delete</button>
@@ -185,7 +479,7 @@ const RegisterBio = () => {
                     ))}
                     {jobList.map((item, index) => (
                         <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-                            <span><strong>Job {index + 1}:</strong> {item.position}, {item.company}, {item.startDate} - {item.endDate} {item.isPublic && <span className="badge bg-primary ms-2">Public</span>}</span>
+                            <span><strong>Job {index + 1}:</strong> {item.position}, {item.company}, {item.startDate.toDateString()} - {item.endDate.toDateString()} {item.isPublic && <span className="badge bg-primary ms-2">Public</span>}</span>
                             <span>
                                 <button className="btn btn-sm btn-warning me-2" onClick={() => handleEditJob(index)}>Edit</button>
                                 <button className="btn btn-sm btn-danger" onClick={() => handleDeleteJob(index)}>Delete</button>
@@ -203,7 +497,7 @@ const RegisterBio = () => {
                     ))}
                 </ul>
             </div>
-    
+
             <Modal show={showSuccessModal} onHide={handleCloseSuccessModal} centered>
                 <Modal.Header closeButton>
                     <Modal.Title style={{ color: 'green' }}>Biography Created</Modal.Title>
@@ -217,7 +511,7 @@ const RegisterBio = () => {
             </Modal>
         </div>
     );
-    
+
 };
 
 export default RegisterBio;

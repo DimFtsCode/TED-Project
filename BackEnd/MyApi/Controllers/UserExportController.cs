@@ -3,10 +3,10 @@ using MyApi.Models;
 using MyApi.Services;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System.Xml.Serialization;
 using System.Xml;
 
@@ -32,7 +32,10 @@ namespace MyApi.Controllers
 
             if (format.ToLower() == "json")
             {
-                var json = JsonConvert.SerializeObject(users, Newtonsoft.Json.Formatting.Indented);
+                var settings = new JsonSerializerSettings();
+                settings.Converters.Add(new StringEnumConverter());
+
+                var json = Newtonsoft.Json.JsonConvert.SerializeObject(users, Newtonsoft.Json.Formatting.Indented, settings);
                 return File(Encoding.UTF8.GetBytes(json), "application/json", "users.json");
             }
             else if (format.ToLower() == "xml")

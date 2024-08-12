@@ -31,27 +31,33 @@ namespace MyApi.Services
                     Educations = u.Education.Select(e => new Education
                     {
                         EducationId = e.EducationId,
-                        Degree = e.Degree ?? string.Empty,
+                        Degree = e.Degree,  // Χρήση του Degree enum
+                        Level = e.Level,    // Χρήση του EducationLevel enum
                         Institution = e.Institution ?? string.Empty,
                         StartDate = e.StartDate,
                         EndDate = e.EndDate,
-                        UserId = e.UserId
+                        UserId = e.UserId,
+                        IsPublic = e.IsPublic
                     }).ToList(),
                     Jobs = u.Jobs.Select(j => new Job
                     {
                         JobId = j.JobId,
-                        Position = j.Position ?? string.Empty,
+                        Position = j.Position,  // Χρήση του JobPosition enum
+                        Industry = j.Industry,  // Χρήση του JobIndustry enum
+                        Level = j.Level,        // Χρήση του JobLevel enum
                         Company = j.Company ?? string.Empty,
                         StartDate = j.StartDate,
                         EndDate = j.EndDate,
-                        UserId = j.UserId
+                        UserId = j.UserId,
+                        IsPublic = j.IsPublic
                     }).ToList(),
                     Skills = u.Skills.Select(s => new Skill
                     {
                         SkillId = s.SkillId,
-                        SkillName = s.SkillName ?? string.Empty,
+                        SkillName = s.SkillName,  // Χρήση του SkillCategory enum
                         Proficiency = s.Proficiency ?? string.Empty,
-                        UserId = s.UserId
+                        UserId = s.UserId,
+                        IsPublic = s.IsPublic
                     }).ToList()
                 })
                 .ToList();

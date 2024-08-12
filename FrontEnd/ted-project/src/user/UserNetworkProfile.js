@@ -9,11 +9,20 @@ const UserNetworkProfile = () => {
     const navigate = useNavigate();
     const { user: currentUser } = useContext(UserContext);
     const [user, setUser] = useState(null);
+    const [enums, setEnums] = useState({
+        Degree: [],
+        EducationLevel: [],
+        JobIndustry: [],
+        JobLevel: [],
+        JobPosition: [],
+        SkillCategory: []
+    });
     const [showChatModal, setShowChatModal] = useState(false);
     const [message, setMessage] = useState('');
 
     useEffect(() => {
         fetchUser();
+        fetchEnums();
     }, []);
 
     const fetchUser = async () => {
@@ -23,6 +32,16 @@ const UserNetworkProfile = () => {
             setUser(response.data);
         } catch (error) {
             console.error('Error fetching user details:', error);
+        }
+    };
+
+    const fetchEnums = async () => {
+        try {
+            const response = await axios.get('https://localhost:7176/api/enum/all-enums');
+            setEnums(response.data);
+            console.log('Fetched Enums:', response.data);
+        } catch (error) {
+            console.error('Error fetching enums:', error);
         }
     };
 
@@ -36,18 +55,15 @@ const UserNetworkProfile = () => {
 
     const handleSendMessage = async () => {
         try {
-            
             if (!currentUser || !currentUser.userId) {
                 alert('User is not logged in');
                 console.log('User is not logged in');
                 return;
             }
     
-            // Ελέγχουμε αν το currentDiscussionId είναι undefined ή null
             let discussionId = typeof currentDiscussionId !== 'undefined' ? currentDiscussionId : null;
             console.log('Existing Discussion ID:', discussionId);
     
-            // Αν δεν υπάρχει discussionId, δημιουργούμε νέα συζήτηση
             if (!discussionId) {
                 const participantIds = [parseInt(currentUser.userId), parseInt(userId)];
                 console.log('Creating discussion with participants:', participantIds);
@@ -83,11 +99,6 @@ const UserNetworkProfile = () => {
             alert('Failed to send message');
         }
     };
-    
-    
-    
-    
-    
 
     const handleBackClick = () => {
         navigate('/user/network');
@@ -143,7 +154,9 @@ const UserNetworkProfile = () => {
                                     {publicInfo.education.length > 0 ? (
                                         <ul>
                                             {publicInfo.education.map((edu, index) => (
-                                                <li key={index}>{edu.degree}, {edu.institution} ({new Date(edu.startDate).toLocaleDateString()} - {new Date(edu.endDate).toLocaleDateString()})</li>
+                                                <li key={index}>
+                                                    {`${enums.Degree[edu.degree] || edu.degree}, ${enums.EducationLevel[edu.level] || edu.level}, ${edu.institution} (${new Date(edu.startDate).toLocaleDateString()} - ${new Date(edu.endDate).toLocaleDateString()})`}
+                                                </li>
                                             ))}
                                         </ul>
                                     ) : (
@@ -155,7 +168,9 @@ const UserNetworkProfile = () => {
                                     {publicInfo.jobs.length > 0 ? (
                                         <ul>
                                             {publicInfo.jobs.map((job, index) => (
-                                                <li key={index}>{job.position}, {job.company} ({new Date(job.startDate).toLocaleDateString()} - {new Date(job.endDate).toLocaleDateString()})</li>
+                                                <li key={index}>
+                                                    {`${enums.JobPosition[job.position] || job.position}, ${enums.JobIndustry[job.industry] || job.industry}, ${enums.JobLevel[job.level] || job.level}, ${job.company} (${new Date(job.startDate).toLocaleDateString()} - ${new Date(job.endDate).toLocaleDateString()})`}
+                                                </li>
                                             ))}
                                         </ul>
                                     ) : (
@@ -167,7 +182,7 @@ const UserNetworkProfile = () => {
                                     {publicInfo.skills.length > 0 ? (
                                         <ul>
                                             {publicInfo.skills.map((skill, index) => (
-                                                <li key={index}>{skill.skillName} ({skill.proficiency})</li>
+                                                <li key={index}>{`${enums.SkillCategory[skill.skillName] || skill.skillName}, ${skill.proficiency}`}</li>
                                             ))}
                                         </ul>
                                     ) : (

@@ -1,5 +1,6 @@
-using System;
-using System.Collections.Generic;
+using MyApi.Models.Enums;  // Προσθέτουμε το namespace όπου βρίσκονται τα enums
+using System.Text.Json.Serialization;
+
 
 namespace MyApi.Models
 {
@@ -13,7 +14,11 @@ namespace MyApi.Models
 
     public class EducationRequest
     {
-        public string Degree { get; set; } = string.Empty;
+       [JsonConverter(typeof(JsonStringEnumConverter))]
+        public Degree Degree { get; set; }
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public EducationLevel Level { get; set; }
         public string Institution { get; set; } = string.Empty;
         public DateTime StartDate { get; set; } = DateTime.MinValue;
         public DateTime EndDate { get; set; } = DateTime.MinValue;
@@ -22,7 +27,12 @@ namespace MyApi.Models
 
     public class JobRequest
     {
-        public string Position { get; set; } = string.Empty;
+        [JsonConverter(typeof(JsonStringEnumConverter))]       
+        public JobPosition Position { get; set; }  // Χρήση του JobPosition enum
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public JobIndustry Industry { get; set; }  // Χρήση του JobIndustry enum
+         [JsonConverter(typeof(JsonStringEnumConverter))]
+        public JobLevel Level { get; set; }  // Χρήση του JobLevel enum
         public string Company { get; set; } = string.Empty;
         public DateTime StartDate { get; set; } = DateTime.MinValue;
         public DateTime EndDate { get; set; } = DateTime.MinValue;
@@ -31,7 +41,8 @@ namespace MyApi.Models
 
     public class SkillRequest
     {
-        public string SkillName { get; set; } = string.Empty;
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public SkillCategory SkillName { get; set; }  // Χρήση του SkillCategory enum
         public string Proficiency { get; set; } = string.Empty;
         public bool IsPublic { get; set; }
     }

@@ -22,6 +22,8 @@ builder.Services.AddScoped<UserSettingsService>();
 builder.Services.AddScoped<UserBasicInfoService>();
 builder.Services.AddScoped<MessageService>();
 builder.Services.AddScoped<DiscussionService>();
+builder.Services.AddScoped<EnumService>();
+
 
 // Προσθήκη του SignalR
 builder.Services.AddSignalR();

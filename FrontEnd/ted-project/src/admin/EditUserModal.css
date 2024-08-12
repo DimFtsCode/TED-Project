@@ -1,0 +1,12 @@
+.custom-modal .modal-dialog {
+    width: 800px;   /* Fixed width */
+    height: 600px;  /* Fixed height */
+    max-width: 100%;  /* Ensures responsiveness on small screens */
+    max-height: 100%; /* Ensures responsiveness on small screens */
+    margin: auto;
+}
+
+.custom-modal .modal-content {
+    height: 100%;    /* Ensure content fills the modal */
+    overflow: auto;  /* Add scrollbars if the content overflows */
+}

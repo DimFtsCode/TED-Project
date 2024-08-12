@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Http;
+using MyApi.Models.Enums;
 
 namespace MyApi.Models
 {
@@ -42,7 +43,8 @@ namespace MyApi.Models
     public class Education
     {
         public int EducationId { get; set; }
-        public string Degree { get; set; } = string.Empty;
+        public Degree Degree { get; set; } // Χρήση του Degree enum
+        public EducationLevel Level { get; set; } // Προσθήκη του πεδίου Level
         public string Institution { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
@@ -53,7 +55,9 @@ namespace MyApi.Models
     public class Job
     {
         public int JobId { get; set; }
-        public string Position { get; set; } = string.Empty;
+        public JobPosition Position { get; set; } // Χρήση του JobPosition enum
+        public JobIndustry Industry { get; set; } // Χρήση του JobIndustry enum
+        public JobLevel Level { get; set; } // Επίπεδο της θέσης εργασίας
         public string Company { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
@@ -64,7 +68,7 @@ namespace MyApi.Models
     public class Skill
     {
         public int SkillId { get; set; }
-        public string SkillName { get; set; } = string.Empty;
+        public SkillCategory SkillName { get; set; } // Χρήση του SkillCategory enum
         public string Proficiency { get; set; } = string.Empty;
         public int UserId { get; set; } // Προσθήκη της ιδιότητας UserId
         public bool IsPublic { get; set; } // Προσθήκη του πεδίου IsPublic
