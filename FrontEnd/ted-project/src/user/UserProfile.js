@@ -10,6 +10,7 @@ import './User.css';
 
 const UserProfile = () => {
   const navigate = useNavigate();
+  const [selectedForm, setSelectedForm] = useState('education');
   const { user: currentUser } = useContext(UserContext);
   const [profile, setProfile] = useState({
     firstName: '',
@@ -27,6 +28,32 @@ const UserProfile = () => {
     jobs: [],
     skills: []
   });
+  const [enums, setEnums] = useState({
+    Degree: [],
+    EducationLevel: [],
+    JobIndustry: [],
+    JobLevel: [],
+    JobPosition: [],
+    SkillCategory: []
+  });
+
+  const [newEducation, setNewEducation] = useState({ degree: '', level: '', institution: '', startDate: '', endDate: '', isPublic: false });
+  const [newJob, setNewJob] = useState({ position: '', industry: '', level: '', company: '', startDate: '', endDate: '', isPublic: false });
+  const [newSkill, setNewSkill] = useState({ skillName: '', proficiency: '', isPublic: false });
+
+  useEffect(() => {
+    const fetchEnums = async () => {
+        try {
+            const response = await axios.get('https://localhost:7176/api/enum/all-enums');
+            setEnums(response.data);
+            console.log('Enums fetched:', response.data);
+        } catch (error) {
+            console.error('Error fetching enums:', error);
+        }
+    };
+
+    fetchEnums();
+  }, []);
 
   useEffect(() => {
     if (currentUser) {
@@ -106,52 +133,46 @@ const UserProfile = () => {
 
 
   const handleAddEducation = () => {
-    setProfile({
-      ...profile,
-      education: [
-        ...profile.education,
-        { degree: '', institution: '', startDate: '', endDate: '', isPublic: false }
-      ]
-    });
+    setProfile(prevProfile => ({
+      ...prevProfile,
+      education: [...prevProfile.education, newEducation]
+    }));
+    // Καθαρισμός της φόρμας μετά την προσθήκη
+    setNewEducation({ degree: '', level: '', institution: '', startDate: '', endDate: '', isPublic: false });
   };
-
+  
   const handleAddJob = () => {
-    setProfile({
-      ...profile,
-      jobs: [
-        ...profile.jobs,
-        { position: '', company: '', startDate: '', endDate: '', isPublic: false }
-      ]
-    });
+    setProfile(prevProfile => ({
+      ...prevProfile,
+      jobs: [...prevProfile.jobs, newJob]
+    }));
+    // Καθαρισμός της φόρμας μετά την προσθήκη
+    setNewJob({ position: '', industry: '', level: '', company: '', startDate: '', endDate: '', isPublic: false });
   };
+  
 
   const handleAddSkill = () => {
-    setProfile({
-      ...profile,
-      skills: [
-        ...profile.skills,
-        { skillName: '', proficiency: '', isPublic: false }
-      ]
-    });
+    setProfile(prevProfile => ({
+      ...prevProfile,
+      skills: [...prevProfile.skills, newSkill]
+    }));
+    // Καθαρισμός της φόρμας μετά την προσθήκη
+    setNewSkill({ skillName: '', proficiency: '', isPublic: false });
   };
 
-  const handleEducationChange = (index, field, value) => {
-    const newEducation = [...profile.education];
-    newEducation[index][field] = value;
-    setProfile({ ...profile, education: newEducation });
+
+  const handleEducationChange = (field, value) => {
+    setNewEducation({ ...newEducation, [field]: value });
   };
 
-  const handleJobChange = (index, field, value) => {
-    const newJobs = [...profile.jobs];
-    newJobs[index][field] = value;
-    setProfile({ ...profile, jobs: newJobs });
+  const handleJobChange = (field, value) => {
+    setNewJob({ ...newJob, [field]: value });
   };
 
-  const handleSkillChange = (index, field, value) => {
-    const newSkills = [...profile.skills];
-    newSkills[index][field] = value;
-    setProfile({ ...profile, skills: newSkills });
+  const handleSkillChange = (field, value) => {
+    setNewSkill({ ...newSkill, [field]: value });
   };
+
 
   const handleRemoveEducation = (index) => {
     const newEducation = [...profile.education];
@@ -197,6 +218,31 @@ const UserProfile = () => {
     }
   };
 
+ 
+
+  const handleDeleteEducation = (index) => {
+    const newEducation = [...profile.education];
+    newEducation.splice(index, 1);
+    setProfile({ ...profile, education: newEducation });
+  };
+
+ 
+  const handleDeleteJob = (index) => {
+    const newJobs = [...profile.jobs];
+    newJobs.splice(index, 1);
+    setProfile({ ...profile, jobs: newJobs });
+  };
+
+
+  const handleDeleteSkill = (index) => {
+    const newSkills = [...profile.skills];
+    newSkills.splice(index, 1);
+    setProfile({ ...profile, skills: newSkills });
+  };
+
+  const handleFormSelection = (e) => {
+    setSelectedForm(e.target.value);
+  };
 
   return (
     <Container fluid>
@@ -213,114 +259,302 @@ const UserProfile = () => {
                     </Nav.Link>
                 </Nav>
             </Col>
-            <Col md={10}>
+        </Row>    
+        
+            {/* Container for Photo, Phone Number, and Address */}
+            <Container className="mb-4">
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+                    {profile.photoData ? (
+                        <img src={`data:${profile.photoMimeType};base64,${profile.photoData}`} alt="User Profile" style={{ width: '100px', height: '100px', borderRadius: '50%' }} />
+                    ) : (
+                        <div style={{ width: '100px', height: '100px', border: '1px solid #ddd', borderRadius: '50%' }}></div>
+                    )}
+                    <h3>{profile.firstName} {profile.lastName}</h3>
+                    <Form.Group controlId="formPhoto" className="mt-3">
+                        <Form.Label>Change Photo</Form.Label>
+                        <Form.Control type="file" name="photo" onChange={handleFileChange} />
+                    </Form.Group>
+                    <Form.Group controlId="formPhoneNumber" className="mt-3">
+                        <Form.Label>Phone Number</Form.Label>
+                        <Form.Control type="text" name="phoneNumber" value={profile.phoneNumber} onChange={handleChange} />
+                    </Form.Group>
+                    <Form.Group controlId="formAddress" className="mt-3">
+                        <Form.Label>Address</Form.Label>
+                        <Form.Control type="text" name="address" value={profile.address} onChange={handleChange} />
+                    </Form.Group>
+                    <Button variant="primary" onClick={handleBasicInfoSubmit} className="mt-3">Update Basic Info</Button>
+                </div>
+            </Container>
+            {/* Education, Jobs, and Skills List */}
+            <Container className="mt-4">
+                <h4>Biography List</h4>
+
+                {/* Education List */}
+                <h5>Education</h5>
+                <ul className="list-group mb-3">
+                    {profile.education.map((item, index) => (
+                        <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                        <span>
+                            <strong>Education {index + 1}:</strong>
+                            {` ${enums.Degree[item.degree] || item.degree}, ${enums.EducationLevel[item.level] || item.level}, ${item.institution}, ${item.startDate} - ${item.endDate}`}
+                            {item.isPublic && <span className="badge bg-primary ms-2">Public</span>}
+                        </span>
+                        <span>
+                            <button className="btn btn-sm btn-danger" onClick={() => handleDeleteEducation(index)}>Delete</button>
+                        </span>
+                        </li>
+                    ))}
+                    </ul>
+
+                    <h5>Jobs</h5>
+                    <ul className="list-group mb-3">
+                    {profile.jobs.map((item, index) => (
+                        <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                        <span>
+                            <strong>Job {index + 1}:</strong>
+                            {` ${enums.JobPosition[item.position] || item.position}, ${enums.JobIndustry[item.industry] || item.industry}, ${enums.JobLevel[item.level] || item.level}, ${item.company}, ${item.startDate} - ${item.endDate}`}
+                            {item.isPublic && <span className="badge bg-primary ms-2">Public</span>}
+                        </span>
+                        <span>
+                            <button className="btn btn-sm btn-danger" onClick={() => handleDeleteJob(index)}>Delete</button>
+                        </span>
+                        </li>
+                    ))}
+                    </ul>
+                {/* Skills List */}
+                <h5>Skills</h5>
+                <ul className="list-group mb-3">
+                    {profile.skills.map((item, index) => (
+                        <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                            <span>
+                                <strong>Skill {index + 1}:</strong>
+                                {` ${enums.SkillCategory[item.skillName] || item.skillName}, ${item.proficiency}`}
+                                {item.isPublic && <span className="badge bg-primary ms-2">Public</span>}
+                            </span>
+                            <span>
+                                <button className="btn btn-sm btn-danger" onClick={() => handleDeleteSkill(index)}>Delete</button>
+                            </span>
+                        </li>
+                    ))}
+                </ul>
+            </Container>
+        
+            {/* Container for Education, Jobs, and Skills */}
+            <Container className="mt-4">
                 <h2>User Profile</h2>
 
-                {/* Container for Photo, Phone Number, and Address */}
-                <Container className="mb-4">
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
-                        {profile.photoData ? (
-                            <img src={`data:${profile.photoMimeType};base64,${profile.photoData}`} alt="User Profile" style={{ width: '100px', height: '100px', borderRadius: '50%' }} />
-                        ) : (
-                            <div style={{ width: '100px', height: '100px', border: '1px solid #ddd', borderRadius: '50%' }}></div>
-                        )}
-                        <h3>{profile.firstName} {profile.lastName}</h3>
-                        <Form.Group controlId="formPhoto" className="mt-3">
-                            <Form.Label>Change Photo</Form.Label>
-                            <Form.Control type="file" name="photo" onChange={handleFileChange} />
-                        </Form.Group>
-                        <Form.Group controlId="formPhoneNumber" className="mt-3">
-                            <Form.Label>Phone Number</Form.Label>
-                            <Form.Control type="text" name="phoneNumber" value={profile.phoneNumber} onChange={handleChange} />
-                        </Form.Group>
-                        <Form.Group controlId="formAddress" className="mt-3">
-                            <Form.Label>Address</Form.Label>
-                            <Form.Control type="text" name="address" value={profile.address} onChange={handleChange} />
-                        </Form.Group>
-                        <Button variant="primary" onClick={handleBasicInfoSubmit} className="mt-3">Update Basic Info</Button>
-                    </div>
-                </Container>
+                {/* Επιλογή Φόρμας */}
+                <Form.Group controlId="formSelection">
+                    <Form.Label>Select Form to Add</Form.Label>
+                    <Form.Select value={selectedForm} onChange={handleFormSelection}>
+                        <option value="education">Education</option>
+                        <option value="job">Job</option>
+                        <option value="skill">Skill</option>
+                    </Form.Select>
+                </Form.Group>
 
-                {/* Container for Education, Jobs, and Skills */}
-                <Container>
-                    <Form onSubmit={handleSubmit}>
-                        <ListGroup className="mb-3">
+                {/* Προσθήκη μόνο της επιλεγμένης φόρμας */}
+                <Form onSubmit={handleSubmit}>
+                    <ListGroup className="mb-3">
+                        {selectedForm === 'education' && (
                             <ListGroup.Item>
-                                <h4>Education</h4>
-                                {profile.education.map((edu, index) => (
-                                    <div key={index}>
-                                        <Form.Group controlId={`formEducationDegree${index}`}>
-                                            <Form.Label>Degree</Form.Label>
-                                            <Form.Control type="text" name="degree" value={edu.degree} onChange={(e) => handleEducationChange(index, 'degree', e.target.value)} />
-                                            <Form.Check type="checkbox" label="Public" name="isPublic" onChange={(e) => handleEducationChange(index, 'isPublic', e.target.checked)} checked={edu.isPublic} />
-                                        </Form.Group>
-                                        <Form.Group controlId={`formEducationInstitution${index}`}>
-                                            <Form.Label>Institution</Form.Label>
-                                            <Form.Control type="text" name="institution" value={edu.institution} onChange={(e) => handleEducationChange(index, 'institution', e.target.value)} />
-                                        </Form.Group>
-                                        <Form.Group controlId={`formEducationStartDate${index}`}>
-                                            <Form.Label>Start Date</Form.Label>
-                                            <Form.Control type="date" name="startDate" value={edu.startDate} onChange={(e) => handleEducationChange(index, 'startDate', e.target.value)} />
-                                        </Form.Group>
-                                        <Form.Group controlId={`formEducationEndDate${index}`}>
-                                            <Form.Label>End Date</Form.Label>
-                                            <Form.Control type="date" name="endDate" value={edu.endDate} onChange={(e) => handleEducationChange(index, 'endDate', e.target.value)} />
-                                        </Form.Group>
-                                        <Button variant="danger" onClick={() => handleRemoveEducation(index)}>Remove</Button>
-                                    </div>
-                                ))}
+                                <h4>Add Education</h4>
+                                <Form.Group controlId="formEducationDegreeNew">
+                                    <Form.Label>Degree</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        name="degree"
+                                        value={newEducation.degree}
+                                        onChange={(e) => handleEducationChange('degree', e.target.value)}
+                                    >
+                                        {enums.Degree.map((degree, i) => (
+                                            <option key={i} value={degree}>
+                                                {degree}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
+                                </Form.Group>
+                                <Form.Group controlId="formEducationLevelNew">
+                                    <Form.Label>Level</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        name="level"
+                                        value={newEducation.level}
+                                        onChange={(e) => handleEducationChange('level', e.target.value)}
+                                    >
+                                        {enums.EducationLevel.map((level, i) => (
+                                            <option key={i} value={level}>
+                                                {level}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
+                                </Form.Group>
+                                <Form.Group controlId="formEducationInstitutionNew">
+                                    <Form.Label>Institution</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="institution"
+                                        value={newEducation.institution}
+                                        onChange={(e) => handleEducationChange('institution', e.target.value)}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="formEducationStartDateNew">
+                                    <Form.Label>Start Date</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        name="startDate"
+                                        value={newEducation.startDate}
+                                        onChange={(e) => handleEducationChange('startDate', e.target.value)}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="formEducationEndDateNew">
+                                    <Form.Label>End Date</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        name="endDate"
+                                        value={newEducation.endDate}
+                                        onChange={(e) => handleEducationChange('endDate', e.target.value)}
+                                    />
+                                </Form.Group>
+                                <Form.Check
+                                    type="checkbox"
+                                    label="Public"
+                                    name="isPublic"
+                                    checked={newEducation.isPublic}
+                                    onChange={(e) => handleEducationChange('isPublic', e.target.checked)}
+                                />
                                 <Button variant="primary" onClick={handleAddEducation}>Add Education</Button>
                             </ListGroup.Item>
+                        )}
+                        
+                        {selectedForm === 'job' && (
                             <ListGroup.Item>
-                                <h4>Jobs</h4>
-                                {profile.jobs.map((job, index) => (
-                                    <div key={index}>
-                                        <Form.Group controlId={`formJobPosition${index}`}>
-                                            <Form.Label>Position</Form.Label>
-                                            <Form.Control type="text" name="position" value={job.position} onChange={(e) => handleJobChange(index, 'position', e.target.value)} />
-                                        </Form.Group>
-                                        <Form.Group controlId={`formJobCompany${index}`}>
-                                            <Form.Label>Company</Form.Label>
-                                            <Form.Control type="text" name="company" value={job.company} onChange={(e) => handleJobChange(index, 'company', e.target.value)} />
-                                        </Form.Group>
-                                        <Form.Group controlId={`formJobStartDate${index}`}>
-                                            <Form.Label>Start Date</Form.Label>
-                                            <Form.Control type="date" name="startDate" value={job.startDate} onChange={(e) => handleJobChange(index, 'startDate', e.target.value)} />
-                                        </Form.Group>
-                                        <Form.Group controlId={`formJobEndDate${index}`}>
-                                            <Form.Label>End Date</Form.Label>
-                                            <Form.Control type="date" name="endDate" value={job.endDate} onChange={(e) => handleJobChange(index, 'endDate', e.target.value)} />
-                                        </Form.Group>
-                                        <Form.Check type="checkbox" label="Public" name="isPublic" onChange={(e) => handleJobChange(index, 'isPublic', e.target.checked)} checked={job.isPublic} />
-                                        <Button variant="danger" onClick={() => handleRemoveJob(index)}>Remove</Button>
-                                    </div>
-                                ))}
+                                <h4>Add Job</h4>
+                                <Form.Group controlId="formJobPositionNew">
+                                    <Form.Label>Position</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        name="position"
+                                        value={newJob.position}
+                                        onChange={(e) => handleJobChange('position', e.target.value)}
+                                    >
+                                        {enums.JobPosition.map((position, i) => (
+                                            <option key={i} value={position}>
+                                                {position}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
+                                </Form.Group>
+                                <Form.Group controlId="formJobIndustryNew">
+                                    <Form.Label>Industry</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        name="industry"
+                                        value={newJob.industry}
+                                        onChange={(e) => handleJobChange('industry', e.target.value)}
+                                    >
+                                        {enums.JobIndustry.map((industry, i) => (
+                                            <option key={i} value={industry}>
+                                                {industry}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
+                                </Form.Group>
+                                <Form.Group controlId="formJobLevelNew">
+                                    <Form.Label>Job Level</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        name="level"
+                                        value={newJob.level}
+                                        onChange={(e) => handleJobChange('level', e.target.value)}
+                                    >
+                                        {enums.JobLevel.map((level, i) => (
+                                            <option key={i} value={level}>
+                                                {level}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
+                                </Form.Group>
+                                <Form.Group controlId="formJobCompanyNew">
+                                    <Form.Label>Company</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="company"
+                                        value={newJob.company}
+                                        onChange={(e) => handleJobChange('company', e.target.value)}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="formJobStartDateNew">
+                                    <Form.Label>Start Date</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        name="startDate"
+                                        value={newJob.startDate}
+                                        onChange={(e) => handleJobChange('startDate', e.target.value)}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="formJobEndDateNew">
+                                    <Form.Label>End Date</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        name="endDate"
+                                        value={newJob.endDate}
+                                        onChange={(e) => handleJobChange('endDate', e.target.value)}
+                                    />
+                                </Form.Group>
+                                <Form.Check
+                                    type="checkbox"
+                                    label="Public"
+                                    name="isPublic"
+                                    checked={newJob.isPublic}
+                                    onChange={(e) => handleJobChange('isPublic', e.target.checked)}
+                                />
                                 <Button variant="primary" onClick={handleAddJob}>Add Job</Button>
                             </ListGroup.Item>
+                        )}
+                        
+                        {selectedForm === 'skill' && (
                             <ListGroup.Item>
-                                <h4>Skills</h4>
-                                {profile.skills.map((skill, index) => (
-                                    <div key={index}>
-                                        <Form.Group controlId={`formSkillName${index}`}>
-                                            <Form.Label>Skill Name</Form.Label>
-                                            <Form.Control type="text" name="skillName" value={skill.skillName} onChange={(e) => handleSkillChange(index, 'skillName', e.target.value)} />
-                                        </Form.Group>
-                                        <Form.Group controlId={`formSkillProficiency${index}`}>
-                                            <Form.Label>Proficiency</Form.Label>
-                                            <Form.Control type="text" name="proficiency" value={skill.proficiency} onChange={(e) => handleSkillChange(index, 'proficiency', e.target.value)} />
-                                        </Form.Group>
-                                        <Form.Check type="checkbox" label="Public" name="isPublic" onChange={(e) => handleSkillChange(index, 'isPublic', e.target.checked)} checked={skill.isPublic} />
-                                        <Button variant="danger" onClick={() => handleRemoveSkill(index)}>Remove</Button>
-                                    </div>
-                                ))}
+                                <h4>Add Skill</h4>
+                                <Form.Group controlId="formSkillNameNew">
+                                    <Form.Label>Skill Name</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        name="skillName"
+                                        value={newSkill.skillName}
+                                        onChange={(e) => handleSkillChange('skillName', e.target.value)}
+                                    >
+                                        {enums.SkillCategory.map((skillName, i) => (
+                                            <option key={i} value={skillName}>
+                                                {skillName}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
+                                </Form.Group>
+                                <Form.Group controlId="formSkillProficiencyNew">
+                                    <Form.Label>Proficiency</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="proficiency"
+                                        value={newSkill.proficiency}
+                                        onChange={(e) => handleSkillChange('proficiency', e.target.value)}
+                                    />
+                                </Form.Group>
+                                <Form.Check
+                                    type="checkbox"
+                                    label="Public"
+                                    name="isPublic"
+                                    checked={newSkill.isPublic}
+                                    onChange={(e) => handleSkillChange('isPublic', e.target.checked)}
+                                />
                                 <Button variant="primary" onClick={handleAddSkill}>Add Skill</Button>
                             </ListGroup.Item>
-                        </ListGroup>
-                        <Button variant="primary" type="submit">Update Education, Jobs, and Skills</Button>
-                    </Form>
-                </Container>
-            </Col>
-        </Row>
+                        )}
+                    </ListGroup>
+                    <Button variant="primary" type="submit">Update Education, Jobs, and Skills</Button>
+                </Form>
+
+        </Container>
     </Container>
   );
 

@@ -1,11 +1,10 @@
 using System;
-using System.IO;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MyApi.Data;
 using MyApi.Models;
-using Microsoft.AspNetCore.Http;
+using MyApi.Models.Enums;
 
 namespace MyApi.Services
 {
@@ -38,7 +37,8 @@ namespace MyApi.Services
                         StartDate = education.StartDate,
                         EndDate = education.EndDate,
                         IsPublic = education.IsPublic,
-                        UserId = user.UserId
+                        UserId = user.UserId,
+                        Level = education.Level  // Προσθήκη του επιπέδου μόρφωσης
                     };
                     user.Education.Add(newEducation);
                     _logger.LogInformation($"Added Education: {education.Degree}, {education.Institution}");
@@ -53,7 +53,9 @@ namespace MyApi.Services
                         StartDate = job.StartDate,
                         EndDate = job.EndDate,
                         IsPublic = job.IsPublic,
-                        UserId = user.UserId
+                        UserId = user.UserId,
+                        Level = job.Level, // Προσθήκη του επιπέδου της θέσης εργασίας
+                        Industry = job.Industry // Προσθήκη της βιομηχανίας
                     };
                     user.Jobs.Add(newJob);
                     _logger.LogInformation($"Added Job: {job.Position}, {job.Company}");
@@ -66,7 +68,8 @@ namespace MyApi.Services
                         SkillName = skill.SkillName,
                         Proficiency = skill.Proficiency,
                         IsPublic = skill.IsPublic,
-                        UserId = user.UserId
+                        UserId = user.UserId,
+                        
                     };
                     user.Skills.Add(newSkill);
                     _logger.LogInformation($"Added Skill: {skill.SkillName}, {skill.Proficiency}");
@@ -101,7 +104,8 @@ namespace MyApi.Services
                         StartDate = education.StartDate,
                         EndDate = education.EndDate,
                         IsPublic = education.IsPublic,
-                        UserId = user.UserId
+                        UserId = user.UserId,
+                        Level = education.Level  // Προσθήκη του επιπέδου μόρφωσης
                     };
                     user.Education.Add(updatedEducation);
                     _logger.LogInformation($"Updated Education: {education.Degree}, {education.Institution}");
@@ -116,7 +120,9 @@ namespace MyApi.Services
                         StartDate = job.StartDate,
                         EndDate = job.EndDate,
                         IsPublic = job.IsPublic,
-                        UserId = user.UserId
+                        UserId = user.UserId,
+                        Level = job.Level, // Προσθήκη του επιπέδου της θέσης εργασίας
+                        Industry = job.Industry // Προσθήκη της βιομηχανίας
                     };
                     user.Jobs.Add(updatedJob);
                     _logger.LogInformation($"Updated Job: {job.Position}, {job.Company}");
@@ -129,7 +135,7 @@ namespace MyApi.Services
                         SkillName = skill.SkillName,
                         Proficiency = skill.Proficiency,
                         IsPublic = skill.IsPublic,
-                        UserId = user.UserId
+                        UserId = user.UserId,
                     };
                     user.Skills.Add(updatedSkill);
                     _logger.LogInformation($"Updated Skill: {skill.SkillName}, {skill.Proficiency}");
@@ -139,8 +145,5 @@ namespace MyApi.Services
                 _logger.LogInformation("User bio updated in the database.");
             }
         }
-
-
-
     }
 }
