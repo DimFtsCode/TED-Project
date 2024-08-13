@@ -1,13 +1,37 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import logo from './images/logo.jpg';
 import transparent_logo from './images/transparent-logo.png';
 import { UserContext } from './UserContext';
+import { UnreadMessagesContext } from './UnreadMessagesContext';
+import axios from 'axios';
 
 const Header = () => {
   const { user, logout } = useContext(UserContext);
+  const {unreadCount, setUnreadCount} = useContext(UnreadMessagesContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      if (user && user.userId) {
+        try {
+          const response = await axios.get(`https://localhost:7176/api/discussions/user/${user.userId}`);
+          const discussions = response.data;
+          const unreadMessagesCount = discussions.reduce((total, discussion) => {
+            return total + (discussion.unreadCount || 0);
+          }, 0);
+          setUnreadCount(unreadMessagesCount);
+        } catch (error) {
+          console.error("Error fetching unread messages count: ", error);
+        }
+      }
+    };
+    fetchUnreadCount();
+
+    // update unread count every 30 seconds
+    const intervalId = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(intervalId);
+  }, [user, setUnreadCount]);
 
   const handleLogout = () => {
     logout();
@@ -54,7 +78,9 @@ const Header = () => {
                         <Link className="nav-link" to="">Jobs</Link>
                       </li>
                       <li className="nav-item">
-                        <Link className="nav-link" to="/user/discussion">Discussions</Link>
+                        <Link className="nav-link" to="/user/discussion">
+                         Discussions{unreadCount > 0 ? ` (${unreadCount})` : ''}
+                         </Link>
                       </li>
                       <li className="nav-item">
                         <Link className="nav-link" to="/user/notifications">Notifications</Link>

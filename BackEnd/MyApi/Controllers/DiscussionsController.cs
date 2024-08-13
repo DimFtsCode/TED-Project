@@ -49,7 +49,16 @@ namespace MyApi.Controllers
         public IActionResult GetDiscussionsByUser(int userId)
         {
             var discussions = _discussionService.GetDiscussionsByUser(userId);
-            return Ok(discussions);
+
+            var discussionsWithUnreadCount = discussions.Select( d => new 
+            {
+                d.Id,
+                d.Title,
+                UnreadCount = d.Messages.SelectMany(m => m.ReadStatuses).Count(rs => !rs.IsRead && rs.UserId == userId)
+
+            }).ToList();
+
+            return Ok(discussionsWithUnreadCount);
         }
 
 
