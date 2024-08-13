@@ -89,9 +89,8 @@ namespace MyApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Degree")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Degree")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("TEXT");
@@ -101,6 +100,9 @@ namespace MyApi.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsPublic")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Level")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("StartDate")
@@ -129,12 +131,17 @@ namespace MyApi.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Industry")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsPublic")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Position")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Level")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("TEXT");
@@ -214,9 +221,8 @@ namespace MyApi.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("SkillName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("SkillName")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("UserId")
                         .HasColumnType("INTEGER");

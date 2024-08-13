@@ -1,15 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Modal, Form, Button, Row, Col, Tabs, Tab } from 'react-bootstrap'; // Εισαγωγή Tabs και Tab
+import './EditUserModal.css';
+import axios from 'axios';
+
 
 const EditUserModal = ({ showEditModal, setShowEditModal, editUser, handleEditChange, handleSaveEditUser }) => {
     const [currentTab, setCurrentTab] = useState('basic');
+    const [enums, setEnums] = useState({
+        Degree: [],
+        EducationLevel: [],
+        JobIndustry: [],
+        JobLevel: [],
+        JobPosition: [],
+        SkillCategory: []
+    });
+
+    useEffect(() => {
+        const fetchEnums = async () => {
+            try {
+                const response = await axios.get('https://localhost:7176/api/enum/all-enums');
+                setEnums(response.data);
+                console.log('Enums fetched:', response.data);
+            } catch (error) {
+                console.error('Error fetching enums:', error);
+            }
+        };
+
+        fetchEnums();
+    }, []);
 
     const handleTabChange = (tab) => {
         setCurrentTab(tab);
     };
 
     return (
-        <Modal show={showEditModal} onHide={() => setShowEditModal(false)} centered size="lg">
+        <Modal show={showEditModal} onHide={() => setShowEditModal(false)} centered className="custom-modal">
             <Modal.Header closeButton>
                 <Modal.Title>Edit User</Modal.Title>
             </Modal.Header>
@@ -125,131 +150,232 @@ const EditUserModal = ({ showEditModal, setShowEditModal, editUser, handleEditCh
                                     />
                                 </Form.Group>
                             </Tab>
-                            <Tab eventKey="details" title="Details">
-                                {editUser.education.map((edu, index) => (
-                                    <div key={index}>
-                                        <Form.Group>
+                            {/* Education Tab */}
+                                <Tab eventKey="education" title="Education">
+                                    {editUser.education.map((edu, index) => (
+                                        <div key={index}>
                                             <Form.Label>Degree</Form.Label>
                                             <Form.Control
-                                                type="text"
+                                                as="select"
                                                 name={`education-${index}-degree`}
-                                                value={edu.degree}
-                                                onChange={handleEditChange}
+                                                value={enums.Degree[edu.degree]}  // Μετατροπή του αριθμού σε string
+                                                onChange={(e) => {
+                                                    const selectedIndex = enums.Degree.indexOf(e.target.value);
+                                                    handleEditChange({
+                                                        target: { name: `education-${index}-degree`, value: selectedIndex }
+                                                    });
+                                                }}
+                                            >
+                                                {enums.Degree.map((degree, i) => (
+                                                    <option key={i} value={degree}>
+                                                        {degree}
+                                                    </option>
+                                                ))}
+                                            </Form.Control>
+                                            <Form.Group>
+                                                <Form.Label>Education Level</Form.Label>
+                                                <Form.Control
+                                                    as="select"
+                                                    name={`education-${index}-level`}
+                                                    value={enums.EducationLevel[edu.level]}  // Μετατροπή του αριθμού σε string
+                                                    onChange={(e) => {
+                                                        const selectedIndex = enums.EducationLevel.indexOf(e.target.value);
+                                                        handleEditChange({
+                                                            target: { name: `education-${index}-level`, value: selectedIndex }
+                                                        });
+                                                    }}
+                                                >
+                                                    {enums.EducationLevel.map((level, i) => (
+                                                        <option key={i} value={level}>
+                                                            {level}
+                                                        </option>
+                                                    ))}
+                                                </Form.Control>
+                                            </Form.Group>
+                                            <Form.Group>
+                                                <Form.Label>Institution</Form.Label>
+                                                <Form.Control
+                                                    type="text"
+                                                    name={`education-${index}-institution`}
+                                                    value={edu.institution}
+                                                    onChange={handleEditChange}
+                                                />
+                                            </Form.Group>
+                                            <Form.Group>
+                                                <Form.Label>Start Date</Form.Label>
+                                                <Form.Control
+                                                    type="date"
+                                                    name={`education-${index}-startDate`}
+                                                    value={edu.startDate ? new Date(edu.startDate).toISOString().split('T')[0] : ''}
+                                                    onChange={handleEditChange}
+                                                />
+                                            </Form.Group>
+                                            <Form.Group>
+                                                <Form.Label>End Date</Form.Label>
+                                                <Form.Control
+                                                    type="date"
+                                                    name={`education-${index}-endDate`}
+                                                    value={edu.endDate ? new Date(edu.endDate).toISOString().split('T')[0] : ''}
+                                                    onChange={handleEditChange}
+                                                />
+                                            </Form.Group>
+                                            <Form.Check
+                                                type="checkbox"
+                                                label="Public"
+                                                name={`education-${index}-isPublic`}
+                                                checked={edu.isPublic}
+                                                onChange={(e) => handleEditChange({ target: { name: `education-${index}-isPublic`, value: e.target.checked } })}
                                             />
-                                        </Form.Group>
-                                        <Form.Group>
-                                            <Form.Label>Institution</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name={`education-${index}-institution`}
-                                                value={edu.institution}
-                                                onChange={handleEditChange}
+                                        </div>
+                                    ))}
+                                </Tab>
+
+                                {/* Jobs Tab */}
+                                <Tab eventKey="jobs" title="Jobs">
+                                    {editUser.jobs.map((job, index) => (
+                                        <div key={index}>
+                                            <Form.Group>
+                                                <Form.Label>Position</Form.Label>
+                                                <Form.Control
+                                                    as="select"
+                                                    name={`jobs-${index}-position`}
+                                                    value={enums.JobPosition[job.position]}  // Μετατροπή του αριθμού σε string
+                                                    onChange={(e) => {
+                                                        const selectedIndex = enums.JobPosition.indexOf(e.target.value);
+                                                        handleEditChange({
+                                                            target: { name: `jobs-${index}-position`, value: selectedIndex }
+                                                        });
+                                                    }}
+                                                >
+                                                    {enums.JobPosition.map((position, i) => (
+                                                        <option key={i} value={position}>
+                                                            {position}
+                                                        </option>
+                                                    ))}
+                                                </Form.Control>
+                                            </Form.Group>
+
+                                            <Form.Group>
+                                                <Form.Label>Industry</Form.Label>
+                                                <Form.Control
+                                                    as="select"
+                                                    name={`jobs-${index}-industry`}
+                                                    value={enums.JobIndustry[job.industry]}  // Μετατροπή του αριθμού σε string
+                                                    onChange={(e) => {
+                                                        const selectedIndex = enums.JobIndustry.indexOf(e.target.value);
+                                                        handleEditChange({
+                                                            target: { name: `jobs-${index}-industry`, value: selectedIndex }
+                                                        });
+                                                    }}
+                                                >
+                                                    {enums.JobIndustry.map((industry, i) => (
+                                                        <option key={i} value={industry}>
+                                                            {industry}
+                                                        </option>
+                                                    ))}
+                                                </Form.Control>
+                                            </Form.Group>
+                                            <Form.Group>
+                                                <Form.Label>Job Level</Form.Label>
+                                                <Form.Control
+                                                    as="select"
+                                                    name={`jobs-${index}-level`}
+                                                    value={enums.JobLevel[job.level]}  // Μετατροπή του αριθμού σε string
+                                                    onChange={(e) => {
+                                                        const selectedIndex = enums.JobLevel.indexOf(e.target.value);
+                                                        handleEditChange({
+                                                            target: { name: `jobs-${index}-level`, value: selectedIndex }
+                                                        });
+                                                    }}
+                                                >
+                                                    {enums.JobLevel.map((level, i) => (
+                                                        <option key={i} value={level}>
+                                                            {level}
+                                                        </option>
+                                                    ))}
+                                                </Form.Control>
+                                            </Form.Group>
+                                            <Form.Group>
+                                                <Form.Label>Company</Form.Label>
+                                                <Form.Control
+                                                    type="text"
+                                                    name={`jobs-${index}-company`}
+                                                    value={job.company}
+                                                    onChange={handleEditChange}
+                                                />
+                                            </Form.Group>
+                                            <Form.Group>
+                                                <Form.Label>Start Date</Form.Label>
+                                                <Form.Control
+                                                    type="date"
+                                                    name={`jobs-${index}-startDate`}
+                                                    value={job.startDate ? new Date(job.startDate).toISOString().split('T')[0] : ''}
+                                                    onChange={handleEditChange}
+                                                />
+                                            </Form.Group>
+                                            <Form.Group>
+                                                <Form.Label>End Date</Form.Label>
+                                                <Form.Control
+                                                    type="date"
+                                                    name={`jobs-${index}-endDate`}
+                                                    value={job.endDate ? new Date(job.endDate).toISOString().split('T')[0] : ''}
+                                                    onChange={handleEditChange}
+                                                />
+                                            </Form.Group>
+                                            <Form.Check
+                                                type="checkbox"
+                                                label="Public"
+                                                name={`jobs-${index}-isPublic`}
+                                                checked={job.isPublic}
+                                                onChange={(e) => handleEditChange({ target: { name: `jobs-${index}-isPublic`, value: e.target.checked } })}
                                             />
-                                        </Form.Group>
-                                        <Form.Group>
-                                            <Form.Label>Start Date</Form.Label>
-                                            <Form.Control
-                                                type="date"
-                                                name={`education-${index}-startDate`}
-                                                value={edu.startDate ? new Date(edu.startDate).toISOString().split('T')[0] : ''}
-                                                onChange={handleEditChange}
+                                        </div>
+                                    ))}
+                                </Tab>
+
+                                {/* Skills Tab */}
+                                <Tab eventKey="skills" title="Skills">
+                                    {editUser.skills.map((skill, index) => (
+                                        <div key={index}>
+                                            <Form.Group>
+                                                <Form.Label>Skill Name</Form.Label>
+                                                <Form.Control
+                                                    as="select"
+                                                    name={`skills-${index}-skillName`}
+                                                    value={enums.SkillCategory[skill.skillName]}  // Μετατροπή του αριθμού σε string
+                                                    onChange={(e) => {
+                                                        const selectedIndex = enums.SkillCategory.indexOf(e.target.value);
+                                                        handleEditChange({
+                                                            target: { name: `skills-${index}-skillName`, value: selectedIndex }
+                                                        });
+                                                    }}
+                                                >
+                                                    {enums.SkillCategory.map((skillName, i) => (
+                                                        <option key={i} value={skillName}>
+                                                            {skillName}
+                                                        </option>
+                                                    ))}
+                                                </Form.Control>
+                                            </Form.Group>
+                                            <Form.Group>
+                                                <Form.Label>Proficiency</Form.Label>
+                                                <Form.Control
+                                                    type="text"
+                                                    name={`skills-${index}-proficiency`}
+                                                    value={skill.proficiency}
+                                                    onChange={handleEditChange}
+                                                />
+                                            </Form.Group>
+                                            <Form.Check
+                                                type="checkbox"
+                                                label="Public"
+                                                name={`skills-${index}-isPublic`}
+                                                checked={skill.isPublic}
+                                                onChange={(e) => handleEditChange({ target: { name: `skills-${index}-isPublic`, value: e.target.checked } })}
                                             />
-                                        </Form.Group>
-                                        <Form.Group>
-                                            <Form.Label>End Date</Form.Label>
-                                            <Form.Control
-                                                type="date"
-                                                name={`education-${index}-endDate`}
-                                                value={edu.endDate ? new Date(edu.endDate).toISOString().split('T')[0] : ''}
-                                                onChange={handleEditChange}
-                                            />
-                                        </Form.Group>
-                                        <Form.Check
-                                            type="checkbox"
-                                            label="Public"
-                                            name={`education-${index}-isPublic`}
-                                            checked={edu.isPublic}
-                                            onChange={(e) => handleEditChange({ target: { name: `education-${index}-isPublic`, value: e.target.checked } })}
-                                        />
-                                    </div>
-                                ))}
-                                {editUser.skills.map((skill, index) => (
-                                    <div key={index}>
-                                        <Form.Group>
-                                            <Form.Label>Skill Name</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name={`skills-${index}-skillName`}
-                                                value={skill.skillName}
-                                                onChange={handleEditChange}
-                                            />
-                                        </Form.Group>
-                                        <Form.Group>
-                                            <Form.Label>Proficiency</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name={`skills-${index}-proficiency`}
-                                                value={skill.proficiency}
-                                                onChange={handleEditChange}
-                                            />
-                                        </Form.Group>
-                                        <Form.Check
-                                            type="checkbox"
-                                            label="Public"
-                                            name={`skills-${index}-isPublic`}
-                                            checked={skill.isPublic}
-                                            onChange={(e) => handleEditChange({ target: { name: `skills-${index}-isPublic`, value: e.target.checked } })}
-                                        />
-                                    </div>
-                                ))}
-                                {editUser.jobs.map((job, index) => (
-                                    <div key={index}>
-                                        <Form.Group>
-                                            <Form.Label>Position</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name={`jobs-${index}-position`}
-                                                value={job.position}
-                                                onChange={handleEditChange}
-                                            />
-                                        </Form.Group>
-                                        <Form.Group>
-                                            <Form.Label>Company</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name={`jobs-${index}-company`}
-                                                value={job.company}
-                                                onChange={handleEditChange}
-                                            />
-                                        </Form.Group>
-                                        <Form.Group>
-                                            <Form.Label>Start Date</Form.Label>
-                                            <Form.Control
-                                                type="date"
-                                                name={`jobs-${index}-startDate`}
-                                                value={job.startDate ? new Date(job.startDate).toISOString().split('T')[0] : ''}
-                                                onChange={handleEditChange}
-                                            />
-                                        </Form.Group>
-                                        <Form.Group>
-                                            <Form.Label>End Date</Form.Label>
-                                            <Form.Control
-                                                type="date"
-                                                name={`jobs-${index}-endDate`}
-                                                value={job.endDate ? new Date(job.endDate).toISOString().split('T')[0] : ''}
-                                                onChange={handleEditChange}
-                                            />
-                                        </Form.Group>
-                                        <Form.Check
-                                            type="checkbox"
-                                            label="Public"
-                                            name={`jobs-${index}-isPublic`}
-                                            checked={job.isPublic}
-                                            onChange={(e) => handleEditChange({ target: { name: `jobs-${index}-isPublic`, value: e.target.checked } })}
-                                        />
-                                    </div>
-                                ))}
-                            </Tab>
+                                        </div>
+                                    ))}
+                                </Tab>
 
                         </Tabs>
                         <Button variant="primary" onClick={handleSaveEditUser} className="mt-3">Save Changes</Button>
