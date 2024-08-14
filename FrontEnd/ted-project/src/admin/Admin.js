@@ -10,7 +10,8 @@ import PaginationComponent from './PaginationComponent';
 
 const Admin = () => {
     const navigate = useNavigate();
-    const { logout } = useContext(UserContext);
+    const {user: currentUser, logout } = useContext(UserContext);
+    const [currentFirstName, setCurrentFirstName] = useState('');
     const [users, setUsers] = useState([]);
     const [selectedAllUsers, setSelectedAllUsers] = useState([]);
     const [selectedAdminUsers, setSelectedAdminUsers] = useState([]);
@@ -41,6 +42,9 @@ const Admin = () => {
         try {
             const response = await axios.get('https://localhost:7176/api/users');
             setUsers(response.data);
+            // find the current user
+            const currUserFirstName = response.data.find(user => user.userId === currentUser.userId);
+            setCurrentFirstName(currUserFirstName.firstName);;
         } catch (error) {
             console.error('Error fetching users:', error);
         }
@@ -189,7 +193,7 @@ const Admin = () => {
         <Container>
             <Row className="my-4">
                 <Col>
-                    <h1>Admin Page</h1>
+                    <h2>Welcome back {currentFirstName}! Manage all users here</h2>
                 </Col>
             </Row>
             <Row>
@@ -229,7 +233,7 @@ const Admin = () => {
                                 renderPagination={renderPagination}
                             />
                         </Tab>
-                        <Tab eventKey="nonAdmins" title="Non-Admins">
+                        <Tab eventKey="nonAdmins" title="Users">
                             <UserTable 
                                 users={users.filter(user => user.admin === false)} 
                                 selectedUsers={selectedNonAdminUsers} 
