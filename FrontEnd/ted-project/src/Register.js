@@ -142,13 +142,16 @@ const Register = () => {
         console.error('User ID is undefined');
         return;
     }
-    try {
-        await axios.post('https://localhost:7176/api/userbio/register-bio', userBioData, { withCredentials: true });
-        setShowSuccessModal(false);
-        navigate('/user');
-    } catch (error) {
-        console.error('Error registering bio:', error);
-    }
+    // try {
+    //     await axios.post('https://localhost:7176/api/userbio/register-bio', userBioData, { withCredentials: true });
+    //     setShowSuccessModal(false);
+    //     navigate('/user');
+    // } catch (error) {
+    //     console.error('Error registering bio:', error);
+    // }
+
+    setShowSuccessModal(false);
+    navigate('/user');
   };
 
   return (
