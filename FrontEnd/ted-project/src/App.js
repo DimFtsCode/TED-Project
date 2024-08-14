@@ -16,6 +16,7 @@ import UserNotifications from './user/UserNotifications';
 import Header from './Header';
 import Footer from './Footer';
 import { UserProvider } from './UserContext';
+import { UnreadMessagesProvider } from './UnreadMessagesContext';
 import ProtectedRoute from './ProtectedRoute';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -25,6 +26,7 @@ import UserDiscussion from './user/UserDiscussion';
 function App() {
   return (
     <UserProvider>
+      <UnreadMessagesProvider>
       <Router>
         <div className="d-flex flex-column min-vh-100">
           <Header />
@@ -49,6 +51,7 @@ function App() {
           <Footer />
         </div>
       </Router>
+      </UnreadMessagesProvider>
     </UserProvider>
   );
 }

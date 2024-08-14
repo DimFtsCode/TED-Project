@@ -2,12 +2,14 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Container, Row, Col, ListGroup, Card, Form, Button, Modal } from 'react-bootstrap';
 import axios from 'axios';
 import { UserContext } from '../UserContext';
+import { UnreadMessagesContext } from '../UnreadMessagesContext';
 import * as signalR from '@microsoft/signalr';
 
 const UserDiscussion = () => {
     const { user: currentUser } = useContext(UserContext);
     const [discussions, setDiscussions] = useState([]);
     const [messages, setMessages] = useState([]);
+    const { setUnreadCount } = useContext(UnreadMessagesContext);
     const [selectedDiscussion, setSelectedDiscussion] = useState(null);
     const [newMessage, setNewMessage] = useState('');
     const [showAddParticipantModal, setShowAddParticipantModal] = useState(false);
@@ -29,11 +31,15 @@ const UserDiscussion = () => {
         const fetchDiscussions = async () => {
             try {
                 const response = await axios.get(`https://localhost:7176/api/discussions/user/${currentUser.userId}`);
-                console.log('Discussions Response:', response.data);
+                // console.log('Discussions Response:', response.data);
                 setDiscussions(response.data);
 
-                // Αυτόματη επιλογή της τελευταίας συζήτησης
-                if (response.data.length > 0) {
+                // Check if there is a saved discussion ID in the local storage. 
+                const savedDiscussionId = localStorage.getItem('selectedDiscussionId');
+                if (savedDiscussionId) {
+                    setSelectedDiscussion(parseInt(savedDiscussionId, 10));
+                    fetchMessages(parseInt(savedDiscussionId, 10));
+                } else if (response.data.length > 0) {  // else, selected the last discussion from the API response
                     const lastDiscussion = response.data[response.data.length - 1];
                     setSelectedDiscussion(lastDiscussion.id);
                     fetchMessages(lastDiscussion.id);
@@ -44,6 +50,7 @@ const UserDiscussion = () => {
         };
 
         fetchDiscussions();
+
     }, [currentUser]);
 
     useEffect(() => {
@@ -57,9 +64,17 @@ const UserDiscussion = () => {
             .then(() => console.log("Connected to SignalR"))
             .catch((err) => console.error("SignalR Connection Error: ", err));
     
-        connection.on("ReceiveMessage", (user, message, senderId) => {
-            setMessages((prevMessages) => [...prevMessages, { senderName: user, text: message, senderId }]);
-            scrollToBottom(); 
+        connection.on("ReceiveMessage", (user, message, senderId, discussionId) => {
+            if (discussionId === selectedDiscussion) {
+                // This ensures the message is added to the current discussion
+                setMessages((prevMessages) => [...prevMessages, { senderName: user, text: message, senderId }]);
+                scrollToBottom(); 
+            }
+    
+            // Only update the unread count if the message is not from the current user and the current discussion is not open
+            if (senderId !== currentUser.userId && discussionId !== selectedDiscussion) {
+                setUnreadCount((prevUnreadCount) => prevUnreadCount + 1);
+            }
         });
     
         connectionRef.current = connection;
@@ -69,7 +84,7 @@ const UserDiscussion = () => {
                 connectionRef.current.stop();
             }
         };
-    }, []);
+    }, [setUnreadCount, currentUser, selectedDiscussion]);
 
     const fetchMessages = async (id) => {
         try {
@@ -94,9 +109,25 @@ const UserDiscussion = () => {
 
     const handleDiscussionClick = async (id) => {
         setSelectedDiscussion(id);
-        fetchMessages(id);
+        await fetchMessages(id);
+        localStorage.setItem('selectedDiscussionId', id);
+        try {
+            // Mark the messages in this discussion as read
+            await axios.post(`https://localhost:7176/api/messages/${id}/mark-as-read/${currentUser.userId}`);
+    
+            // Fetch the updated discussions list and adjust the unread count
+            const updatedDiscussions = await axios.get(`https://localhost:7176/api/discussions/user/${currentUser.userId}`);
+            setDiscussions(updatedDiscussions.data);
+    
+            // Update the unread count after marking messages as read
+            const discussion = updatedDiscussions.data.find(d => d.id === id);
+            const unreadMessagesInDiscussion = discussion ? discussion.unreadCount : 0;
+            setUnreadCount((prevCount) => Math.max(prevCount - unreadMessagesInDiscussion, 0));
+        } catch (error) {
+            console.error('Error marking messages as read:', error);
+        }
     };
-
+    
     const handleSendMessage = async () => {
         if (!newMessage.trim()) {
             return;
@@ -109,6 +140,16 @@ const UserDiscussion = () => {
                 discussionId: selectedDiscussion,
                 timestamp: new Date().toISOString()
             });
+
+            // Immediately show the message in the UI for the sender
+            setMessages((prevMessages) => [
+                ...prevMessages,
+                {
+                    senderName: "You",
+                    text: newMessage,
+                    senderId: currentUser.userId,
+                },
+            ]);
 
             setNewMessage('');
             messageInputRef.current.focus();
@@ -231,10 +272,12 @@ const UserDiscussion = () => {
         fetchParticipantNames();
     }, [participants]);
     
-    
     const isDiscussionCreator = selectedDiscussion && discussions.length > 0 && 
-        discussions.find(discussion => discussion.id === selectedDiscussion)?.participants[0] === currentUser.userId;
+        discussions.find(discussion => discussion.id === selectedDiscussion)?.participants?.[0] === currentUser.userId;
 
+    if (!selectedDiscussion) {
+        return <div>Loading discussions...</div>
+    }
     return (
         <Container className="mt-5">
             <Row>
@@ -271,7 +314,8 @@ const UserDiscussion = () => {
                                                 }}
                                             >
                                                 <div>
-                                                    <strong>{message.senderName}</strong>
+                                                    {message.senderId === currentUser.userId ? <strong> You </strong> : <strong> {message.senderName}</strong>}
+                                                    
                                                 </div>
                                                 <div
                                                     style={{
@@ -303,6 +347,12 @@ const UserDiscussion = () => {
                                     placeholder="Enter your message..."
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleSendMessage();
+                                        }
+                                    }}
                                     ref={messageInputRef}
                                 />
                                 <Button variant="primary" className="mt-2" onClick={handleSendMessage}>

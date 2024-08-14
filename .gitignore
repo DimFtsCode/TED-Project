@@ -106,11 +106,11 @@ artifacts/
 # Node.js
 FrontEnd/ted-project/node_modules/
 
-# SQLite databases
-# *.db
-# *.db3
-# *.sqlite
-# *.sqlite3
+SQLite databases
+*.db
+*.db3
+*.sqlite
+*.sqlite3
 
 # Environment files
 appsettings.json

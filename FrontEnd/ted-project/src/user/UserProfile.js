@@ -133,6 +133,10 @@ const UserProfile = () => {
 
 
   const handleAddEducation = () => {
+    if (!newEducation.degree || !newEducation.level || !newEducation.institution || !newEducation.startDate) {
+        alert('Please fill in all required (*) fields.');
+        return;
+    }
     setProfile(prevProfile => ({
       ...prevProfile,
       education: [...prevProfile.education, newEducation]
@@ -142,6 +146,10 @@ const UserProfile = () => {
   };
   
   const handleAddJob = () => {
+    if (!newJob.position || !newJob.industry || !newJob.level || !newJob.company || !newJob.startDate) {
+        alert('Please fill in all required (*) fields.');
+        return;
+    }
     setProfile(prevProfile => ({
       ...prevProfile,
       jobs: [...prevProfile.jobs, newJob]
@@ -152,6 +160,10 @@ const UserProfile = () => {
   
 
   const handleAddSkill = () => {
+    if (!newSkill.skillName || !newSkill.proficiency) {
+        alert('Please fill in all required (*) fields.');
+        return;
+    }
     setProfile(prevProfile => ({
       ...prevProfile,
       skills: [...prevProfile.skills, newSkill]
@@ -360,13 +372,14 @@ const UserProfile = () => {
                             <ListGroup.Item>
                                 <h4>Add Education</h4>
                                 <Form.Group controlId="formEducationDegreeNew">
-                                    <Form.Label>Degree</Form.Label>
+                                    <Form.Label>Degree*</Form.Label>
                                     <Form.Control
                                         as="select"
                                         name="degree"
                                         value={newEducation.degree}
                                         onChange={(e) => handleEducationChange('degree', e.target.value)}
                                     >
+                                        <option value="" disabled hidden>Select Degree</option> {/* Default empty disabled option */}
                                         {enums.Degree.map((degree, i) => (
                                             <option key={i} value={degree}>
                                                 {degree}
@@ -375,13 +388,14 @@ const UserProfile = () => {
                                     </Form.Control>
                                 </Form.Group>
                                 <Form.Group controlId="formEducationLevelNew">
-                                    <Form.Label>Level</Form.Label>
+                                    <Form.Label>Level*</Form.Label>
                                     <Form.Control
                                         as="select"
                                         name="level"
                                         value={newEducation.level}
                                         onChange={(e) => handleEducationChange('level', e.target.value)}
                                     >
+                                        <option value="" disabled hidden>Select Level</option> {/* Default empty disabled option */}
                                         {enums.EducationLevel.map((level, i) => (
                                             <option key={i} value={level}>
                                                 {level}
@@ -390,7 +404,7 @@ const UserProfile = () => {
                                     </Form.Control>
                                 </Form.Group>
                                 <Form.Group controlId="formEducationInstitutionNew">
-                                    <Form.Label>Institution</Form.Label>
+                                    <Form.Label>Institution*</Form.Label>
                                     <Form.Control
                                         type="text"
                                         name="institution"
@@ -399,7 +413,7 @@ const UserProfile = () => {
                                     />
                                 </Form.Group>
                                 <Form.Group controlId="formEducationStartDateNew">
-                                    <Form.Label>Start Date</Form.Label>
+                                    <Form.Label>Start Date*</Form.Label>
                                     <Form.Control
                                         type="date"
                                         name="startDate"
@@ -431,13 +445,14 @@ const UserProfile = () => {
                             <ListGroup.Item>
                                 <h4>Add Job</h4>
                                 <Form.Group controlId="formJobPositionNew">
-                                    <Form.Label>Position</Form.Label>
+                                    <Form.Label>Position*</Form.Label>
                                     <Form.Control
                                         as="select"
                                         name="position"
                                         value={newJob.position}
                                         onChange={(e) => handleJobChange('position', e.target.value)}
                                     >
+                                        <option value="" disabled hidden>Select Position</option>
                                         {enums.JobPosition.map((position, i) => (
                                             <option key={i} value={position}>
                                                 {position}
@@ -446,13 +461,14 @@ const UserProfile = () => {
                                     </Form.Control>
                                 </Form.Group>
                                 <Form.Group controlId="formJobIndustryNew">
-                                    <Form.Label>Industry</Form.Label>
+                                    <Form.Label>Industry*</Form.Label>
                                     <Form.Control
                                         as="select"
                                         name="industry"
                                         value={newJob.industry}
                                         onChange={(e) => handleJobChange('industry', e.target.value)}
                                     >
+                                        <option value="" disabled hidden>Select Industry</option>
                                         {enums.JobIndustry.map((industry, i) => (
                                             <option key={i} value={industry}>
                                                 {industry}
@@ -461,13 +477,14 @@ const UserProfile = () => {
                                     </Form.Control>
                                 </Form.Group>
                                 <Form.Group controlId="formJobLevelNew">
-                                    <Form.Label>Job Level</Form.Label>
+                                    <Form.Label>Job Level*</Form.Label>
                                     <Form.Control
                                         as="select"
                                         name="level"
                                         value={newJob.level}
                                         onChange={(e) => handleJobChange('level', e.target.value)}
                                     >
+                                        <option value="" disabled hidden>Select Level</option>
                                         {enums.JobLevel.map((level, i) => (
                                             <option key={i} value={level}>
                                                 {level}
@@ -476,7 +493,7 @@ const UserProfile = () => {
                                     </Form.Control>
                                 </Form.Group>
                                 <Form.Group controlId="formJobCompanyNew">
-                                    <Form.Label>Company</Form.Label>
+                                    <Form.Label>Company*</Form.Label>
                                     <Form.Control
                                         type="text"
                                         name="company"
@@ -485,7 +502,7 @@ const UserProfile = () => {
                                     />
                                 </Form.Group>
                                 <Form.Group controlId="formJobStartDateNew">
-                                    <Form.Label>Start Date</Form.Label>
+                                    <Form.Label>Start Date*</Form.Label>
                                     <Form.Control
                                         type="date"
                                         name="startDate"
@@ -517,13 +534,14 @@ const UserProfile = () => {
                             <ListGroup.Item>
                                 <h4>Add Skill</h4>
                                 <Form.Group controlId="formSkillNameNew">
-                                    <Form.Label>Skill Name</Form.Label>
+                                    <Form.Label>Skill Name*</Form.Label>
                                     <Form.Control
                                         as="select"
                                         name="skillName"
                                         value={newSkill.skillName}
                                         onChange={(e) => handleSkillChange('skillName', e.target.value)}
                                     >
+                                        <option value="" disabled hidden>Select Skill</option>
                                         {enums.SkillCategory.map((skillName, i) => (
                                             <option key={i} value={skillName}>
                                                 {skillName}
@@ -532,7 +550,7 @@ const UserProfile = () => {
                                     </Form.Control>
                                 </Form.Group>
                                 <Form.Group controlId="formSkillProficiencyNew">
-                                    <Form.Label>Proficiency</Form.Label>
+                                    <Form.Label>Proficiency*</Form.Label>
                                     <Form.Control
                                         type="text"
                                         name="proficiency"

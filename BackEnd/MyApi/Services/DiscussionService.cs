@@ -68,6 +68,12 @@ namespace MyApi.Services
                 .FirstOrDefault(d => d.Participants.OrderBy(p => p).SequenceEqual(new List<int> { senderId, receiverId }.OrderBy(p => p)));
         }
 
+        public List<int> GetParticipantsByDiscussionId(int discussionId)
+        {   
+            var discussion = _context.Discussions.FirstOrDefault(d => d.Id == discussionId);
+            return discussion?.Participants ?? new List<int>();
+        }
+
         public bool AddParticipantToDiscussion(int discussionId, int userId)
         {
             var discussion = _context.Discussions
