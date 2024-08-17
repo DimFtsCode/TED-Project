@@ -3,8 +3,8 @@ namespace MyApi.Models.Enums
     public enum EducationLevel
     {
         HighSchool,
-        Bachelors,
-        Masters,
+        Bachelor,
+        Master,
         Doctorate
     }
 
@@ -19,7 +19,8 @@ namespace MyApi.Models.Enums
         Law,                  // Νομική
         Psychology,           // Ψυχολογία
         Education,            // Παιδαγωγική
-        Economics             // Οικονομικά
+        Economics,             // Οικονομικά
+        NoDegree
     }
 
     public enum JobIndustry

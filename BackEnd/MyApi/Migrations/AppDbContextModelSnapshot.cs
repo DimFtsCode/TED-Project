@@ -65,6 +65,58 @@ namespace MyApi.Migrations
                     b.ToTable("Friendships");
                 });
 
+            modelBuilder.Entity("MyApi.Models.Advertisement", b =>
+                {
+                    b.Property<int>("AdvertisementId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ApplicantUserIds")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("MinimumYearsExperience")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("PostedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("RequiredDegree")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RequiredEducationLevel")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RequiredIndustry")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RequiredJobLevel")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RequiredPosition")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RequiredSkill")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("AdvertisementId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Advertisements");
+                });
+
             modelBuilder.Entity("MyApi.Models.Discussion", b =>
                 {
                     b.Property<int>("Id")
@@ -315,6 +367,15 @@ namespace MyApi.Migrations
                     b.Navigation("Friend");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MyApi.Models.Advertisement", b =>
+                {
+                    b.HasOne("MyApi.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("MyApi.Models.Education", b =>

@@ -22,7 +22,11 @@ import ProtectedRoute from './ProtectedRoute';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import UserDetail from './user/UserDetail';
 import UserDiscussion from './user/UserDiscussion';
-
+import UserJobs from './user/UserJobs';
+import UserJobsCreate from './user/Jobs/UserJobsCreate'; 
+import UserJobsView from './user/Jobs/UserJobsView'; 
+import UserAdParticipants from "./user/Jobs/UserAdParticipants";
+ 
 function App() {
   return (
     <UserProvider>
@@ -45,6 +49,10 @@ function App() {
                 <Route path="/user/settings" element={<ProtectedRoute><UserSettings/></ProtectedRoute>} />
                 <Route path="/user/notifications" element={<ProtectedRoute><UserNotifications/></ProtectedRoute>} />
                 <Route path="/user/discussion" element={<ProtectedRoute><UserDiscussion/></ProtectedRoute>} />
+                <Route path="/user/jobs" element={<ProtectedRoute><UserJobs/></ProtectedRoute>} />
+                <Route path="/user/jobs/create-ad" element={<ProtectedRoute><UserJobsCreate /></ProtectedRoute>} />
+                <Route path="/user/jobs/view-ad" element={<ProtectedRoute><UserJobsView /></ProtectedRoute>} />
+                <Route path="/user/jobs/participants" element={<ProtectedRoute><UserAdParticipants /></ProtectedRoute>} />
               </Route>
             </Routes>
           </main>
