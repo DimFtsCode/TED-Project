@@ -97,6 +97,8 @@ const UserNetwork = () => {
     }
   };
 
+  
+
   const handleDeleteFriend = async (friendId) => {
     try {
       await axios.delete(`https://localhost:7176/api/usernetwork/${currentUser.userId}/friends/${friendId}`);

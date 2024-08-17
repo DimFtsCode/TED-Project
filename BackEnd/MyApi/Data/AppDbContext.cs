@@ -18,6 +18,8 @@ namespace MyApi.Data
         public DbSet<Friendship> Friendships { get; set; }
         public DbSet<Discussion> Discussions { get; set; }
         public DbSet<Message> Messages { get; set; }
+        public DbSet<Advertisement> Advertisements { get; set; } 
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -79,6 +81,13 @@ namespace MyApi.Data
                 .HasOne<Discussion>() // Αφαιρούμε την πλοηγητική ιδιότητα `Discussion`
                 .WithMany(d => d.Messages)
                 .HasForeignKey(m => m.DiscussionId);
+
+
+            modelBuilder.Entity<Advertisement>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

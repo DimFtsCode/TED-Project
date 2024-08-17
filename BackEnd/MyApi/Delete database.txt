@@ -1,0 +1,4 @@
+DELETE FROM sqlite_sequence WHERE name='users';
+DELETE FROM sqlite_sequence WHERE name='educations';
+DELETE FROM sqlite_sequence WHERE name='jobs';
+DELETE FROM sqlite_sequence WHERE name='skills';

@@ -23,6 +23,7 @@ builder.Services.AddScoped<UserBasicInfoService>();
 builder.Services.AddScoped<MessageService>();
 builder.Services.AddScoped<DiscussionService>();
 builder.Services.AddScoped<EnumService>();
+builder.Services.AddScoped<AdvertisementService>();
 
 
 // Προσθήκη του SignalR
