@@ -74,7 +74,7 @@ const UserDiscussion = () => {
                 expectedDiscussionId: selectedDiscussion
             });
             if (discussionId === selectedDiscussion) {
-                console.log('Message added to the current discussion');
+                // console.log('Message added to the current discussion');
                 // This ensures the message is added to the current discussion
                 setMessages((prevMessages) => [...prevMessages, { senderName: user, text: message, senderId }]);
                 scrollToBottom(); 
@@ -117,10 +117,20 @@ const UserDiscussion = () => {
         setSelectedDiscussion(id);
         await fetchMessages(id);
         localStorage.setItem('selectedDiscussionId', id);
+        
         try {
             // Mark the messages in this discussion as read
             await axios.post(`https://localhost:7176/api/messages/${id}/mark-as-read/${currentUser.userId}`);
-    
+        } catch (error) {
+            if (error.response && error.response.status === 404) {
+                // No unread messages found, it's not an error
+                console.log("No unread messages to mark as read.");
+            } else {
+                console.error('Error marking messages as read:', error);
+            }
+        }
+        
+        try {
             // Fetch the updated discussions list and adjust the unread count
             const updatedDiscussions = await axios.get(`https://localhost:7176/api/discussions/user/${currentUser.userId}`);
             setDiscussions(updatedDiscussions.data);
@@ -130,7 +140,7 @@ const UserDiscussion = () => {
             const unreadMessagesInDiscussion = discussion ? discussion.unreadCount : 0;
             setUnreadCount((prevCount) => Math.max(prevCount - unreadMessagesInDiscussion, 0));
         } catch (error) {
-            console.error('Error marking messages as read:', error);
+            console.error('Error fetching updated discussions:', error);
         }
     };
     
