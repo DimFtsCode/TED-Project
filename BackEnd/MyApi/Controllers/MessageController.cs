@@ -34,10 +34,10 @@ namespace MyApi.Controllers
             {
                 if (message.DiscussionId == 0)
                 {
-                    // Δημιουργία νέας συζήτησης αν δεν υπάρχει ήδη
+                    // Create a new discussion if it doesn't exist
                     var discussion = new Discussion
                     {
-                        Participants = new List<int> { message.SenderId } // Μόνο το SenderId, χωρίς ReceiverId
+                        Participants = new List<int> { message.SenderId } // Only SenderId, without ReceiverId
                     };
 
                     var createdDiscussion = _discussionService.CreateDiscussion(discussion);
@@ -64,7 +64,9 @@ namespace MyApi.Controllers
                 {
                     if (participantId != message.SenderId)
                     {
-                        await _hubContext.Clients.User(participantId.ToString()).SendAsync("ReceiveMessage", message.SenderId, message.Text, message.DiscussionId);
+                        Console.WriteLine($"Sending message to participant {participantId}, sender {message.SenderId}, discussion {message.DiscussionId}");
+                        await _hubContext.Clients.User(participantId.ToString())
+                            .SendAsync("ReceiveMessage",message.SenderName, message.Text, message.SenderId, message.DiscussionId);
                     }
                 }
 
@@ -78,7 +80,7 @@ namespace MyApi.Controllers
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
-        }
+}
 
         [HttpPost("{discussionId}/mark-as-read/{userId}")]
         public IActionResult MarkMessagesAsRead(int discussionId, int userId)
