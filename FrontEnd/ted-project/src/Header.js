@@ -1,37 +1,54 @@
 import React, { useContext, useState, useEffect } from 'react';
+import Badge from 'react-bootstrap/Badge';
 import { Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import transparent_logo from './images/transparent-logo.png';
 import { UserContext } from './UserContext';
 import { UnreadMessagesContext } from './UnreadMessagesContext';
+import { SignalRContext } from './SignalRContext';
 import axios from 'axios';
 
 const Header = () => {
   const { user, logout } = useContext(UserContext);
   const {unreadCount, setUnreadCount} = useContext(UnreadMessagesContext);
+  const { message } = useContext(SignalRContext);
   const navigate = useNavigate();
+  
+  const fetchUnreadCount = async () => {
+    if (user && user.userId) {
+      try {
+        const response = await axios.get(`https://localhost:7176/api/discussions/user/${user.userId}`);
+        const discussions = response.data;
+        const unreadMessagesCount = discussions.reduce((total, discussion) => {
+          return total + (discussion.unreadCount || 0);
+        }, 0);
+        // console.log("Header: Fetched unread messages count: ", unreadMessagesCount);
+        setUnreadCount(unreadMessagesCount);
+      } catch (error) {
+        console.error("Error fetching unread messages count: ", error);
+      }
+    }
+  };
+
+  // fetch unread count on initial render
+  useEffect(() => {
+    fetchUnreadCount();
+  }, [user]);
 
   useEffect(() => {
-    const fetchUnreadCount = async () => {
-      if (user && user.userId) {
-        try {
-          const response = await axios.get(`https://localhost:7176/api/discussions/user/${user.userId}`);
-          const discussions = response.data;
-          const unreadMessagesCount = discussions.reduce((total, discussion) => {
-            return total + (discussion.unreadCount || 0);
-          }, 0);
-          setUnreadCount(unreadMessagesCount);
-        } catch (error) {
-          console.error("Error fetching unread messages count: ", error);
-        }
+    if (message){
+      console.log("Header: Received message from SignalR ", message);
+      if (message.senderId !== user.userId) {
+        fetchUnreadCount();
       }
-    };
-    fetchUnreadCount();
+    } 
+  }, [message]);
 
-    // update unread count every 30 seconds
+  useEffect(() => {
+    // Update unread count periodically
     const intervalId = setInterval(fetchUnreadCount, 30000);
     return () => clearInterval(intervalId);
-  }, [user, setUnreadCount]);
+  }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -79,8 +96,11 @@ const Header = () => {
                       </li>
                       <li className="nav-item">
                         <Link className="nav-link" to="/user/discussion">
-                         Discussions{unreadCount > 0 ? ` (${unreadCount})` : ''}
+                         Discussions {unreadCount > 0 && <Badge pill bg="primary">{unreadCount}</Badge>}
                          </Link>
+                        {/* <Link className="nav-link" to="/user/discussion">
+                         Discussions{unreadCount > 0 ? ` (${unreadCount})` : ''}
+                         </Link> */}
                       </li>
                       <li className="nav-item">
                         <Link className="nav-link" to="/user/notifications">Notifications</Link>

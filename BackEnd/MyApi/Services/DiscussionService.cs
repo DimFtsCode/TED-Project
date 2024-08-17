@@ -61,6 +61,26 @@ namespace MyApi.Services
                 .ToList();
         }
 
+        public IEnumerable<DiscussionWithUnreadCount> GetDiscussionsWithUnreadCountByUser(int userId)
+        {
+            var discussions = _context.Discussions
+                .Include(d => d.Messages)
+                .ThenInclude(m => m.ReadStatuses) // Ensure that ReadStatuses are loaded
+                .Where(d => d.Participants.Contains(userId))
+                .ToList();
+
+            var discussionsWithUnreadCount = discussions.Select(d => new DiscussionWithUnreadCount
+            {
+                Id = d.Id,
+                Title = d.Title,
+                UnreadCount = d.Messages
+                    .SelectMany(m => m.ReadStatuses)
+                    .Count(rs => !rs.IsRead && rs.UserId == userId) // Count unread messages for the current user
+            }).ToList();
+
+            return discussionsWithUnreadCount;
+        }
+
         public Discussion? GetDiscussionByParticipants(int senderId, int receiverId)
         {
             return _context.Discussions
@@ -222,5 +242,12 @@ namespace MyApi.Services
         }
 
 
+    }
+    // Helper class to represent discussions with unread count
+    public class DiscussionWithUnreadCount
+    {
+        public int Id { get; set; }
+        public string? Title { get; set; }
+        public int UnreadCount { get; set; }
     }
 }

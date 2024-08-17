@@ -18,6 +18,8 @@ namespace MyApi.Data
         public DbSet<Friendship> Friendships { get; set; }
         public DbSet<Discussion> Discussions { get; set; }
         public DbSet<Message> Messages { get; set; }
+
+        public DbSet<MessageReadStatus> MessageReadStatuses { get; set; }
         public DbSet<Advertisement> Advertisements { get; set; } 
 
 
@@ -73,20 +75,32 @@ namespace MyApi.Data
 
             // New relationships for chat functionality
             modelBuilder.Entity<Message>()
-                .HasOne<User>() // Αφαιρούμε την πλοηγητική ιδιότητα `Sender`
+                .HasOne<User>() // Removing the navigation property `Sender`
                 .WithMany(u => u.SentMessages)
                 .HasForeignKey(m => m.SenderId);
 
             modelBuilder.Entity<Message>()
-                .HasOne<Discussion>() // Αφαιρούμε την πλοηγητική ιδιότητα `Discussion`
+                .HasOne<Discussion>() // Removing the navigation property `Discussion`
                 .WithMany(d => d.Messages)
                 .HasForeignKey(m => m.DiscussionId);
-
 
             modelBuilder.Entity<Advertisement>()
                 .HasOne<User>()
                 .WithMany()
                 .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            // New relationships for MessageReadStatus
+            modelBuilder.Entity<MessageReadStatus>()
+                .HasOne<Message>()
+                .WithMany(m => m.ReadStatuses)
+                .HasForeignKey(mrs => mrs.MessageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<MessageReadStatus>()
+                .HasOne<User>()
+                .WithMany() 
+                .HasForeignKey(mrs => mrs.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

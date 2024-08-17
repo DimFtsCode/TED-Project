@@ -17,6 +17,7 @@ import Header from './Header';
 import Footer from './Footer';
 import { UserProvider } from './UserContext';
 import { UnreadMessagesProvider } from './UnreadMessagesContext';
+import { SignalRProvider } from './SignalRContext';
 import ProtectedRoute from './ProtectedRoute';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -30,6 +31,7 @@ import UserAdParticipants from "./user/Jobs/UserAdParticipants";
 function App() {
   return (
     <UserProvider>
+      <SignalRProvider>
       <UnreadMessagesProvider>
       <Router>
         <div className="d-flex flex-column min-vh-100">
@@ -60,6 +62,7 @@ function App() {
         </div>
       </Router>
       </UnreadMessagesProvider>
+      </SignalRProvider>
     </UserProvider>
   );
 }
