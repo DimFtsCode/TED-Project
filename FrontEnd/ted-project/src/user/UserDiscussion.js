@@ -54,6 +54,7 @@ const UserDiscussion = () => {
     }, [currentUser]);
 
     useEffect(() => {
+        console.log('Selected Discussion:', selectedDiscussion);
         // Δημιουργία της σύνδεσης με το SignalR hub
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("https://localhost:7176/chathub")
@@ -63,20 +64,25 @@ const UserDiscussion = () => {
         connection.start()
             .then(() => console.log("Connected to SignalR"))
             .catch((err) => console.error("SignalR Connection Error: ", err));
-    
+            
         connection.on("ReceiveMessage", (user, message, senderId, discussionId) => {
+            console.log('SignalR - Received message:', {
+                user,
+                message,
+                senderId,
+                discussionId,
+                expectedDiscussionId: selectedDiscussion
+            });
             if (discussionId === selectedDiscussion) {
+                console.log('Message added to the current discussion');
                 // This ensures the message is added to the current discussion
                 setMessages((prevMessages) => [...prevMessages, { senderName: user, text: message, senderId }]);
                 scrollToBottom(); 
-            }
-    
-            // Only update the unread count if the message is not from the current user and the current discussion is not open
-            if (senderId !== currentUser.userId && discussionId !== selectedDiscussion) {
+            } else if (senderId !== currentUser.userId) {
                 setUnreadCount((prevUnreadCount) => prevUnreadCount + 1);
             }
         });
-    
+            
         connectionRef.current = connection;
     
         return () => {
@@ -132,6 +138,7 @@ const UserDiscussion = () => {
         if (!newMessage.trim()) {
             return;
         }
+        //console.log('Message sent:', newMessage, currentUser.userId, selectedDiscussion);
 
         try {
             await axios.post('https://localhost:7176/api/messages/send', {
@@ -140,7 +147,6 @@ const UserDiscussion = () => {
                 discussionId: selectedDiscussion,
                 timestamp: new Date().toISOString()
             });
-
             // Immediately show the message in the UI for the sender
             setMessages((prevMessages) => [
                 ...prevMessages,
