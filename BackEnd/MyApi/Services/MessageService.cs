@@ -72,7 +72,7 @@ namespace MyApi.Services
             _context.SaveChanges();
 
             // Αποστολή του μηνύματος σε όλους τους συνδεδεμένους clients μέσω SignalR
-            await _chatHubContext.Clients.All.SendAsync("ReceiveMessage", message.SenderName, message.Text, message.SenderId);
+            await _chatHubContext.Clients.All.SendAsync("ReceiveMessage", message.SenderName, message.Text, message.SenderId, message.DiscussionId);
 
             return message;
         }
