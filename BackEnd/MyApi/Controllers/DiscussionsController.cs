@@ -48,18 +48,35 @@ namespace MyApi.Controllers
         [HttpGet("user/{userId}")]
         public IActionResult GetDiscussionsByUser(int userId)
         {
-            var discussions = _discussionService.GetDiscussionsByUser(userId);
+            var discussionsWithUnreadCount = _discussionService.GetDiscussionsWithUnreadCountByUser(userId);
 
-            var discussionsWithUnreadCount = discussions.Select( d => new 
+            if (discussionsWithUnreadCount == null)
             {
-                d.Id,
-                d.Title,
-                UnreadCount = d.Messages.SelectMany(m => m.ReadStatuses).Count(rs => !rs.IsRead && rs.UserId == userId)
+                return NotFound("No discussions found for the user.");
+            }
 
-            }).ToList();
+            // Log the result for debugging
+            Console.WriteLine($"Discussions fetched for user {userId}: {string.Join(", ", discussionsWithUnreadCount.Select(d => $"DiscussionId: {d.Id}, UnreadCount: {d.UnreadCount}"))}");
 
             return Ok(discussionsWithUnreadCount);
         }
+        // [HttpGet("user/{userId}")]
+        // public IActionResult GetDiscussionsByUser(int userId)
+        // {
+        //     var discussions = _discussionService.GetDiscussionsByUser(userId);
+
+        //     var discussionsWithUnreadCount = discussions.Select( d => new 
+        //     {
+        //         d.Id,
+        //         d.Title,
+        //         UnreadCount = d.Messages.SelectMany(m => m.ReadStatuses).Count(rs => !rs.IsRead && rs.UserId == userId)
+
+        //     }).ToList();
+
+        //     Console.WriteLine($"Discussions fetched for user {userId}: {string.Join(", ", discussionsWithUnreadCount.Select(d => $"DiscussionId: {d.Id}, UnreadCount: {d.UnreadCount}"))}");
+
+        //     return Ok(discussionsWithUnreadCount);
+        // }
 
 
         

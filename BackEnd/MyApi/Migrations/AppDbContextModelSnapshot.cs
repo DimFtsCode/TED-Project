@@ -257,7 +257,9 @@ namespace MyApi.Migrations
 
                     b.HasIndex("MessageId");
 
-                    b.ToTable("MessageReadStatus");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("MessageReadStatuses");
                 });
 
             modelBuilder.Entity("MyApi.Models.Skill", b =>
@@ -416,6 +418,12 @@ namespace MyApi.Migrations
                     b.HasOne("MyApi.Models.Message", null)
                         .WithMany("ReadStatuses")
                         .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyApi.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
