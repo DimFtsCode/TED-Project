@@ -18,6 +18,7 @@ import Footer from './Footer';
 import { UserProvider } from './UserContext';
 import { UnreadMessagesProvider } from './UnreadMessagesContext';
 import { SignalRProvider } from './SignalRContext';
+import { SelectedDiscussionProvider } from './SelectedDiscussionContext';
 import ProtectedRoute from './ProtectedRoute';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -34,6 +35,7 @@ function App() {
       <SignalRProvider>
       <UnreadMessagesProvider>
       <Router>
+      <SelectedDiscussionProvider>
         <div className="d-flex flex-column min-vh-100">
           <Header />
           <main className="flex-fill">
@@ -60,6 +62,7 @@ function App() {
           </main>
           <Footer />
         </div>
+      </SelectedDiscussionProvider>
       </Router>
       </UnreadMessagesProvider>
       </SignalRProvider>

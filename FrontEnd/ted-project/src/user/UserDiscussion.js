@@ -3,6 +3,7 @@ import { Container, Row, Col, ListGroup, Card, Form, Button, Modal, Badge } from
 import axios from 'axios';
 import { UserContext } from '../UserContext';
 import { UnreadMessagesContext } from '../UnreadMessagesContext';
+import { SelectedDiscussionContext } from '../SelectedDiscussionContext';
 import { SignalRContext } from '../SignalRContext';
 
 const UserDiscussion = () => {
@@ -10,6 +11,7 @@ const UserDiscussion = () => {
     const [discussions, setDiscussions] = useState([]);
     const [messages, setMessages] = useState([]);
     const { setUnreadCount } = useContext(UnreadMessagesContext);
+    const { selectedDiscussionId, setSelectedDiscussionId } = useContext(SelectedDiscussionContext);
     const [selectedDiscussion, setSelectedDiscussion] = useState(null);
     const [newMessage, setNewMessage] = useState('');
     const [showAddParticipantModal, setShowAddParticipantModal] = useState(false);
@@ -84,14 +86,30 @@ const UserDiscussion = () => {
     }
 
     useEffect(() => {
-        if (message && message.discussionId === selectedDiscussion) {
-          console.log('UserDiscussion: New message received', message);
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            { senderName: message.user, text: message.message, senderId: message.senderId },
-        ]);
+        if (message) {
+            // Log message details for debugging
+            console.log('UserDiscussion: New message received', message);
+    
+            setDiscussions((prevDiscussions) => 
+                prevDiscussions.map((discussion) => {
+                    // If the message is for the currently selected discussion, add the message to the chat window
+                    if (discussion.id === message.discussionId) {
+                        if (message.discussionId === selectedDiscussion) {
+                            setMessages((prevMessages) => [
+                                ...prevMessages,
+                                { senderName: message.user, text: message.message, senderId: message.senderId },
+                            ]);
+                            scrollToBottom();
+                        } else {
+                            // If it's for a different discussion, increment the unread count
+                            return { ...discussion, unreadCount: (discussion.unreadCount || 0) + 1 };
+                        }
+                    }
+                    return discussion;
+                })
+            );
         }
-    }, [message, selectedDiscussion]);
+    }, [message]);
 
     const fetchMessages = async (id) => {
         try {
@@ -116,6 +134,7 @@ const UserDiscussion = () => {
 
     const handleDiscussionClick = async (id) => {
         setSelectedDiscussion(id);
+        setSelectedDiscussionId(id); // Context for the Header component
         await fetchMessages(id);
         localStorage.setItem('selectedDiscussionId', id);
         
@@ -282,6 +301,7 @@ const UserDiscussion = () => {
                         <ListGroup variant="flush">
                             {discussions.map((discussion) => (
                                 <ListGroup.Item 
+                                    className="d-flex justify-content-between align-items-start"
                                     key={discussion.id} 
                                     action
                                     onClick={() => handleDiscussionClick(discussion.id)}
@@ -289,7 +309,7 @@ const UserDiscussion = () => {
                                 >
                                     {discussion.title}
                                     {discussion.unreadCount > 0 && (
-                                        <Badge pill bg="primary" className="ms-2">{discussion.unreadCount}</Badge>
+                                        <Badge pill bg="primary">{discussion.unreadCount}</Badge>
                                     )}
                                 </ListGroup.Item>
                             ))}

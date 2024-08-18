@@ -5,12 +5,14 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import transparent_logo from './images/transparent-logo.png';
 import { UserContext } from './UserContext';
 import { UnreadMessagesContext } from './UnreadMessagesContext';
+import { SelectedDiscussionContext } from './SelectedDiscussionContext';
 import { SignalRContext } from './SignalRContext';
 import axios from 'axios';
 
 const Header = () => {
   const { user, logout } = useContext(UserContext);
   const {unreadCount, setUnreadCount} = useContext(UnreadMessagesContext);
+  const { selectedDiscussionId } = useContext(SelectedDiscussionContext);
   const { message } = useContext(SignalRContext);
   const navigate = useNavigate();
   
@@ -20,7 +22,11 @@ const Header = () => {
         const response = await axios.get(`https://localhost:7176/api/discussions/user/${user.userId}`);
         const discussions = response.data;
         const unreadMessagesCount = discussions.reduce((total, discussion) => {
-          return total + (discussion.unreadCount || 0);
+          // exclude selected discussion from unread count
+          if (discussion.id !== selectedDiscussionId){
+            return total + (discussion.unreadCount || 0);
+          }
+          return total;
         }, 0);
         // console.log("Header: Fetched unread messages count: ", unreadMessagesCount);
         setUnreadCount(unreadMessagesCount);
