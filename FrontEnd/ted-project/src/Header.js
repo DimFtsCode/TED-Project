@@ -13,7 +13,7 @@ const Header = () => {
   const { user, logout } = useContext(UserContext);
   const {unreadCount, setUnreadCount} = useContext(UnreadMessagesContext);
   const { selectedDiscussionId } = useContext(SelectedDiscussionContext);
-  const { message } = useContext(SignalRContext);
+  const { message, pendingFriendRequests } = useContext(SignalRContext);
   const navigate = useNavigate();
   
   const fetchUnreadCount = async () => {
@@ -109,7 +109,9 @@ const Header = () => {
                          </Link> */}
                       </li>
                       <li className="nav-item">
-                        <Link className="nav-link" to="/user/notifications">Notifications</Link>
+                        <Link className="nav-link" to="/user/notifications">
+                        Notifications {pendingFriendRequests > 0 && <Badge pill bg="primary">{pendingFriendRequests}</Badge>}
+                        </Link>
                       </li>
                       <li className="nav-item">
                         <Link className="nav-link" to="/user/profile">Profile</Link>
