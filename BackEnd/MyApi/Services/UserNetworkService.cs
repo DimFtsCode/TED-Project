@@ -37,7 +37,6 @@ namespace MyApi.Services
                 .ToListAsync();
         }
 
-
         public async Task SendConnectionRequestAsync(int senderId, int receiverId)
         {
             var request = new ConnectionRequest
@@ -50,8 +49,8 @@ namespace MyApi.Services
             _context.ConnectionRequests.Add(request);
             await _context.SaveChangesAsync();
 
-            // Send a SignalR notification to the receiver
-            await _chatHubContext.Clients.User(receiverId.ToString()).SendAsync("ReceiveFriendRequest");
+            // Send a SignalR notification 
+            await _chatHubContext.Clients.All.SendAsync("ReceiveFriendRequest", receiverId);
         }
 
         public async Task AcceptConnectionRequestAsync(int requestId)

@@ -7,12 +7,9 @@ namespace MyApi.Hubs
     {
         public async Task SendMessage(string user, string message, int senderId, int discussionId, List<int> participantIds)
         {
-            Console.WriteLine($"ChatHub - Received message: {message}, from user: {user}, senderId: {senderId}, discussionId: {discussionId}");
             foreach (var participantId in participantIds)
             {
-                Console.WriteLine($"Sending message to participantId: {participantId}");
                 // send to all participants except the sender
-                
                 await Clients.User(participantId.ToString()).SendAsync("ReceiveMessage",user, message, senderId, discussionId);
             }
             
@@ -23,7 +20,7 @@ namespace MyApi.Hubs
         public async Task SendFriendRequestNotification(int recipientUserId)
         {
             // send a notification to the recipient
-            await Clients.User(recipientUserId.ToString()).SendAsync("ReceveFriendReqeust", recipientUserId);
+            await Clients.User(recipientUserId.ToString()).SendAsync("ReceiveFriendRequest", recipientUserId);
         }
         public async Task PingHub()
         {

@@ -1,13 +1,15 @@
-import React, { createContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useEffect, useRef, useState, useContext } from 'react';
 import * as signalR from '@microsoft/signalr';
+import { UserContext } from './UserContext';
 
 export const SignalRContext = createContext();
 
 export const SignalRProvider = ({ children }) => {
   const connectionRef = useRef(null);
+  const { user: currentUser } = useContext(UserContext);
   const [connected, setConnected] = useState(false);
   const [message, setMessage] = useState(null);  // Store messages globally
-  const [pendingFriendRequests, setPendingFriendRequests] = useState(0);  // Store friend requests globally
+  const [friendRequests, setFriendRequests] = useState(0);  // Store friend requests globally
 
   useEffect(() => {
     const connection = new signalR.HubConnectionBuilder()
@@ -17,7 +19,7 @@ export const SignalRProvider = ({ children }) => {
 
     connection.start()
       .then(() => {
-        console.log("Connected to SignalR");
+        console.log("Connected to SignalR:", connection);
         setConnected(true);
       })
       .catch((err) => console.error("SignalR Connection Error: ", err));
@@ -29,9 +31,9 @@ export const SignalRProvider = ({ children }) => {
 
     // Handle incoming friend requests
     connection.on("ReceiveFriendRequest", (recipientUserId) => {
-      console.log(`Received friend request for user: ${recipientUserId}`);
-      // Increase the count of pending friend requests when a new one is received
-      setPendingFriendRequests(prevCount => prevCount + 1);
+      if (recipientUserId === currentUser?.userId ){
+        setFriendRequests((prev) => prev + 1); 
+      }
     });
     connectionRef.current = connection;
 
@@ -40,10 +42,14 @@ export const SignalRProvider = ({ children }) => {
         connectionRef.current.stop();
       }
     };
-  }, []);
+  }, [currentUser]);                                                              
 
+  // Function to reset friend requests count
+  const resetFriendRequests = () => {
+    setFriendRequests(0);
+  }
   return (
-    <SignalRContext.Provider value={{ connection: connectionRef.current, connected, message }}>
+    <SignalRContext.Provider value={{ connection: connectionRef.current, connected, message, friendRequests, resetFriendRequests }}>
       {children}
     </SignalRContext.Provider>
   );
