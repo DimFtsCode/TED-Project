@@ -4,16 +4,20 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyApi.Models;
 using MyApi.Data;
+using MyApi.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace MyApi.Services
 {
     public class UserNetworkService
     {
         private readonly AppDbContext _context;
+        private readonly IHubContext<ChatHub> _chatHubContext;
 
-        public UserNetworkService(AppDbContext context)
+        public UserNetworkService(AppDbContext context, IHubContext<ChatHub> chatHubContext)
         {
             _context = context;
+            _chatHubContext = chatHubContext;
         }
 
         public async Task<List<User>> SearchUsersAsync(string query, int currentUserId)
@@ -33,7 +37,6 @@ namespace MyApi.Services
                 .ToListAsync();
         }
 
-
         public async Task SendConnectionRequestAsync(int senderId, int receiverId)
         {
             var request = new ConnectionRequest
@@ -45,6 +48,9 @@ namespace MyApi.Services
             };
             _context.ConnectionRequests.Add(request);
             await _context.SaveChangesAsync();
+
+            // Send a SignalR notification 
+            await _chatHubContext.Clients.All.SendAsync("ReceiveFriendRequest", receiverId);
         }
 
         public async Task AcceptConnectionRequestAsync(int requestId)
