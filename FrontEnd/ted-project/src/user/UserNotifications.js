@@ -2,9 +2,11 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Container, Button, Table, Tabs, Tab } from 'react-bootstrap';
 import { UserContext } from '../UserContext';
+import { SignalRContext } from '../SignalRContext';
 
 const UserNotifications = () => {
   const { user: currentUser } = useContext(UserContext);
+  const { resetFriendRequests } = useContext(SignalRContext);
   const [connectionRequests, setConnectionRequests] = useState([]);
   const [notesOfInterest, setNotesOfInterest] = useState([]);
   const [error, setError] = useState('');
@@ -13,6 +15,7 @@ const UserNotifications = () => {
     if (currentUser) {
       fetchConnectionRequests();
       fetchNotesOfInterest();
+      resetFriendRequests();  // reset friend requests count when the user navigates to the notifications page
     }
   }, [currentUser]);
 

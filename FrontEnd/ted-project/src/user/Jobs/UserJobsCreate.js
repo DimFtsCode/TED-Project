@@ -130,7 +130,7 @@ const UserJobsCreate = () => {
                             value={requiredDegree}
                             onChange={(e) => setRequiredDegree(e.target.value)}
                         >
-                            <option value="">Select Degree</option>
+                            <option value="" disabled hidden>Select Degree</option>
                             {enums.Degree.map((degree) => (
                             <option key={degree} value={degree}>{degree}</option>
                             ))}
@@ -146,7 +146,7 @@ const UserJobsCreate = () => {
                             value={requiredEducationLevel}
                             onChange={(e) => setRequiredEducationLevel(e.target.value)}
                         >
-                            <option value="">Select Education Level</option>
+                            <option value="" disabled hidden>Select Education Level</option>
                             {enums.EducationLevel.map((level) => (
                             <option key={level} value={level}>{level}</option>
                             ))}
@@ -164,7 +164,7 @@ const UserJobsCreate = () => {
                             value={requiredPosition}
                             onChange={(e) => setRequiredPosition(e.target.value)}
                         >
-                            <option value="">Select Position</option>
+                            <option value="" disabled hidden>Select Position</option>
                             {enums.JobPosition.map((position) => (
                             <option key={position} value={position}>{position}</option>
                             ))}
@@ -180,7 +180,7 @@ const UserJobsCreate = () => {
                             value={requiredIndustry}
                             onChange={(e) => setRequiredIndustry(e.target.value)}
                         >
-                            <option value="">Select Industry</option>
+                            <option value="" disabled hidden>Select Industry</option>
                             {enums.JobIndustry.map((industry) => (
                             <option key={industry} value={industry}>{industry}</option>
                             ))}
@@ -198,7 +198,7 @@ const UserJobsCreate = () => {
                             value={requiredJobLevel}
                             onChange={(e) => setRequiredJobLevel(e.target.value)}
                         >
-                            <option value="">Select Job Level</option>
+                            <option value="" disabled hidden>Select Job Level</option>
                             {enums.JobLevel.map((level) => (
                             <option key={level} value={level}>{level}</option>
                             ))}
@@ -228,7 +228,7 @@ const UserJobsCreate = () => {
                             value={requiredSkill}
                             onChange={(e) => setRequiredSkill(e.target.value)}
                         >
-                            <option value="">Select Skill</option>
+                            <option value="" disabled hidden>Select Skill</option>
                             {enums.SkillCategory.map((skill) => (
                             <option key={skill} value={skill}>{skill}</option>
                             ))}

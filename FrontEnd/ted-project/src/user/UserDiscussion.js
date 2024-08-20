@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { Container, Row, Col, ListGroup, Card, Form, Button, Modal } from 'react-bootstrap';
+import { Container, Row, Col, ListGroup, Card, Form, Button, Modal, Badge } from 'react-bootstrap';
 import axios from 'axios';
 import { UserContext } from '../UserContext';
 import { UnreadMessagesContext } from '../UnreadMessagesContext';
-import * as signalR from '@microsoft/signalr';
+import { SelectedDiscussionContext } from '../SelectedDiscussionContext';
+import { SignalRContext } from '../SignalRContext';
 
 const UserDiscussion = () => {
     const { user: currentUser } = useContext(UserContext);
     const [discussions, setDiscussions] = useState([]);
     const [messages, setMessages] = useState([]);
     const { setUnreadCount } = useContext(UnreadMessagesContext);
+    const { selectedDiscussionId, setSelectedDiscussionId } = useContext(SelectedDiscussionContext);
     const [selectedDiscussion, setSelectedDiscussion] = useState(null);
     const [newMessage, setNewMessage] = useState('');
     const [showAddParticipantModal, setShowAddParticipantModal] = useState(false);
@@ -19,8 +21,8 @@ const UserDiscussion = () => {
     const [participants, setParticipants] = useState([]); 
     const [participantNames, setParticipantNames] = useState([]);
     const messageInputRef = useRef(null);
-    const connectionRef = useRef(null);
     const messagesEndRef = useRef(null);
+    const {message } = useContext(SignalRContext);
 
     useEffect(() => {
         if (!currentUser || !currentUser.userId) {
@@ -33,16 +35,23 @@ const UserDiscussion = () => {
                 const response = await axios.get(`https://localhost:7176/api/discussions/user/${currentUser.userId}`);
                 // console.log('Discussions Response:', response.data);
                 setDiscussions(response.data);
-
+                
                 // Check if there is a saved discussion ID in the local storage. 
                 const savedDiscussionId = localStorage.getItem('selectedDiscussionId');
                 if (savedDiscussionId) {
-                    setSelectedDiscussion(parseInt(savedDiscussionId, 10));
-                    fetchMessages(parseInt(savedDiscussionId, 10));
+                    const discussionId = parseInt(savedDiscussionId, 10);
+                    setSelectedDiscussion(discussionId);
+                    await fetchMessages(discussionId);
+
+                    // Mark messages are read for the auto-selected discussion
+                    await markMessagesAsRead(discussionId);
                 } else if (response.data.length > 0) {  // else, selected the last discussion from the API response
                     const lastDiscussion = response.data[response.data.length - 1];
                     setSelectedDiscussion(lastDiscussion.id);
-                    fetchMessages(lastDiscussion.id);
+                    await fetchMessages(lastDiscussion.id);
+
+                    // Mark messages are read for the auto-selected discussion
+                    await markMessagesAsRead(lastDiscussion.id);
                 }
             } catch (error) {
                 console.error('Error fetching discussions:', error);
@@ -53,44 +62,54 @@ const UserDiscussion = () => {
 
     }, [currentUser]);
 
+    const markMessagesAsRead = async (discussionId) => {
+        try {
+            // Mark the messages in this discussion as read
+            await axios.post(`https://localhost:7176/api/messages/${discussionId}/mark-as-read/${currentUser.userId}`);
+            
+            // Fetch the updated discussions list and adjust the unread count
+            const updatedDiscussions = await axios.get(`https://localhost:7176/api/discussions/user/${currentUser.userId}`);
+            setDiscussions(updatedDiscussions.data);
+    
+            // Update the unread count in the context after marking messages as read
+            const newUnreadCount = updatedDiscussions.data.reduce((total, discussion) => {
+                return total + (discussion.unreadCount || 0);
+            }, 0);
+            setUnreadCount(newUnreadCount);
+        } catch (error) {
+            if (error.response && error.response.status === 404) {
+                console.log("No unread messages to mark as read.");
+            } else {
+                console.error('Error marking messages as read:', error);
+            }
+        }
+    }
+
     useEffect(() => {
-        console.log('Selected Discussion:', selectedDiscussion);
-        // Δημιουργία της σύνδεσης με το SignalR hub
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("https://localhost:7176/chathub")
-            .configureLogging(signalR.LogLevel.Information)
-            .build();
+        if (message) {
+            // Log message details for debugging
+            console.log('UserDiscussion: New message received', message);
     
-        connection.start()
-            .then(() => console.log("Connected to SignalR"))
-            .catch((err) => console.error("SignalR Connection Error: ", err));
-            
-        connection.on("ReceiveMessage", (user, message, senderId, discussionId) => {
-            console.log('SignalR - Received message:', {
-                user,
-                message,
-                senderId,
-                discussionId,
-                expectedDiscussionId: selectedDiscussion
-            });
-            if (discussionId === selectedDiscussion) {
-                console.log('Message added to the current discussion');
-                // This ensures the message is added to the current discussion
-                setMessages((prevMessages) => [...prevMessages, { senderName: user, text: message, senderId }]);
-                scrollToBottom(); 
-            } else if (senderId !== currentUser.userId) {
-                setUnreadCount((prevUnreadCount) => prevUnreadCount + 1);
-            }
-        });
-            
-        connectionRef.current = connection;
-    
-        return () => {
-            if (connectionRef.current) {
-                connectionRef.current.stop();
-            }
-        };
-    }, [setUnreadCount, currentUser, selectedDiscussion]);
+            setDiscussions((prevDiscussions) => 
+                prevDiscussions.map((discussion) => {
+                    // If the message is for the currently selected discussion, add the message to the chat window
+                    if (discussion.id === message.discussionId) {
+                        if (message.discussionId === selectedDiscussion) {
+                            setMessages((prevMessages) => [
+                                ...prevMessages,
+                                { senderName: message.user, text: message.message, senderId: message.senderId },
+                            ]);
+                            scrollToBottom();
+                        } else {
+                            // If it's for a different discussion, increment the unread count
+                            return { ...discussion, unreadCount: (discussion.unreadCount || 0) + 1 };
+                        }
+                    }
+                    return discussion;
+                })
+            );
+        }
+    }, [message]);
 
     const fetchMessages = async (id) => {
         try {
@@ -115,23 +134,12 @@ const UserDiscussion = () => {
 
     const handleDiscussionClick = async (id) => {
         setSelectedDiscussion(id);
+        setSelectedDiscussionId(id); // Context for the Header component
         await fetchMessages(id);
         localStorage.setItem('selectedDiscussionId', id);
-        try {
-            // Mark the messages in this discussion as read
-            await axios.post(`https://localhost:7176/api/messages/${id}/mark-as-read/${currentUser.userId}`);
-    
-            // Fetch the updated discussions list and adjust the unread count
-            const updatedDiscussions = await axios.get(`https://localhost:7176/api/discussions/user/${currentUser.userId}`);
-            setDiscussions(updatedDiscussions.data);
-    
-            // Update the unread count after marking messages as read
-            const discussion = updatedDiscussions.data.find(d => d.id === id);
-            const unreadMessagesInDiscussion = discussion ? discussion.unreadCount : 0;
-            setUnreadCount((prevCount) => Math.max(prevCount - unreadMessagesInDiscussion, 0));
-        } catch (error) {
-            console.error('Error marking messages as read:', error);
-        }
+        
+        // Mark messages are read for the selected discussion
+        await markMessagesAsRead(id);
     };
     
     const handleSendMessage = async () => {
@@ -293,12 +301,16 @@ const UserDiscussion = () => {
                         <ListGroup variant="flush">
                             {discussions.map((discussion) => (
                                 <ListGroup.Item 
+                                    className="d-flex justify-content-between align-items-start"
                                     key={discussion.id} 
                                     action
                                     onClick={() => handleDiscussionClick(discussion.id)}
                                     active={selectedDiscussion === discussion.id}
                                 >
                                     {discussion.title}
+                                    {discussion.unreadCount > 0 && (
+                                        <Badge pill bg="primary">{discussion.unreadCount}</Badge>
+                                    )}
                                 </ListGroup.Item>
                             ))}
                         </ListGroup>
