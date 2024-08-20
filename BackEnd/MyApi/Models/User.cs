@@ -33,6 +33,8 @@ namespace MyApi.Models
         public List<Skill> Skills { get; set; } = new List<Skill>();
 
         public List<Message> SentMessages { get; set; } = new List<Message>(); // One-to-Many relationship with Message
+        public List<Advertisement> Advertisements { get; set; } = new List<Advertisement>();
+
 
         public bool IsValid()
         {

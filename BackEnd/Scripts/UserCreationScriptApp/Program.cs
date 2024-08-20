@@ -116,7 +116,25 @@ namespace UserCreationScript
                 Random random = new Random();
 
                 
+                User adminUser = new User
+                {
+                    FirstName = "admin",
+                    LastName = "admin",
+                    Email = "admin@example.com",
+                    PhoneNumber = $"555-000001",
+                    Password = "1234",
+                    DateOfBirth = DateTime.Now.AddYears(-30), // Μπορείς να αλλάξεις την ηλικία αν θέλεις
+                    Address = "Admin Address",
+                    Admin = true,
+                    PublicFields = new List<string> { "FirstName", "LastName", "Email" },
+                    Education = new List<Education>(), // Κενή λίστα εκπαίδευσης
+                    Jobs = new List<Job>(), // Κενή λίστα εργασιών
+                    Skills = new List<Skill>(), // Κενή λίστα δεξιοτήτων
+                    Advertisements = new List<Advertisement>() // Κενή λίστα διαφημίσεων
+                };
 
+                // Προσθήκη του admin στη λίστα των χρηστών
+                users.Add(adminUser);
 
 
                 for (int i = 1; i <= userCount; i++)
@@ -149,19 +167,11 @@ namespace UserCreationScript
                         PublicFields = new List<string> { "FirstName", "LastName", "Email" },
                         Education = GenerateRandomEducation(universities, random, degree, age),
                         Jobs = GenerateRandomJobs(position, industry, companyList, age), // Εδώ περνάς τη λίστα εταιρειών
-                        Skills = GenerateRandomSkills(random)
+                        Skills = GenerateRandomSkills(random),
+                        Advertisements = new List<Advertisement>() // Αρχικοποιούμε τη λίστα των διαφημίσεων
                     };
 
-                    users.Add(user);
-                }
-
-                // Αποθήκευση χρηστών στη βάση δεδομένων
-                context.Users.AddRange(users);
-                context.SaveChanges();  // Οι χρήστες αποθηκεύονται και το UserId τους ενημερώνεται
-
-                // Βήμα 2: Δημιουργία και αποθήκευση διαφημίσεων
-                foreach (var user in users)
-                {
+                    // Δημιουργία διαφημίσεων για τον χρήστη
                     if (user.Jobs.Any())
                     {
                         var lastJob = user.Jobs.Last();
@@ -171,17 +181,21 @@ namespace UserCreationScript
                         {
                             Console.WriteLine("Creating advertisement for user: " + user.Email);
                             Advertisement advertisement = CreateAdvertisementForUser(user, random);
-                            context.Advertisements.Add(advertisement); // Προσθήκη αγγελίας στη βάση
+                            user.Advertisements.Add(advertisement); // Προσθήκη αγγελίας στη λίστα του χρήστη
                         }
                     }
                     else
                     {
                         Console.WriteLine($"User: {user.Email} has no jobs.");
                     }
+
+                    users.Add(user);
                 }
 
-                // Αποθήκευση διαφημίσεων στη βάση δεδομένων
-                context.SaveChanges();
+                // Αποθήκευση χρηστών μαζί με τις διαφημίσεις τους στη βάση δεδομένων
+                context.Users.AddRange(users);
+                context.SaveChanges();  // Οι χρήστες και οι διαφημίσεις αποθηκεύονται ταυτόχρονα
+
 
                 // Εκτύπωση των χρηστών
                 foreach (var user in users)
@@ -348,15 +362,15 @@ namespace UserCreationScript
                 else if (currentLevel > JobLevel.Internship)
                 {
                     // Αύξηση του currentLevel βάσει της διάρκειας της προηγούμενης εργασίας
-                    if (jobDuration <= 3)
+                    if (jobDuration > 0 && random.NextDouble() < 0.5) // Πιθανότητα 50%
                     {
                         currentLevel += 1; // +1 επίπεδο αν η προηγούμενη εργασία ήταν μέχρι 2 χρόνια
                     }
-                    else if (jobDuration > 3 && jobDuration <= 7)
+                    if (jobDuration > 3 && random.NextDouble() < 0.3) // Πιθανότητα 20%
                     {
                         currentLevel += 2; // +2 επίπεδα αν η προηγούμενη εργασία ήταν 2-4 χρόνια
                     }
-                    else if (jobDuration > 8 )
+                    if (jobDuration > 8 && random.NextDouble() < 0.2) // Πιθανότητα 10%
                     {
                         currentLevel += 3; // +3 επίπεδα αν η προηγούμενη εργασία ήταν 4-6 χρόνια
                     }

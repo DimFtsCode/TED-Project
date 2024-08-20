@@ -103,5 +103,38 @@ namespace MyApi.Controllers
                 return NotFound(ex.Message);
             }
         }
+
+        [HttpGet("filtered/{userId}")]
+        public IActionResult GetFilteredAdvertisements(int userId)
+        {
+            var advertisements = _advertisementService.GetFilteredAdvertisementsForUser(userId);
+            if (!advertisements.Any()) return NotFound();
+
+            return Ok(advertisements);
+        }
+
+        [HttpPost("{advertisementId}/participant/{participantId}")]
+        public IActionResult AddParticipant(int advertisementId, int participantId)
+        {
+            try
+            {
+                var result = _advertisementService.AddParticipant(advertisementId, participantId);
+                if (!result)
+                {
+                    return BadRequest("Participant could not be added.");
+                }
+
+                return Ok("Participant added successfully.");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }

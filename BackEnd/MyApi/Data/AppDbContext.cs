@@ -84,10 +84,11 @@ namespace MyApi.Data
 
 
             modelBuilder.Entity<Advertisement>()
-                .HasOne<User>()
-                .WithMany()
+                .HasOne(a => a.User)
+                .WithMany(u => u.Advertisements)
                 .HasForeignKey(a => a.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }

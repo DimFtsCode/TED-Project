@@ -25,6 +25,7 @@ namespace MyApi.Models
 
         // Συσχέτιση με τον χρήστη που δημοσίευσε την αγγελία
         public int UserId { get; set; } // Συσχέτιση με τον χρήστη
+        public User? User { get; set; }
 
         // Λίστα των UserId των χρηστών που έχουν κάνει αίτηση
         public List<int> ApplicantUserIds { get; set; } = new List<int>();
