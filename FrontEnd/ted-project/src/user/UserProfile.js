@@ -257,7 +257,7 @@ const UserProfile = () => {
   };
 
   return (
-    <Container fluid>
+    <Container fluid style={{ padding: '20px', height: '800px', overflowY: 'auto' }}>
         <Row>
             <Col md={2} className="bg-light sidebar">
                 <Nav className="flex-column">
@@ -274,7 +274,7 @@ const UserProfile = () => {
         </Row>    
         
             {/* Container for Photo, Phone Number, and Address */}
-            <Container className="mb-4">
+            <Container className="mb-4" >
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
                     {profile.photoData ? (
                         <img src={`data:${profile.photoMimeType};base64,${profile.photoData}`} alt="User Profile" style={{ width: '100px', height: '100px', borderRadius: '50%' }} />
@@ -352,7 +352,7 @@ const UserProfile = () => {
             </Container>
         
             {/* Container for Education, Jobs, and Skills */}
-            <Container className="mt-4">
+            <Container className="mt-4" style={{ padding: '20px', height: '800px', overflowY: 'auto' }}>
                 <h2>User Profile</h2>
 
                 {/* Επιλογή Φόρμας */}
@@ -572,7 +572,7 @@ const UserProfile = () => {
                     <Button variant="primary" type="submit">Update Education, Jobs, and Skills</Button>
                 </Form>
 
-        </Container>
+            </Container>
     </Container>
   );
 

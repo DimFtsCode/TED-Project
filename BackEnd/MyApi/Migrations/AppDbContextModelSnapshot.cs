@@ -117,6 +117,43 @@ namespace MyApi.Migrations
                     b.ToTable("Advertisements");
                 });
 
+            modelBuilder.Entity("MyApi.Models.AdvertisementVector", b =>
+                {
+                    b.Property<int>("AdvertisementVectorId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AdvertisementId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RequiredDegree")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RequiredEducationLevel")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RequiredIndustry")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RequiredJobLevel")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RequiredPosition")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RequiredSkill")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("AdvertisementVectorId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AdvertisementVectors");
+                });
+
             modelBuilder.Entity("MyApi.Models.Discussion", b =>
                 {
                     b.Property<int>("Id")
@@ -382,6 +419,15 @@ namespace MyApi.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MyApi.Models.AdvertisementVector", b =>
+                {
+                    b.HasOne("MyApi.Models.User", null)
+                        .WithMany("InteractionVectors")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("MyApi.Models.Education", b =>
                 {
                     b.HasOne("MyApi.Models.User", null)
@@ -454,6 +500,8 @@ namespace MyApi.Migrations
                     b.Navigation("Advertisements");
 
                     b.Navigation("Education");
+
+                    b.Navigation("InteractionVectors");
 
                     b.Navigation("Jobs");
 

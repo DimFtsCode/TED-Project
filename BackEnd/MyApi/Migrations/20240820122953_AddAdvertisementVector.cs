@@ -1,40 +1,34 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace MyApi.Migrations
 {
     /// <inheritdoc />
-    public partial class AddAdvertisements : Migration
+    public partial class AddAdvertisementVector : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Advertisements",
+                name: "AdvertisementVectors",
                 columns: table => new
                 {
-                    AdvertisementId = table.Column<int>(type: "INTEGER", nullable: false)
+                    AdvertisementVectorId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Title = table.Column<string>(type: "TEXT", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: false),
-                    PostedDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     RequiredDegree = table.Column<int>(type: "INTEGER", nullable: false),
                     RequiredEducationLevel = table.Column<int>(type: "INTEGER", nullable: false),
                     RequiredPosition = table.Column<int>(type: "INTEGER", nullable: false),
                     RequiredIndustry = table.Column<int>(type: "INTEGER", nullable: false),
                     RequiredJobLevel = table.Column<int>(type: "INTEGER", nullable: false),
-                    MinimumYearsExperience = table.Column<int>(type: "INTEGER", nullable: false),
                     RequiredSkill = table.Column<int>(type: "INTEGER", nullable: false),
-                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ApplicantUserIds = table.Column<string>(type: "TEXT", nullable: false)
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Advertisements", x => x.AdvertisementId);
+                    table.PrimaryKey("PK_AdvertisementVectors", x => x.AdvertisementVectorId);
                     table.ForeignKey(
-                        name: "FK_Advertisements_Users_UserId",
+                        name: "FK_AdvertisementVectors_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "UserId",
@@ -42,8 +36,8 @@ namespace MyApi.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Advertisements_UserId",
-                table: "Advertisements",
+                name: "IX_AdvertisementVectors_UserId",
+                table: "AdvertisementVectors",
                 column: "UserId");
         }
 
@@ -51,7 +45,7 @@ namespace MyApi.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Advertisements");
+                name: "AdvertisementVectors");
         }
     }
 }

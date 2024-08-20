@@ -24,6 +24,7 @@ builder.Services.AddScoped<MessageService>();
 builder.Services.AddScoped<DiscussionService>();
 builder.Services.AddScoped<EnumService>();
 builder.Services.AddScoped<AdvertisementService>();
+builder.Services.AddScoped<AdvertisementVectorService>();
 
 
 // Προσθήκη του SignalR

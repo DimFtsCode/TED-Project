@@ -26,20 +26,41 @@ const UserJobs = () => {
     fetchEnums();
   }, []);
 
+
   useEffect(() => {
-    // Fetch the filtered advertisements for the user
     const fetchAdvertisements = async () => {
       try {
-        const response = await axios.get(`https://localhost:7176/api/advertisement/filtered/${user.userId}`);
-        const sortedAds = response.data.sort((a, b) => new Date(b.postedDate) - new Date(a.postedDate));
-        setAdvertisements(sortedAds);
+        // Πρώτη προσπάθεια - Ανάκτηση προτεινόμενων διαφημίσεων
+        const response1 = await fetch(`https://localhost:7176/api/addvector/recommendations/${user.userId}`);
+        if (!response1.ok) {
+          throw new Error(`HTTP error! status: ${response1.status}`);
+        }
+        const data1 = await response1.json();
+  
+        if (data1 && data1.length > 0) {
+          // Αν υπάρχουν προτεινόμενες διαφημίσεις, ταξινόμησέ τις
+          const sortedAds = data1.sort((a, b) => new Date(b.postedDate) - new Date(a.postedDate));
+          setAdvertisements(sortedAds);
+        } else {
+          // Αν δεν υπάρχουν προτεινόμενες διαφημίσεις, κάνε fallback στο δεύτερο endpoint
+          throw new Error('No recommended ads available, fetching fallback ads.');
+        }
       } catch (error) {
-        console.error('Error fetching advertisements:', error);
+        console.error('Error fetching data or fallback:', error);
+        // Είτε σε περίπτωση σφάλματος είτε αν δεν υπάρχουν προτεινόμενες διαφημίσεις, κάνε fallback στο δεύτερο endpoint
+        try {
+          const response2 = await axios.get(`https://localhost:7176/api/advertisement/filtered/${user.userId}`);
+          const sortedAds = response2.data.sort((a, b) => new Date(b.postedDate) - new Date(a.postedDate));
+          setAdvertisements(sortedAds);
+        } catch (fallbackError) {
+          console.error('Error fetching fallback advertisements:', fallbackError);
+        }
       }
     };
-
+  
     fetchAdvertisements();
   }, [user]);
+  
 
   const getEnumString = (enumType, value) => {
     const enumMapping = enums[enumType];
@@ -77,6 +98,31 @@ const UserJobs = () => {
         console.error('Error fetching user details:', error);
       }
     }
+
+    createUserVector(selectedAd);
+  };
+
+  const createUserVector =async (advertisement) => {
+    const userVector = {
+        advertisementId: advertisement.advertisementId,
+        requiredDegree: advertisement.requiredDegree,
+        requiredEducationLevel: advertisement.requiredEducationLevel,
+        requiredPosition: advertisement.requiredPosition,
+        requiredIndustry: advertisement.requiredIndustry,
+        requiredJobLevel: advertisement.requiredJobLevel,
+        requiredSkill: advertisement.requiredSkill,
+        userId: user.userId,
+    };
+
+    console.log('User vector created:', userVector);
+
+    try {
+        const response = await axios.post('https://localhost:7176/api/addvector', userVector);
+        console.log('Advertisement vector added successfully:', response.data);
+    } catch (error) {
+        console.error('Error adding advertisement vector:', error);
+    }
+    
   };
 
   const handleSendCV = async (advertisementId) => {
@@ -114,7 +160,7 @@ const UserJobs = () => {
           </Nav>
         </Col>
 
-        <Col xs={8} md={{ span: 6, offset: 1 }} style={{ padding: '20px' }}>
+        <Col xs={8} md={{ span: 6, offset: 1 }} style={{ padding: '20px', height: '800px', overflowY: 'auto' }}>
           <Card>
             <Card.Body>
               <Card.Title>Job Advertisements</Card.Title>

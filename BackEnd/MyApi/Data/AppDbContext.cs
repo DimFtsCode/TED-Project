@@ -21,6 +21,8 @@ namespace MyApi.Data
 
         public DbSet<MessageReadStatus> MessageReadStatuses { get; set; }
         public DbSet<Advertisement> Advertisements { get; set; } 
+        public DbSet<AdvertisementVector> AdvertisementVectors { get; set; } // Προσθήκη του DbSet
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -45,6 +47,13 @@ namespace MyApi.Data
                 .HasMany(u => u.Skills)
                 .WithOne()
                 .HasForeignKey(s => s.UserId);
+
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.InteractionVectors)
+                .WithOne()
+                .HasForeignKey(av => av.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Friendship>()
                 .HasKey(f => new { f.UserId, f.FriendId });
@@ -103,6 +112,10 @@ namespace MyApi.Data
                 .WithMany() 
                 .HasForeignKey(mrs => mrs.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+
+            modelBuilder.Entity<AdvertisementVector>()
+                .HasKey(av => av.AdvertisementVectorId);
 
         }
     }

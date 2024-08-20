@@ -147,7 +147,7 @@ const UserJobsView = () => {
         </Col>
 
         {/* Main Content */}
-        <Col xs={12} md={{ span: 6, offset: 1 }} style={{ padding: '20px' }}>
+        <Col xs={12} md={{ span: 6, offset: 1 }} style={{ padding: '20px', height: '800px', overflowY: 'auto' }}>
           <Card>
             <Card.Body>
               <Card.Title>Your Job Advertisements</Card.Title>
