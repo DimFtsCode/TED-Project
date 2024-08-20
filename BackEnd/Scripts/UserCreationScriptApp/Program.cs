@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using MyApi.Models.Enums;
 using MyApi.Models;
-using MyApi.Data;  // Βεβαιώσου ότι αυτό είναι σωστό
+using MyApi.Data; 
 //dotnet run --project ./Scripts/UserCreationScriptApp/UserCreationScriptApp.csproj 100
 namespace UserCreationScript
 {
@@ -123,7 +123,7 @@ namespace UserCreationScript
                     Email = "admin@example.com",
                     PhoneNumber = $"555-000001",
                     Password = "1234",
-                    DateOfBirth = DateTime.Now.AddYears(-30), // Μπορείς να αλλάξεις την ηλικία αν θέλεις
+                    DateOfBirth = DateTime.Now.AddYears(-30),
                     Address = "Admin Address",
                     Admin = true,
                     PublicFields = new List<string> { "FirstName", "LastName", "Email" },
@@ -166,7 +166,7 @@ namespace UserCreationScript
                         Admin = false,
                         PublicFields = new List<string> { "FirstName", "LastName", "Email" },
                         Education = GenerateRandomEducation(universities, random, degree, age),
-                        Jobs = GenerateRandomJobs(position, industry, companyList, age), // Εδώ περνάς τη λίστα εταιρειών
+                        Jobs = GenerateRandomJobs(position, industry, companyList, age), 
                         Skills = GenerateRandomSkills(random),
                         Advertisements = new List<Advertisement>() // Αρχικοποιούμε τη λίστα των διαφημίσεων
                     };
