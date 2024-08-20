@@ -5,25 +5,25 @@
 namespace MyApi.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdatedUserModel : Migration
+    public partial class AddAdvertisementIdToAdvertisementVector : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "PublicFields",
-                table: "Users",
-                type: "TEXT",
+            migrationBuilder.AddColumn<int>(
+                name: "AdvertisementId",
+                table: "AdvertisementVectors",
+                type: "INTEGER",
                 nullable: false,
-                defaultValue: "[]");
+                defaultValue: 0);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "PublicFields",
-                table: "Users");
+                name: "AdvertisementId",
+                table: "AdvertisementVectors");
         }
     }
 }
