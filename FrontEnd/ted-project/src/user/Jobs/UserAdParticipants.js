@@ -14,6 +14,8 @@ const UserAdParticipants = () => {
   const [expandedParticipantId, setExpandedParticipantId] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [enums, setEnums] = useState({ Degree: [], EducationLevel: [], JobIndustry: [], JobLevel: [], JobPosition: [], SkillCategory: [] });
+
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -30,6 +32,20 @@ const UserAdParticipants = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    // Fetch enum values
+    const fetchEnums = async () => {
+      try {
+        const response = await axios.get('https://localhost:7176/api/enum/all-enums');
+        setEnums(response.data);
+        console.log(response.data);
+      } catch (error) {
+        console.error('Error fetching enums:', error);
+      }
+    };
+
+    fetchEnums();
+    }, []);
   const handleJobClick = async (id) => {
     setSelectedJob(id);
     setLoading(true);
@@ -172,8 +188,8 @@ const UserAdParticipants = () => {
           </ListGroup>
         </Col>
 
-        <Col xs={12} md={{ span: 8, offset: 1 }}>
-          <Card>
+        <Col xs={12} md={{ span: 8, offset: 1 }} style={{ padding: '20px', height: '800px', overflowY: 'auto' }}>
+        <Card>
             <Card.Body>
               <Card.Title>Participants</Card.Title>
               {loading ? (
@@ -224,10 +240,16 @@ const UserAdParticipants = () => {
                                     .filter(edu => edu.isPublic)
                                     .map((edu, eduIndex) => (
                                       <ListGroup.Item key={eduIndex}>
-                                        <div><strong>Degree:</strong> {edu.degree}</div>
+                                        <div>
+                                          <strong>Degree:</strong> {enums.Degree[edu.degree] || edu.degree}
+                                        </div>
                                         <div><strong>Institution:</strong> {edu.institution}</div>
-                                        <div><strong>Level:</strong> {edu.level}</div>
-                                        <div><strong>Duration:</strong> {new Date(edu.startDate).toLocaleDateString()} - {new Date(edu.endDate).toLocaleDateString()}</div>
+                                        <div>
+                                          <strong>Level:</strong> {enums.EducationLevel[edu.level] || edu.level}
+                                        </div>
+                                        <div>
+                                          <strong>Duration:</strong> {new Date(edu.startDate).toLocaleDateString()} - {new Date(edu.endDate).toLocaleDateString()}
+                                        </div>
                                       </ListGroup.Item>
                                     ))}
                                 </ListGroup>
@@ -246,11 +268,19 @@ const UserAdParticipants = () => {
                                     .filter(job => job.isPublic)
                                     .map((job, jobIndex) => (
                                       <ListGroup.Item key={jobIndex}>
-                                        <div><strong>Position:</strong> {job.position}</div>
+                                        <div>
+                                          <strong>Position:</strong> {enums.JobPosition[job.position] || job.position}
+                                        </div>
                                         <div><strong>Company:</strong> {job.company}</div>
-                                        <div><strong>Industry:</strong> {job.industry}</div>
-                                        <div><strong>Level:</strong> {job.level}</div>
-                                        <div><strong>Duration:</strong> {new Date(job.startDate).toLocaleDateString()} - {new Date(job.endDate).toLocaleDateString()}</div>
+                                        <div>
+                                          <strong>Industry:</strong> {enums.JobIndustry[job.industry] || job.industry}
+                                        </div>
+                                        <div>
+                                          <strong>Level:</strong> {enums.JobLevel[job.level] || job.level}
+                                        </div>
+                                        <div>
+                                          <strong>Duration:</strong> {new Date(job.startDate).toLocaleDateString()} - {new Date(job.endDate).toLocaleDateString()}
+                                        </div>
                                       </ListGroup.Item>
                                     ))}
                                 </ListGroup>
@@ -269,8 +299,12 @@ const UserAdParticipants = () => {
                                     .filter(skill => skill.isPublic)
                                     .map((skill, skillIndex) => (
                                       <ListGroup.Item key={skillIndex}>
-                                        <div><strong>Skill:</strong> {skill.skillName}</div>
-                                        <div><strong>Proficiency:</strong> {skill.proficiency}</div>
+                                        <div>
+                                          <strong>Skill:</strong> {enums.SkillCategory[skill.skillName] || skill.skillName}
+                                        </div>
+                                        <div>
+                                          <strong>Proficiency:</strong> { skill.proficiency}
+                                        </div>
                                       </ListGroup.Item>
                                     ))}
                                 </ListGroup>
@@ -279,6 +313,7 @@ const UserAdParticipants = () => {
                               )}
                             </Col>
                           </Row>
+
 
                           <Row className="mt-4">
                             <Col>
