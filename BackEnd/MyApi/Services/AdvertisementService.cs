@@ -2,6 +2,8 @@ using MyApi.Data;
 using MyApi.Models;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace MyApi.Services
 {
@@ -17,10 +19,19 @@ namespace MyApi.Services
         // Δημιουργία αγγελίας
         public Advertisement CreateAdvertisement(Advertisement advertisement)
         {
-            _context.Advertisements.Add(advertisement);
+            var user = _context.Users.Include(u => u.Advertisements).FirstOrDefault(u => u.UserId == advertisement.UserId);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found");
+            }
+
+            user.Advertisements.Add(advertisement);
             _context.SaveChanges();
+
             return advertisement;
         }
+
 
         // Ενημέρωση αγγελίας
         public Advertisement UpdateAdvertisement(int id, Advertisement updatedAdvertisement)
@@ -101,5 +112,68 @@ namespace MyApi.Services
 
             return true;
         }
+
+        public bool AddParticipant(int advertisementId, int participantId)
+        {
+            var advertisement = _context.Advertisements.FirstOrDefault(a => a.AdvertisementId == advertisementId);
+
+            if (advertisement == null)
+                throw new KeyNotFoundException("Advertisement not found");
+
+            if (advertisement.ApplicantUserIds.Contains(participantId))
+                throw new InvalidOperationException("Participant already added to the advertisement");
+
+            // Add the participant's ID to the list
+            advertisement.ApplicantUserIds.Add(participantId);
+
+            // Save the changes to the database
+            _context.SaveChanges();
+
+            return true;
+        }
+
+
+
+        public IEnumerable<AdvertisementDto> GetFilteredAdvertisementsForUser(int userId)
+        {
+            var user = _context.Users
+                .Include(u => u.Education)
+                .Include(u => u.Jobs)
+                .FirstOrDefault(u => u.UserId == userId);
+
+            if (user == null) return Enumerable.Empty<AdvertisementDto>();
+
+            var userDegree = user.Education.Max(e => e.Degree);
+            var userEducationLevel = user.Education.Max(e => e.Level);
+            var userJobIndustry = user.Jobs.Max(j => j.Industry);
+            var userJobLevel = user.Jobs.Max(j => j.Level);
+            var userJobPosition = user.Jobs.Max(j => j.Position);
+
+            return _context.Advertisements
+                .Where(ad =>
+                    ad.RequiredDegree == userDegree &&
+                    (ad.RequiredEducationLevel == userEducationLevel ||
+                    ad.RequiredEducationLevel == userEducationLevel + 1 ||
+                    ad.RequiredEducationLevel == userEducationLevel - 1) &&
+                    ad.RequiredPosition == userJobPosition
+                )
+                .Select(ad => new AdvertisementDto
+                {
+                    AdvertisementId = ad.AdvertisementId,
+                    Title = ad.Title,
+                    Description = ad.Description,
+                    PostedDate = ad.PostedDate,
+                    RequiredDegree = ad.RequiredDegree,
+                    RequiredEducationLevel = ad.RequiredEducationLevel,
+                    RequiredPosition = ad.RequiredPosition,
+                    RequiredIndustry = ad.RequiredIndustry,
+                    RequiredJobLevel = ad.RequiredJobLevel,
+                    MinimumYearsExperience = ad.MinimumYearsExperience,
+                    RequiredSkill = ad.RequiredSkill,
+                    UserId = ad.UserId // Επιστροφή του UserId
+                })
+                .ToList();
+        }
+
     }
 }

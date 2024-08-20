@@ -373,11 +373,13 @@ namespace MyApi.Migrations
 
             modelBuilder.Entity("MyApi.Models.Advertisement", b =>
                 {
-                    b.HasOne("MyApi.Models.User", null)
-                        .WithMany()
+                    b.HasOne("MyApi.Models.User", "User")
+                        .WithMany("Advertisements")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MyApi.Models.Education", b =>
@@ -449,6 +451,8 @@ namespace MyApi.Migrations
 
             modelBuilder.Entity("MyApi.Models.User", b =>
                 {
+                    b.Navigation("Advertisements");
+
                     b.Navigation("Education");
 
                     b.Navigation("Jobs");

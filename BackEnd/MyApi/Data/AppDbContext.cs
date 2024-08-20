@@ -85,10 +85,11 @@ namespace MyApi.Data
                 .HasForeignKey(m => m.DiscussionId);
 
             modelBuilder.Entity<Advertisement>()
-                .HasOne<User>()
-                .WithMany()
+                .HasOne(a => a.User)
+                .WithMany(u => u.Advertisements)
                 .HasForeignKey(a => a.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
             
             // New relationships for MessageReadStatus
             modelBuilder.Entity<MessageReadStatus>()
@@ -102,6 +103,7 @@ namespace MyApi.Data
                 .WithMany() 
                 .HasForeignKey(mrs => mrs.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }
