@@ -33,6 +33,8 @@ const UserJobsView = () => {
     const fetchJobs = async () => {
       try {
         const response = await axios.get(`https://localhost:7176/api/advertisement/user/${user.userId}`);
+        console.log('Response from API:', response); // Logging της πλήρους απόκρισης του API
+        console.log('Jobs data:', response.data);
         setJobs(response.data); // Αποθηκεύουμε όλες τις αγγελίες του χρήστη
       } catch (error) {
         console.error('Error fetching jobs:', error);
@@ -45,8 +47,10 @@ const UserJobsView = () => {
   }, [user]);
 
   const handleJobClick = (id) => {
+    console.log('Job clicked with ID:', id);
     // Βρίσκουμε την αγγελία που επιλέχθηκε από τις ήδη φορτωμένες αγγελίες
     const job = jobs.find(job => job.advertisementId === id);
+    console.log('Selected job:', job);
     setSelectedJob(job);
     setIsEditing(false); // Reset editing mode
   };
