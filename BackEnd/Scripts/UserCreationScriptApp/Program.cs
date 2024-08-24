@@ -15,7 +15,8 @@ namespace UserCreationScript
         {
             // Σύνδεση με τη βάση δεδομένων
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            optionsBuilder.UseSqlite("Data Source=D:/desktop/TED/Project/backend/MyApi/database.db");
+            //optionsBuilder.UseSqlite("Data Source=D:/desktop/TED/Project/backend/MyApi/database.db");
+            optionsBuilder.UseSqlite(@"Data Source=C:\Users\ziziz\Documents\DI\6ο εξάμηνο\ΤΕΔΙ\TED-Project\BackEnd\MyApi\database.db");
 
             using (var context = new AppDbContext(optionsBuilder.Options))
             {
@@ -26,178 +27,14 @@ namespace UserCreationScript
                     userCount = parsedCount;
                 }
 
-                List<string> firstNames = new List<string>
-                {
-                    "John", "Jane", "Alex", "Emily", "Chris", "Katie", "Michael", "Sarah", "David", "Laura",
-                    "Robert", "Linda", "James", "Mary", "William", "Patricia", "Richard", "Barbara", "Charles", "Jennifer"
-                };
+                List<User> users = CreateUsers(context, userCount);
+                List<Article> articles = GenerateSampleArticles(context, users);
+                GenerateSampleInteractions(context, users, articles);
 
-                List<string> lastNames = new List<string>
-                {
-                    "Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor",
-                    "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Thompson", "Garcia", "Martinez", "Robinson"
-                };
+                // Save all changes to the database
+                context.SaveChanges();
 
-                List<string> universities = new List<string>
-                {
-                    "Harvard", "Stanford", "MIT", "Cambridge", "Oxford", "Yale", "Princeton", "Columbia", "UCLA", "UC Berkeley",
-                    "University of Toronto", "University of Melbourne", "National University of Singapore", "University of Tokyo",
-                    "ETH Zurich", "Peking University", "University of Hong Kong", "Seoul National University", "Tsinghua University", "University of Sydney"
-                };
-
-                // Ξεχωριστές λίστες εταιρειών για κάθε JobIndustry
-                List<string> technologyCompanies = new List<string>
-                {
-                    "Google", "Microsoft", "Apple", "Amazon", "Facebook", "Tesla", "Netflix", "IBM", "Intel", "Cisco"
-                };
-
-                List<string> healthcareCompanies = new List<string>
-                {
-                    "Pfizer", "Johnson & Johnson", "Roche", "Novartis", "Merck", "Gilead Sciences", "Sanofi", "AbbVie", "Amgen", "Bristol-Myers Squibb"
-                };
-
-                List<string> energyCompanies = new List<string>
-                {
-                    "ExxonMobil", "Chevron", "Shell", "BP", "Total", "Schlumberger", "Halliburton", "Baker Hughes", "ConocoPhillips", "Valero Energy"
-                };
-
-                List<string> transportationCompanies = new List<string>
-                {
-                    "DHL", "FedEx", "United Parcel Service", "Maersk", "Caterpillar", "Boeing", "Airbus", "General Motors", "Ford", "Toyota"
-                };
-
-                List<string> educationCompanies = new List<string>
-                {
-                    "Pearson", "McGraw-Hill", "Houghton Mifflin Harcourt", "Cengage Learning", "Scholastic", "Wiley", "Cambridge University Press",
-                    "Oxford University Press", "Hachette Livre", "Macmillan Education"
-                };
-
-                List<string> creativeCompanies = new List<string>
-                {
-                    "WarnerMedia", "Walt Disney", "Comcast", "Sony Pictures", "Universal Music Group", "Paramount Pictures", "Lionsgate", "HBO",
-                    "20th Century Studios", "NBCUniversal"
-                };
-
-                List<string> legalCompanies = new List<string>
-                {
-                    "Kirkland & Ellis", "Latham & Watkins", "Baker McKenzie", "DLA Piper", "Skadden, Arps, Slate, Meagher & Flom",
-                    "Jones Day", "Sidley Austin", "Hogan Lovells", "Norton Rose Fulbright", "White & Case"
-                };
-
-                // Χαρτογράφηση Degree σε JobPosition
-                Dictionary<Degree, List<JobPosition>> degreeToJobMap = new Dictionary<Degree, List<JobPosition>>
-                {
-                    { Degree.ComputerScience, new List<JobPosition> { JobPosition.SoftwareEngineer, JobPosition.DataScientist, JobPosition.ITManager, JobPosition.CyberSecurityAnalyst } },
-                    { Degree.BusinessAdministration, new List<JobPosition> { JobPosition.ITManager, JobPosition.MarketingSpecialist, JobPosition.HealthcareAdministrator, JobPosition.LegalAssistant } },
-                    { Degree.MechanicalEngineering, new List<JobPosition> { JobPosition.CyberSecurityAnalyst, JobPosition.RenewableEnergyEngineer, JobPosition.LogisticsManager, JobPosition.TransportationEngineer } },
-                    { Degree.ElectricalEngineering, new List<JobPosition> { JobPosition.CyberSecurityAnalyst, JobPosition.RenewableEnergyEngineer } },
-                    { Degree.CivilEngineering, new List<JobPosition> { JobPosition.TransportationEngineer, JobPosition.LogisticsManager } },
-                    { Degree.Medicine, new List<JobPosition> { JobPosition.Nurse, JobPosition.MedicalTechnician, JobPosition.HealthcareAdministrator } },
-                    { Degree.Law, new List<JobPosition> { JobPosition.Lawyer, JobPosition.LegalAssistant } },
-                    { Degree.Psychology, new List<JobPosition> { JobPosition.AcademicCounselor, JobPosition.LegalAssistant } },
-                    { Degree.Education, new List<JobPosition> { JobPosition.Teacher, JobPosition.AcademicCounselor } },
-                    { Degree.Economics, new List<JobPosition> { JobPosition.MarketingSpecialist, JobPosition.LegalAssistant, JobPosition.SupplyChainAnalyst } },
-                    { Degree.NoDegree, new List<JobPosition> { JobPosition.ContentCreator, JobPosition.GraphicDesigner } }
-                };
-
-                // Χαρτογράφηση JobIndustry σε εταιρείες
-                Dictionary<JobIndustry, List<string>> industryToCompanyMap = new Dictionary<JobIndustry, List<string>>
-                {
-                    { JobIndustry.Technology, technologyCompanies },
-                    { JobIndustry.Healthcare, healthcareCompanies },
-                    { JobIndustry.Energy, energyCompanies },
-                    { JobIndustry.Transportation, transportationCompanies },
-                    { JobIndustry.Education, educationCompanies },
-                    { JobIndustry.Creative, creativeCompanies },
-                    { JobIndustry.Legal, legalCompanies }
-                };
-
-                List<User> users = new List<User>();
-                Random random = new Random();
-
-                
-                User adminUser = new User
-                {
-                    FirstName = "admin",
-                    LastName = "admin",
-                    Email = "admin@example.com",
-                    PhoneNumber = $"555-000001",
-                    Password = "1234",
-                    DateOfBirth = DateTime.Now.AddYears(-30),
-                    Address = "Admin Address",
-                    Admin = true,
-                    PublicFields = new List<string> { "FirstName", "LastName", "Email" },
-                    Education = new List<Education>(), // Κενή λίστα εκπαίδευσης
-                    Jobs = new List<Job>(), // Κενή λίστα εργασιών
-                    Skills = new List<Skill>(), // Κενή λίστα δεξιοτήτων
-                    Advertisements = new List<Advertisement>() // Κενή λίστα διαφημίσεων
-                };
-
-                // Προσθήκη του admin στη λίστα των χρηστών
-                users.Add(adminUser);
-
-
-                for (int i = 1; i <= userCount; i++)
-                {
-                    string firstName = firstNames[random.Next(firstNames.Count)];
-                    string lastName = lastNames[random.Next(lastNames.Count)];
-                    string email = $"user{i}@example.com";
-
-                    Degree degree = (Degree)random.Next(0, Enum.GetNames(typeof(Degree)).Length);
-                    List<JobPosition> possiblePositions = degreeToJobMap[degree];
-                    JobPosition position = possiblePositions[random.Next(possiblePositions.Count)];
-
-                    JobIndustry industry = GetIndustryFromPosition(position);
-                    List<string> companyList = industryToCompanyMap[industry];
-                    string company = companyList[random.Next(companyList.Count)];
-
-                    int age = random.Next(25, 66); // 25 to 65 years old
-                    DateTime dateOfBirth = DateTime.Now.AddYears(-age);
-
-                    User user = new User
-                    {
-                        FirstName = firstName,
-                        LastName = lastName,
-                        Email = email,
-                        PhoneNumber = $"555-010{i:D3}",
-                        Password = $"1234",
-                        DateOfBirth = dateOfBirth,
-                        Address = $"Address {i}",
-                        Admin = false,
-                        PublicFields = new List<string> { "FirstName", "LastName", "Email" },
-                        Education = GenerateRandomEducation(universities, random, degree, age),
-                        Jobs = GenerateRandomJobs(position, industry, companyList, age), 
-                        Skills = GenerateRandomSkills(random),
-                        Advertisements = new List<Advertisement>() // Αρχικοποιούμε τη λίστα των διαφημίσεων
-                    };
-
-                    // Δημιουργία διαφημίσεων για τον χρήστη
-                    if (user.Jobs.Any())
-                    {
-                        var lastJob = user.Jobs.Last();
-                        Console.WriteLine($"User: {user.Email}, Last Job: {lastJob.Position}, Level: {lastJob.Level}");
-
-                        if ((int)lastJob.Level > (int)JobLevel.Senior)
-                        {
-                            Console.WriteLine("Creating advertisement for user: " + user.Email);
-                            Advertisement advertisement = CreateAdvertisementForUser(user, random);
-                            user.Advertisements.Add(advertisement); // Προσθήκη αγγελίας στη λίστα του χρήστη
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine($"User: {user.Email} has no jobs.");
-                    }
-
-                    users.Add(user);
-                }
-
-                // Αποθήκευση χρηστών μαζί με τις διαφημίσεις τους στη βάση δεδομένων
-                context.Users.AddRange(users);
-                context.SaveChanges();  // Οι χρήστες και οι διαφημίσεις αποθηκεύονται ταυτόχρονα
-
-
-                // Εκτύπωση των χρηστών
+                // Print the created users 
                 foreach (var user in users)
                 {
                     Console.WriteLine($"Created user: {user.FirstName} {user.LastName}, Email: {user.Email}, UserId: {user.UserId}");
@@ -205,6 +42,181 @@ namespace UserCreationScript
             }
         }
 
+        static List<User> CreateUsers(AppDbContext context, int userCount)
+        {
+            List<string> firstNames = new List<string>
+            {
+                "John", "Jane", "Alex", "Emily", "Chris", "Katie", "Michael", "Sarah", "David", "Laura",
+                "Robert", "Linda", "James", "Mary", "William", "Patricia", "Richard", "Barbara", "Charles", "Jennifer"
+            };
+
+            List<string> lastNames = new List<string>
+            {
+                "Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor",
+                "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Thompson", "Garcia", "Martinez", "Robinson",
+                "Clark", "Rodriguez", "Lewis", "Lee", "Walker", "Hall", "Allen", "Young", "Hernandez", "King"
+            };
+
+            List<string> universities = new List<string>
+            {
+                "Harvard", "Stanford", "MIT", "Cambridge", "Oxford", "Yale", "Princeton", "Columbia", "UCLA", "UC Berkeley",
+                "University of Toronto", "University of Melbourne", "National University of Singapore", "University of Tokyo",
+                "ETH Zurich", "Peking University", "University of Hong Kong", "Seoul National University", "Tsinghua University", "University of Sydney"
+            };
+
+            // Ξεχωριστές λίστες εταιρειών για κάθε JobIndustry
+            List<string> technologyCompanies = new List<string>
+            {
+                "Google", "Microsoft", "Apple", "Amazon", "Facebook", "Tesla", "Netflix", "IBM", "Intel", "Cisco"
+            };
+
+            List<string> healthcareCompanies = new List<string>
+            {
+                "Pfizer", "Johnson & Johnson", "Roche", "Novartis", "Merck", "Gilead Sciences", "Sanofi", "AbbVie", "Amgen", "Bristol-Myers Squibb"
+            };
+
+            List<string> energyCompanies = new List<string>
+            {
+                "ExxonMobil", "Chevron", "Shell", "BP", "Total", "Schlumberger", "Halliburton", "Baker Hughes", "ConocoPhillips", "Valero Energy"
+            };
+
+            List<string> transportationCompanies = new List<string>
+            {
+                "DHL", "FedEx", "United Parcel Service", "Maersk", "Caterpillar", "Boeing", "Airbus", "General Motors", "Ford", "Toyota"
+            };
+
+            List<string> educationCompanies = new List<string>
+            {
+                "Pearson", "McGraw-Hill", "Houghton Mifflin Harcourt", "Cengage Learning", "Scholastic", "Wiley", "Cambridge University Press",
+                "Oxford University Press", "Hachette Livre", "Macmillan Education"
+            };
+
+            List<string> creativeCompanies = new List<string>
+            {
+                "WarnerMedia", "Walt Disney", "Comcast", "Sony Pictures", "Universal Music Group", "Paramount Pictures", "Lionsgate", "HBO",
+                "20th Century Studios", "NBCUniversal"
+            };
+
+            List<string> legalCompanies = new List<string>
+            {
+                "Kirkland & Ellis", "Latham & Watkins", "Baker McKenzie", "DLA Piper", "Skadden, Arps, Slate, Meagher & Flom",
+                "Jones Day", "Sidley Austin", "Hogan Lovells", "Norton Rose Fulbright", "White & Case"
+            };
+
+            // Χαρτογράφηση Degree σε JobPosition
+            Dictionary<Degree, List<JobPosition>> degreeToJobMap = new Dictionary<Degree, List<JobPosition>>
+            {
+                { Degree.ComputerScience, new List<JobPosition> { JobPosition.SoftwareEngineer, JobPosition.DataScientist, JobPosition.ITManager, JobPosition.CyberSecurityAnalyst } },
+                { Degree.BusinessAdministration, new List<JobPosition> { JobPosition.ITManager, JobPosition.MarketingSpecialist, JobPosition.HealthcareAdministrator, JobPosition.LegalAssistant } },
+                { Degree.MechanicalEngineering, new List<JobPosition> { JobPosition.CyberSecurityAnalyst, JobPosition.RenewableEnergyEngineer, JobPosition.LogisticsManager, JobPosition.TransportationEngineer } },
+                { Degree.ElectricalEngineering, new List<JobPosition> { JobPosition.CyberSecurityAnalyst, JobPosition.RenewableEnergyEngineer } },
+                { Degree.CivilEngineering, new List<JobPosition> { JobPosition.TransportationEngineer, JobPosition.LogisticsManager } },
+                { Degree.Medicine, new List<JobPosition> { JobPosition.Nurse, JobPosition.MedicalTechnician, JobPosition.HealthcareAdministrator } },
+                { Degree.Law, new List<JobPosition> { JobPosition.Lawyer, JobPosition.LegalAssistant } },
+                { Degree.Psychology, new List<JobPosition> { JobPosition.AcademicCounselor, JobPosition.LegalAssistant } },
+                { Degree.Education, new List<JobPosition> { JobPosition.Teacher, JobPosition.AcademicCounselor } },
+                { Degree.Economics, new List<JobPosition> { JobPosition.MarketingSpecialist, JobPosition.LegalAssistant, JobPosition.SupplyChainAnalyst } },
+                { Degree.NoDegree, new List<JobPosition> { JobPosition.ContentCreator, JobPosition.GraphicDesigner } }
+            };
+
+            // Χαρτογράφηση JobIndustry σε εταιρείες
+            Dictionary<JobIndustry, List<string>> industryToCompanyMap = new Dictionary<JobIndustry, List<string>>
+            {
+                { JobIndustry.Technology, technologyCompanies },
+                { JobIndustry.Healthcare, healthcareCompanies },
+                { JobIndustry.Energy, energyCompanies },
+                { JobIndustry.Transportation, transportationCompanies },
+                { JobIndustry.Education, educationCompanies },
+                { JobIndustry.Creative, creativeCompanies },
+                { JobIndustry.Legal, legalCompanies }
+            };
+
+            List<User> users = new List<User>();
+            Random random = new Random();
+
+
+            // Admin user creation
+            User adminUser = new User
+            {
+                FirstName = "admin",
+                LastName = "admin",
+                Email = "admin@example.com",
+                PhoneNumber = $"555-000001",
+                Password = "1234",
+                DateOfBirth = DateTime.Now.AddYears(-30),
+                Address = "Admin Address",
+                Admin = true,
+                PublicFields = new List<string> { "FirstName", "LastName", "Email" },
+                Education = new List<Education>(), // Κενή λίστα εκπαίδευσης
+                Jobs = new List<Job>(), // Κενή λίστα εργασιών
+                Skills = new List<Skill>(), // Κενή λίστα δεξιοτήτων
+                Advertisements = new List<Advertisement>() // Κενή λίστα διαφημίσεων
+            };
+
+            // Προσθήκη του admin στη λίστα των χρηστών
+            users.Add(adminUser);
+
+            // regular user creation
+            for (int i = 1; i <= userCount; i++)
+            {
+                string firstName = firstNames[random.Next(firstNames.Count)];
+                string lastName = lastNames[random.Next(lastNames.Count)];
+                string email = $"user{i}@example.com";
+
+                Degree degree = (Degree)random.Next(0, Enum.GetNames(typeof(Degree)).Length);
+                List<JobPosition> possiblePositions = degreeToJobMap[degree];
+                JobPosition position = possiblePositions[random.Next(possiblePositions.Count)];
+
+                JobIndustry industry = GetIndustryFromPosition(position);
+                List<string> companyList = industryToCompanyMap[industry];
+                string company = companyList[random.Next(companyList.Count)];
+
+                int age = random.Next(25, 66); // 25 to 65 years old
+                DateTime dateOfBirth = DateTime.Now.AddYears(-age);
+
+                User user = new User
+                {
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Email = email,
+                    PhoneNumber = $"555-010{i:D3}",
+                    Password = $"1234",
+                    DateOfBirth = dateOfBirth,
+                    Address = $"Address {i}",
+                    Admin = false,
+                    PublicFields = new List<string> { "FirstName", "LastName", "Email" },
+                    Education = GenerateRandomEducation(universities, random, degree, age),
+                    Jobs = GenerateRandomJobs(position, industry, companyList, age), 
+                    Skills = GenerateRandomSkills(random),
+                    Advertisements = new List<Advertisement>() // Αρχικοποιούμε τη λίστα των διαφημίσεων
+                };
+
+                // Δημιουργία διαφημίσεων για τον χρήστη
+                if (user.Jobs.Any())
+                {
+                    var lastJob = user.Jobs.Last();
+                    Console.WriteLine($"User: {user.Email}, Last Job: {lastJob.Position}, Level: {lastJob.Level}");
+
+                    if ((int)lastJob.Level > (int)JobLevel.Senior)
+                    {
+                        Console.WriteLine("Creating advertisement for user: " + user.Email);
+                        Advertisement advertisement = CreateAdvertisementForUser(user, random);
+                        user.Advertisements.Add(advertisement); // Προσθήκη αγγελίας στη λίστα του χρήστη
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"User: {user.Email} has no jobs.");
+                }
+
+                users.Add(user);
+            }
+
+            // Αποθήκευση χρηστών μαζί με τις διαφημίσεις τους στη βάση δεδομένων
+            context.Users.AddRange(users);
+            return users;
+        }
+                
         static List<Education> GenerateRandomEducation(List<string> universities, Random random, Degree degree, int age)
         {
             var educationList = new List<Education>();
@@ -289,10 +301,6 @@ namespace UserCreationScript
 
             return educationList;
         }
-
-
-
-
 
 
         static List<Job> GenerateRandomJobs(JobPosition position, JobIndustry industry, List<string> companies, int age)
@@ -387,13 +395,6 @@ namespace UserCreationScript
         }
 
 
-
-
-
-
-
-
-
         static List<Skill> GenerateRandomSkills(Random random)
         {
             var skillList = new List<Skill>();
@@ -443,7 +444,7 @@ namespace UserCreationScript
                 RequiredJobLevel = newJobLevel,
                 MinimumYearsExperience = (newJobLevel == JobLevel.Internship) ? 0 : random.Next(0, 3), // Υπολογισμός εμπειρίας
                 RequiredSkill = user.Skills.FirstOrDefault()?.SkillName ?? SkillCategory.Communication, // Χρήση δεξιοτήτων του χρήστη
-                UserId = user.UserId,
+                User = user,
                 ApplicantUserIds = new List<int>()
             };
         }
@@ -482,6 +483,78 @@ namespace UserCreationScript
                 default:
                     throw new Exception("Unknown Job Position");
             }
+        }
+    
+        static List<Article> GenerateSampleArticles(AppDbContext context, List<User> users)
+        {
+            var articles = new List<Article>();
+            Random random = new Random();
+
+            foreach (var user in users)
+            {
+                int articleCount = random.Next(1, 5); // Each user creates 1 to 4 articles
+
+                for (int i = 0; i < articleCount; i++)
+                {
+                    var article = new Article
+                    {
+                        Title = $"Sample Article {i + 1} by {user.FirstName}",
+                        Content = "This is a sample article content.",
+                        PostedDate = DateTime.Now.AddDays(-random.Next(1, 365)),
+                        Author = user
+                    };
+
+                    articles.Add(article);
+                }
+            }
+
+            context.Articles.AddRange(articles);
+            return articles;
+        }
+        static void GenerateSampleInteractions(AppDbContext context, List<User> users, List<Article> articles)
+        {
+            var likes = new List<Like>();
+            var comments = new List<Comment>();
+            Random random = new Random();
+
+            foreach (var article in articles)
+            {
+                int likeCount = random.Next(1, 10); // Each article gets 1 to 21 likes
+                int commentCount = random.Next(1, 5); // Each article gets 1 to 4 comments
+
+                // Generate Likes
+                for (int i = 0; i < likeCount; i++)
+                {
+                    var liker = users[random.Next(users.Count)];
+
+                    var like = new Like
+                    {
+                        Article = article,
+                        Liker = liker
+                    };
+
+                    likes.Add(like);
+                }
+
+                // Generate Comments
+                for (int i = 0; i < commentCount; i++)
+                {
+                    var commenter = users[random.Next(users.Count)];
+
+                    var comment = new Comment
+                    {
+                        Article = article,
+                        Commenter = commenter,
+                        Content = "This is a sample comment.",
+                        PostedDate = DateTime.Now.AddDays(-random.Next(1, 365))
+                    };
+
+                    comments.Add(comment);
+                }
+            }
+
+            context.Likes.AddRange(likes);
+            context.Comments.AddRange(comments);
         }
     }
 }
