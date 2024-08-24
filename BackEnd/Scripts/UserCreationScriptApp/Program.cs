@@ -29,8 +29,8 @@ namespace UserCreationScript
 
                 List<User> users = CreateUsers(context, userCount);
                 List<Article> articles = GenerateSampleArticles(context, users);
+                context.SaveChanges(); // Save once before generating interactions, to avoid foreign key conflicts
                 GenerateSampleInteractions(context, users, articles);
-
                 // Save all changes to the database
                 context.SaveChanges();
 
@@ -444,7 +444,7 @@ namespace UserCreationScript
                 RequiredJobLevel = newJobLevel,
                 MinimumYearsExperience = (newJobLevel == JobLevel.Internship) ? 0 : random.Next(0, 3), // Υπολογισμός εμπειρίας
                 RequiredSkill = user.Skills.FirstOrDefault()?.SkillName ?? SkillCategory.Communication, // Χρήση δεξιοτήτων του χρήστη
-                User = user,
+                UserId = user.UserId, // Σύνδεση της αγγελίας με τον χρήστη
                 ApplicantUserIds = new List<int>()
             };
         }
@@ -529,8 +529,8 @@ namespace UserCreationScript
 
                     var like = new Like
                     {
-                        Article = article,
-                        Liker = liker
+                        ArticleId = article.ArticleId,
+                        LikerId = liker.UserId 
                     };
 
                     likes.Add(like);
@@ -543,8 +543,8 @@ namespace UserCreationScript
 
                     var comment = new Comment
                     {
-                        Article = article,
-                        Commenter = commenter,
+                        ArticleId = article.ArticleId,
+                        CommenterId = commenter.UserId,
                         Content = "This is a sample comment.",
                         PostedDate = DateTime.Now.AddDays(-random.Next(1, 365))
                     };
