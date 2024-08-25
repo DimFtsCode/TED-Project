@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using MyApi.Models.Enums;
@@ -28,11 +30,11 @@ namespace UserCreationScript
                 }
 
                 List<User> users = CreateUsers(context, userCount);
+                context.SaveChanges(); // Save once before generating interactions, to avoid foreign key conflicts
                 List<Article> articles = GenerateSampleArticles(context, users);
                 context.SaveChanges(); // Save once before generating interactions, to avoid foreign key conflicts
                 GenerateSampleInteractions(context, users, articles);
-                // Save all changes to the database
-                context.SaveChanges();
+                context.SaveChanges(); // Save all changes to the database
 
                 // Print the created users 
                 foreach (var user in users)
@@ -130,6 +132,10 @@ namespace UserCreationScript
                 { JobIndustry.Creative, creativeCompanies },
                 { JobIndustry.Legal, legalCompanies }
             };
+            
+            // File path to the stock profile pictures directory
+            string stockProfilesPath = Path.Combine(Directory.GetCurrentDirectory(), "stockProfiles");
+            string[] stockProfilePictures = Directory.GetFiles(stockProfilesPath, "*.jpg");
 
             List<User> users = new List<User>();
             Random random = new Random();
@@ -152,6 +158,10 @@ namespace UserCreationScript
                 Skills = new List<Skill>(), // Κενή λίστα δεξιοτήτων
                 Advertisements = new List<Advertisement>() // Κενή λίστα διαφημίσεων
             };
+
+            // Τυχαία επιλογή εικόνας προφίλ για τον admin
+            adminUser.PhotoData = LoadRadomProfilePicture(stockProfilePictures, stockProfilesPath, random);
+            adminUser.PhotoMimeType = "image/jpeg";
 
             // Προσθήκη του admin στη λίστα των χρηστών
             users.Add(adminUser);
@@ -190,6 +200,10 @@ namespace UserCreationScript
                     Skills = GenerateRandomSkills(random),
                     Advertisements = new List<Advertisement>() // Αρχικοποιούμε τη λίστα των διαφημίσεων
                 };
+                
+                // Τυχαία επιλογή εικόνας προφίλ για τον χρήστη
+                user.PhotoData = LoadRadomProfilePicture(stockProfilePictures, stockProfilesPath, random);
+                user.PhotoMimeType = "image/jpeg";
 
                 // Δημιουργία διαφημίσεων για τον χρήστη
                 if (user.Jobs.Any())
@@ -501,7 +515,7 @@ namespace UserCreationScript
                         Title = $"Sample Article {i + 1} by {user.FirstName}",
                         Content = "This is a sample article content.",
                         PostedDate = DateTime.Now.AddDays(-random.Next(1, 365)),
-                        Author = user
+                        AuthorId = user.UserId
                     };
 
                     articles.Add(article);
@@ -555,6 +569,16 @@ namespace UserCreationScript
 
             context.Likes.AddRange(likes);
             context.Comments.AddRange(comments);
+        }
+        static byte[] LoadRadomProfilePicture(string[] stockProfilePictures, string stockProfilesPath, Random random)
+        {   
+            if (stockProfilePictures.Length == 0)
+            {
+                throw new Exception("No stock profile pictures found.");
+            }
+            // Τυχαία επιλογή εικόνας προφίλ από τον κατάλογο stockProfiles
+            string selectedProfilePath = stockProfilePictures[random.Next(stockProfilePictures.Length)];
+            return File.ReadAllBytes(selectedProfilePath);
         }
     }
 }

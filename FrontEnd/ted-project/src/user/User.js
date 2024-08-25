@@ -42,9 +42,6 @@ const User = () => {
           </Nav>
         </Col>
         <Col md={10}>
-          <h1>User Page</h1>
-          <p>Welcome to the User Page!</p>
-          
           {/* Render the UserArticles compenent */}
           <UserArticles />
         </Col>

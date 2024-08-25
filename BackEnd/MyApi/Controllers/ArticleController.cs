@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MyApi.Models;
+using MyApi.DTOs;
 using MyApi.Services;
 
 namespace MyApi.Controllers
@@ -19,7 +20,7 @@ namespace MyApi.Controllers
         [HttpGet]
         public IActionResult GetAllArticles()
         {
-            var articles = _articleService.GetAllArticles();
+            List<ArticleDto> articles = _articleService.GetAllArticles();
             return Ok(articles);
         }
 
@@ -27,7 +28,7 @@ namespace MyApi.Controllers
         [HttpGet("{id}")]
         public IActionResult GetArticleById(int id)
         {
-            var article = _articleService.GetArticleById(id);
+            ArticleDto? article = _articleService.GetArticleById(id);
             if (article == null) return NotFound();
             return Ok(article);
         }
@@ -42,11 +43,32 @@ namespace MyApi.Controllers
 
         // Add a like to an article 
         [HttpPost("{id}/like")]
-        public IActionResult LikeArticle(int id, int userId)
+        public IActionResult LikeArticle(int id, [FromBody] LikeRequest likeRequest)
         {
-            var result = _articleService.LikeArticle(id, userId);
+            var result = _articleService.LikeArticle(id, likeRequest.UserId);
             if (!result) return NotFound();
             return Ok();
+        }
+
+        // Remove a like from an article
+        [HttpPost("{id}/unlike")]
+        public IActionResult UnlikeArticle(int id, LikeRequest likeRequest)
+        {
+            var result = _articleService.UnlikeArticle(id, likeRequest.UserId);
+            if (!result) return NotFound();
+            return Ok();
+        }
+        public class LikeRequest
+        {
+            public int UserId { get; set; }
+        }
+
+        // Get liked articles for a specific user 
+        [HttpGet("liked/{userId}")]
+        public IActionResult GetLikedArticles(int userId)
+        {
+            var likedArticleIds = _articleService.GetLikedArticlesByUser(userId);
+            return Ok(likedArticleIds);
         }
 
         // add a comment

@@ -1,0 +1,27 @@
+.like-fade-transition {
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  .like-button img {
+    opacity: 1;
+  }
+  
+  .like-button.clicked img {
+    opacity: 0.5;
+  }
+
+  .comment-section {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  
+  .comment-section img {
+    margin-right: 10px;
+  }
+  
+  .comment-section div {
+    background-color: #f0f2f5;
+    padding: 10px;
+    border-radius: 10px;
+  }

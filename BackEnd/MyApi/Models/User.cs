@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http;
 using MyApi.Models.Enums;
 
@@ -41,7 +42,6 @@ namespace MyApi.Models
         public ICollection<Article> Articles { get; set; } = new List<Article>();
         public ICollection<Like> Likes { get; set; } = new List<Like>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
-
         public bool IsValid()
         {
             return Password == Password;
