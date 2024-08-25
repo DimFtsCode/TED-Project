@@ -6,6 +6,7 @@ import { Modal, Button, Container, Row, Col, Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faNetworkWired } from '@fortawesome/free-solid-svg-icons';
 import './User.css'; 
+import UserArticles from './UserArticles';
 //npm install @fortawesome/react-fontawesome @fortawesome/free-solid-svg-icons @fortawesome/fontawesome-svg-core --legacy-peer-deps
 
 const User = () => {
@@ -41,8 +42,8 @@ const User = () => {
           </Nav>
         </Col>
         <Col md={10}>
-          <h1>User Page</h1>
-          <p>Welcome to the User Page!</p>
+          {/* Render the UserArticles compenent */}
+          <UserArticles />
         </Col>
       </Row>
 

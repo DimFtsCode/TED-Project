@@ -31,7 +31,6 @@ build/
 *.[Ee]ot
 *.[Ww]off
 *.[Ww]off2
-*.svg
 
 # Visual Studio Code
 .history/

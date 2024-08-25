@@ -23,6 +23,9 @@ namespace MyApi.Data
         public DbSet<Advertisement> Advertisements { get; set; } 
         public DbSet<AdvertisementVector> AdvertisementVectors { get; set; } // Προσθήκη του DbSet
 
+        public DbSet<Article> Articles { get; set; }
+        public DbSet<Like> Likes { get; set; }
+        public DbSet<Comment> Comments { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -117,6 +120,36 @@ namespace MyApi.Data
             modelBuilder.Entity<AdvertisementVector>()
                 .HasKey(av => av.AdvertisementVectorId);
 
+            // New relationships for Article, Like, and Comment
+            modelBuilder.Entity<Article>()
+                .HasOne(a => a.Author)
+                .WithMany(u => u.Articles)
+                .HasForeignKey(a => a.AuthorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Like>()
+                .HasOne(l => l.Liker)
+                .WithMany(u => u.Likes)
+                .HasForeignKey(l => l.LikerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Like>()
+                .HasOne(l => l.Article)
+                .WithMany(a => a.Likes)
+                .HasForeignKey(l => l.ArticleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.Commenter)
+                .WithMany(u => u.Comments)
+                .HasForeignKey(c => c.CommenterId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.Article)
+                .WithMany(a => a.Comments)
+                .HasForeignKey(c => c.ArticleId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -166,14 +166,14 @@ const UserDiscussion = () => {
                 timestamp: new Date().toISOString()
             });
             // Immediately show the message in the UI for the sender
-            setMessages((prevMessages) => [
-                ...prevMessages,
-                {
-                    senderName: "You",
-                    text: newMessage,
-                    senderId: currentUser.userId,
-                },
-            ]);
+            // setMessages((prevMessages) => [
+            //     ...prevMessages,
+            //     {
+            //         senderName: "You",
+            //         text: newMessage,
+            //         senderId: currentUser.userId,
+            //     },
+            // ]);
 
             setNewMessage('');
             messageInputRef.current.focus();
