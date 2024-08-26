@@ -6,7 +6,8 @@ import { Modal, Button, Container, Row, Col, Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faNetworkWired } from '@fortawesome/free-solid-svg-icons';
 import './User.css'; 
-import UserArticles from './UserArticles';
+import UserArticles from './Articles/UserArticles';
+import CreateArticle from './Articles/CreateArticle';
 //npm install @fortawesome/react-fontawesome @fortawesome/free-solid-svg-icons @fortawesome/fontawesome-svg-core --legacy-peer-deps
 
 const User = () => {
@@ -22,6 +23,10 @@ const User = () => {
     }, 5000); // 5 δευτερόλεπτα
   }, 300000); // 5 λεπτά
 
+  const handleArticleCreated = (newArticle) => {
+    console.log('New article created:'. newArticle);
+  }
+
   const handleCloseModal = () => {
     setShowModal(false);
   };
@@ -29,7 +34,7 @@ const User = () => {
   return (
     <Container fluid>
       <Row>
-        <Col md={2} className="bg-light sidebar">
+        <Col md={2} className="bg-light sidebar" style={{height: '100vh', position: 'sticky', top: 0}}>
           <Nav className="flex-column">
             <Nav.Link as={Link} to="/user/profile" className="nav-link-custom">
               <FontAwesomeIcon icon={faUser} className="me-2" />
@@ -42,8 +47,8 @@ const User = () => {
           </Nav>
         </Col>
         <Col md={10}>
-          {/* Render the UserArticles compenent */}
-          <UserArticles />
+          <CreateArticle onArticleCreated={handleArticleCreated} /> {/* The CreateArticle Component */}
+          <UserArticles />                                          {/* The UserArticles Component */}
         </Col>
       </Row>
 

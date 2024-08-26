@@ -29,10 +29,17 @@ namespace UserCreationScript
                     userCount = parsedCount;
                 }
 
+                // Create users
                 List<User> users = CreateUsers(context, userCount);
                 context.SaveChanges(); // Save once before generating interactions, to avoid foreign key conflicts
+                System.Threading.Thread.Sleep(1000); // Sleep for 1 second
+
+                // Generate sample articles 
                 List<Article> articles = GenerateSampleArticles(context, users);
-                context.SaveChanges(); // Save once before generating interactions, to avoid foreign key conflicts
+                context.SaveChanges(); 
+                System.Threading.Thread.Sleep(1000); /
+                
+                // Generate sample interactions to articles
                 GenerateSampleInteractions(context, users, articles);
                 context.SaveChanges(); // Save all changes to the database
 

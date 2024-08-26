@@ -25,3 +25,10 @@
     padding: 10px;
     border-radius: 10px;
   }
+
+  .restricted-media {
+    max-width: 100%;
+    max-height: 300px; 
+    object-fit: contain; /* Maintain aspect ratio while fitting within the specified size */
+    margin-bottom: 15px;
+  }

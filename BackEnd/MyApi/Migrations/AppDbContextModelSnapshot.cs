@@ -166,10 +166,22 @@ namespace MyApi.Migrations
                     b.Property<string>("Content")
                         .HasColumnType("TEXT");
 
+                    b.Property<byte[]>("PhotoData")
+                        .HasColumnType("BLOB");
+
+                    b.Property<string>("PhotoMimeType")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("PostedDate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("VideoData")
+                        .HasColumnType("BLOB");
+
+                    b.Property<string>("VideoMimeType")
                         .HasColumnType("TEXT");
 
                     b.HasKey("ArticleId");

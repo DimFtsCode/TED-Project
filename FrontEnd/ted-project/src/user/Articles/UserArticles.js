@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Container, Row, Col, Card, Button, Form, Spinner, Image } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Form, Spinner, Image, Modal } from 'react-bootstrap';
 import axios from 'axios';
-import {encode} from 'base64-arraybuffer';
-import { UserContext } from '../UserContext';
-import likeIcon from '../images/like.svg';
-import likedIcon from '../images/liked.svg';
+import { UserContext } from '../../UserContext';
+import likeIcon from '../../images/like.svg';
+import likedIcon from '../../images/liked.svg';
 import './UserArticles.css';
 
 const UserArticles = () => {
@@ -15,6 +14,8 @@ const UserArticles = () => {
   const [articlesToShow, setArticlesToShow] = useState(5); // Track the articles to show on the page
   const [loadingMoreArticles, setLoadingMoreArticles] = useState(false); // Track the loading state for the "Load more" button
   const [expandedComments, setExpandedComments] = useState([]); // Track the expanded comments for each article
+  const [showModal, setShowModal] = useState(false);
+  const [modalImageSrc, setModalImageSrc] = useState('');
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -26,7 +27,8 @@ const UserArticles = () => {
         // log the first article to see the structure
         const sortedArticles = articlesResponse.data.sort((a, b) => new Date(b.postedDate) - new Date(a.postedDate));
         setArticles(sortedArticles);
-  
+        
+        console.log('First article:', sortedArticles[0]);
         // Set the liked articles from the response
         setLikedArticles(likedArticlesResponse.data);
       } catch (error) {
@@ -136,8 +138,18 @@ const UserArticles = () => {
     }
   }, [loadingMoreArticles]);
 
+  const handleImageClick = (imageSrc) => {
+    setModalImageSrc(imageSrc);
+    setShowModal(true);
+  }
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setModalImageSrc('');
+  }
+
   return (
-    <Container fluid style={{ height: '100vh', overflowY: 'auto' }}>
+    <>
+    <Container fluid>
       <Row>
         <Col md={{ span: 8, offset: 2 }} style={{ padding: '20px' }}>
           <Card>
@@ -151,12 +163,37 @@ const UserArticles = () => {
                       <Card.Header>
                         <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                           <span>{new Date(article.postedDate).toLocaleDateString()}</span>
-                          <span>By: {article.authorName}</span>
+                          <span>By: {article.authorId === user.userId ? 'Me' : article.authorName}</span>
                         </div>
                       </Card.Header>
                       <Card.Body>
                         <h5>{article.title}</h5>
                         <p>{article.content}</p>
+                        {/* Display the multimedia content if available */}
+                        <Row>
+                        {article.photoData && (
+                          <Col md={6}>
+                          <Image 
+                            src={`data:${article.photoMimeType};base64,${article.photoData}`}
+                            alt='Article Photo'
+                            fluid
+                            className='restricted-media'
+                            onClick={() => handleImageClick(`data:${article.photoMimeType};base64,${article.photoData}`)}
+                              style={{ cursor: 'pointer' }} 
+                            /> 
+                          </Col>
+                        )}
+                        </Row>
+                        <Row>
+                        {article.videoData && (
+                          <Col md={6}>
+                          <video controls className='restricted-media'>
+                            <source src={`data:${article.videoMimeType};base64,${article.videoData}`} type={article.videoMimeType} />
+                            Your browser does not support the video tag.
+                            </video>
+                          </Col>
+                        )}
+                        </Row>
                         <div>
                           <strong>Likes:</strong> {article.likesCount}
                           <Button variant="link" onClick={() => handleLike(article.articleId)} className='like-button'>
@@ -170,7 +207,7 @@ const UserArticles = () => {
                         </div>
                         <div>
                         <Button variant="light" size='sm' onClick={() => toggleComments(article.articleId)}>
-                          {expandedComments.includes(article.articleId) ? 'Hide comments' : 'Show comments'}
+                          {expandedComments.includes(article.articleId) ? 'Hide comments' : 'Show comments' + ` (${article.comments.length})`}
                         </Button>
                         {expandedComments.includes(article.articleId) && (
                           <div>
@@ -189,7 +226,7 @@ const UserArticles = () => {
                                       style={{ width: '40px', height: '40px', marginRight: '10px' }}
                                     />
                                     <div>
-                                      <strong>{comment.commenterName === user.userName ? 'You' : comment.commenterName}</strong>
+                                      <strong>{article.authorId === user.userId ? 'Me' : comment.commenterName}</strong>
                                       <p>{comment.content}</p>
                                     </div>
                                   </div>
@@ -231,6 +268,12 @@ const UserArticles = () => {
         </Col>
       </Row>
     </Container>
+    <Modal show={showModal} onHide={handleCloseModal} centered>
+      <Modal.Body>
+        <Image src={modalImageSrc} alt='Full Size Image' fluid />
+      </Modal.Body>
+    </Modal>
+    </>
   );
 };
 

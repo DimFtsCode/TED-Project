@@ -28,7 +28,12 @@ namespace MyApi.Services
                     Title = a.Title,
                     Content = a.Content,
                     PostedDate = a.PostedDate,
+                    AuthorId = a.AuthorId,
                     AuthorName = a.Author != null? a.Author.FirstName + " " + a.Author.LastName : "Unknown",
+                    PhotoData = a.PhotoData,
+                    PhotoMimeType = a.PhotoMimeType,
+                    VideoData = a.VideoData,
+                    VideoMimeType = a.VideoMimeType,
                     LikesCount = a.Likes.Count,
                     Comments = a.Comments.Select(static c => new CommentDto
                     {
@@ -60,7 +65,12 @@ namespace MyApi.Services
                 Title = article.Title,
                 Content = article.Content,
                 PostedDate = article.PostedDate,
+                AuthorId = article.AuthorId,
                 AuthorName = article.Author != null ? article.Author.FirstName + " " + article.Author.LastName : "Unknown",
+                PhotoData = article.PhotoData,
+                PhotoMimeType = article.PhotoMimeType,
+                VideoData = article.VideoData,
+                VideoMimeType = article.VideoMimeType,
                 LikesCount = article.Likes.Count,
                 Comments = article.Comments.Select(c => new CommentDto
                 {
