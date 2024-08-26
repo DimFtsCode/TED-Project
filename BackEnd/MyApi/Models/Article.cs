@@ -16,6 +16,12 @@ namespace MyApi.Models
         public int AuthorId { get; set; } 
         public User? Author { get; set; }
 
+        // Properties for multimedia content
+        public byte[]? PhotoData { get; set; }
+        public string? PhotoMimeType { get; set; }
+        public byte[]? VideoData { get; set; }
+        public string? VideoMimeType { get; set; }
+
         // Navigation properties for Interactions
         public ICollection<Like> Likes { get; set; } = new List<Like>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
