@@ -92,16 +92,26 @@ const UserDiscussion = () => {
     
             setDiscussions((prevDiscussions) => 
                 prevDiscussions.map((discussion) => {
-                    // If the message is for the currently selected discussion, add the message to the chat window
                     if (discussion.id === message.discussionId) {
+                        // Avoid adding the message multiple times
                         if (message.discussionId === selectedDiscussion) {
-                            setMessages((prevMessages) => [
-                                ...prevMessages,
-                                { senderName: message.user, text: message.message, senderId: message.senderId },
-                            ]);
+                            setMessages((prevMessages) => {
+                                // Check if the message already exists
+                                const messageExists = prevMessages.some(
+                                    (msg) => msg.senderId === message.senderId && msg.text === message.message && msg.timestamp === message.timestamp
+                                );
+    
+                                if (!messageExists) {
+                                    return [
+                                        ...prevMessages,
+                                        { senderName: message.user, text: message.message, senderId: message.senderId },
+                                    ];
+                                }
+    
+                                return prevMessages;
+                            });
                             scrollToBottom();
                         } else {
-                            // If it's for a different discussion, increment the unread count
                             return { ...discussion, unreadCount: (discussion.unreadCount || 0) + 1 };
                         }
                     }
@@ -156,14 +166,14 @@ const UserDiscussion = () => {
                 timestamp: new Date().toISOString()
             });
             // Immediately show the message in the UI for the sender
-            setMessages((prevMessages) => [
-                ...prevMessages,
-                {
-                    senderName: "You",
-                    text: newMessage,
-                    senderId: currentUser.userId,
-                },
-            ]);
+            // setMessages((prevMessages) => [
+            //     ...prevMessages,
+            //     {
+            //         senderName: "You",
+            //         text: newMessage,
+            //         senderId: currentUser.userId,
+            //     },
+            // ]);
 
             setNewMessage('');
             messageInputRef.current.focus();

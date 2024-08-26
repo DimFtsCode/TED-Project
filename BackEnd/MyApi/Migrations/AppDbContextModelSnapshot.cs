@@ -154,6 +154,58 @@ namespace MyApi.Migrations
                     b.ToTable("AdvertisementVectors");
                 });
 
+            modelBuilder.Entity("MyApi.Models.Article", b =>
+                {
+                    b.Property<int>("ArticleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("PostedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ArticleId");
+
+                    b.HasIndex("AuthorId");
+
+                    b.ToTable("Articles");
+                });
+
+            modelBuilder.Entity("MyApi.Models.Comment", b =>
+                {
+                    b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ArticleId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CommenterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("PostedDate")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("CommentId");
+
+                    b.HasIndex("ArticleId");
+
+                    b.HasIndex("CommenterId");
+
+                    b.ToTable("Comments");
+                });
+
             modelBuilder.Entity("MyApi.Models.Discussion", b =>
                 {
                     b.Property<int>("Id")
@@ -243,6 +295,27 @@ namespace MyApi.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Jobs");
+                });
+
+            modelBuilder.Entity("MyApi.Models.Like", b =>
+                {
+                    b.Property<int>("LikeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ArticleId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("LikerId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("LikeId");
+
+                    b.HasIndex("ArticleId");
+
+                    b.HasIndex("LikerId");
+
+                    b.ToTable("Likes");
                 });
 
             modelBuilder.Entity("MyApi.Models.Message", b =>
@@ -428,6 +501,36 @@ namespace MyApi.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MyApi.Models.Article", b =>
+                {
+                    b.HasOne("MyApi.Models.User", "Author")
+                        .WithMany("Articles")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+                });
+
+            modelBuilder.Entity("MyApi.Models.Comment", b =>
+                {
+                    b.HasOne("MyApi.Models.Article", "Article")
+                        .WithMany("Comments")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyApi.Models.User", "Commenter")
+                        .WithMany("Comments")
+                        .HasForeignKey("CommenterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("Commenter");
+                });
+
             modelBuilder.Entity("MyApi.Models.Education", b =>
                 {
                     b.HasOne("MyApi.Models.User", null)
@@ -444,6 +547,25 @@ namespace MyApi.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("MyApi.Models.Like", b =>
+                {
+                    b.HasOne("MyApi.Models.Article", "Article")
+                        .WithMany("Likes")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyApi.Models.User", "Liker")
+                        .WithMany("Likes")
+                        .HasForeignKey("LikerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("Liker");
                 });
 
             modelBuilder.Entity("MyApi.Models.Message", b =>
@@ -485,6 +607,13 @@ namespace MyApi.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MyApi.Models.Article", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Likes");
+                });
+
             modelBuilder.Entity("MyApi.Models.Discussion", b =>
                 {
                     b.Navigation("Messages");
@@ -499,11 +628,17 @@ namespace MyApi.Migrations
                 {
                     b.Navigation("Advertisements");
 
+                    b.Navigation("Articles");
+
+                    b.Navigation("Comments");
+
                     b.Navigation("Education");
 
                     b.Navigation("InteractionVectors");
 
                     b.Navigation("Jobs");
+
+                    b.Navigation("Likes");
 
                     b.Navigation("SentMessages");
 

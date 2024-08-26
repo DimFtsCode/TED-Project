@@ -8,6 +8,15 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { enUS } from 'date-fns/locale';
 
+import profile1 from './images/stockProfiles/profile1.jpg';
+import profile2 from './images/stockProfiles/profile2.jpg';
+import profile3 from './images/stockProfiles/profile3.jpg';
+import profile4 from './images/stockProfiles/profile4.jpg';
+import profile5 from './images/stockProfiles/profile5.jpg';
+import profile6 from './images/stockProfiles/profile6.jpg';
+import profile7 from './images/stockProfiles/profile7.jpg';
+import profile8 from './images/stockProfiles/profile8.jpg';
+import profile9 from './images/stockProfiles/profile9.jpg';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -33,6 +42,19 @@ const Register = () => {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  // store the stock images in an array
+  const defaultProfileImages = [
+    profile1,
+    profile2,
+    profile3,
+    profile4,
+    profile5,
+    profile6,
+    profile7,
+    profile8,
+    profile9,
+  ];
+  
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setUser({
@@ -55,26 +77,45 @@ const Register = () => {
         setError('Passwords do not match');
         return;
     }
+
     const formData = new FormData();
     const publicFields = [];
-    // Append user data to formData and collect public fields
+
+    // If the user hasn't uploaded a photo, assign a random default image
+    if (!user.photo) {
+        const randomIndex = Math.floor(Math.random() * defaultProfileImages.length);
+        const randomImageUrl = defaultProfileImages[randomIndex];
+
+        // Fetch the image and convert it to a Blob
+        const response = await fetch(randomImageUrl);
+        const blob = await response.blob();
+
+        // Create a File object from the blob (with a filename and MIME type)
+        const defaultPhotoFile = new File([blob], `defaultProfile${randomIndex + 1}.png`, { type: blob.type });
+        formData.append('photo', defaultPhotoFile);
+    } else {
+        // Append the user-uploaded photo to formData
+        formData.append('photo', user.photo);
+    }
+
+    // Append other user data to formData
     for (let key in user) {
-      if (
-        key !== 'confirmPassword' &&
-        key !== 'isFirstNamePublic' &&
-        key !== 'isLastNamePublic' &&
-        key !== 'isEmailPublic' &&
-        key !== 'isPhoneNumberPublic' &&
-        key !== 'isDateOfBirthPublic' &&
-        key !== 'isAddressPublic' &&
-        user[key]
-      ) {
-        if (key === 'dateOfBirth') {
-          formData.append(key, user[key].toISOString());
-        } else {
-          formData.append(key, user[key]);
+        if (
+            key !== 'confirmPassword' &&
+            key !== 'isFirstNamePublic' &&
+            key !== 'isLastNamePublic' &&
+            key !== 'isEmailPublic' &&
+            key !== 'isPhoneNumberPublic' &&
+            key !== 'isDateOfBirthPublic' &&
+            key !== 'isAddressPublic' &&
+            user[key]
+        ) {
+            if (key === 'dateOfBirth') {
+                formData.append(key, user[key].toISOString());
+            } else {
+                formData.append(key, user[key]);
+            }
         }
-      }
     }
 
     // Collect public fields based on user input
@@ -111,18 +152,17 @@ const Register = () => {
 
         setShowSuccessModal(true);
     } catch (error) {
-      console.error(error);
-  
-      const errorMessage = error.response?.data?.message || error.response?.data;
-  
-      if (typeof errorMessage === 'string' && errorMessage.includes('Email is already in use')) {
-          setShowEmailModal(true);
-      } else {
-          setError('An error occurred during registration. Please try again.');
-      }
+        console.error(error);
+
+        const errorMessage = error.response?.data?.message || error.response?.data;
+
+        if (typeof errorMessage === 'string' && errorMessage.includes('Email is already in use')) {
+            setShowEmailModal(true);
+        } else {
+            setError('An error occurred during registration. Please try again.');
+        }
     }
-  
-  };
+};
 
 
 
