@@ -28,7 +28,6 @@ const UserArticles = () => {
         const sortedArticles = articlesResponse.data.sort((a, b) => new Date(b.postedDate) - new Date(a.postedDate));
         setArticles(sortedArticles);
         
-        console.log('First article:', sortedArticles[0]);
         // Set the liked articles from the response
         setLikedArticles(likedArticlesResponse.data);
       } catch (error) {

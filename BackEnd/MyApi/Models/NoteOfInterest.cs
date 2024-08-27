@@ -1,10 +1,13 @@
-using MyApi.Models; // Προσθήκη της οδηγίας using
-
-
-public class NoteOfInterest
+namespace MyApi.Models
 {
-    public int Id { get; set; }
-    public string Content { get; set; } = string.Empty; // Αρχικοποίηση με κενή τιμή
-    public int UserId { get; set; }
-    public User User { get; set; } = null!; // Χρήση null-forgiving operator
+    public class NoteOfInterest
+    {
+        public int Id { get; set; }
+        public int UserId { get; set; } // The user who will receive the noitfication 
+        public User? User { get; set; } // Navigation property to User
+        public string? Content { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public bool IsRead { get; set; } // To track if the notification is read
+
+    }
 }

@@ -22,6 +22,12 @@ namespace MyApi.Hubs
             // send a notification to the recipient
             await Clients.User(recipientUserId.ToString()).SendAsync("ReceiveFriendRequest", recipientUserId);
         }
+
+        public async Task SendNoteOfInterestNotification(int recipientUserId)
+        {
+            // send a notification to the recipient
+            await Clients.User(recipientUserId.ToString()).SendAsync("ReceiveNoteOfInterest", recipientUserId);
+        }
         public async Task PingHub()
         {
             Console.WriteLine("PingHub method called");

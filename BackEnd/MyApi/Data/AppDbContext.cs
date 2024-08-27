@@ -18,6 +18,7 @@ namespace MyApi.Data
         public DbSet<Friendship> Friendships { get; set; }
         public DbSet<Discussion> Discussions { get; set; }
         public DbSet<Message> Messages { get; set; }
+        public DbSet<NoteOfInterest> NotesOfInterest { get; set; }
 
         public DbSet<MessageReadStatus> MessageReadStatuses { get; set; }
         public DbSet<Advertisement> Advertisements { get; set; } 
@@ -150,6 +151,13 @@ namespace MyApi.Data
                 .WithMany(a => a.Comments)
                 .HasForeignKey(c => c.ArticleId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<NoteOfInterest>()
+                .HasOne(n => n.User)
+                .WithMany()
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }

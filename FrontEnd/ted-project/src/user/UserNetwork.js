@@ -113,7 +113,6 @@ const UserNetwork = () => {
   const indexOfLastResult = currentPage * resultsPerPage;
   const indexOfFirstResult = indexOfLastResult - resultsPerPage;
   const currentResults = searchResults.slice(indexOfFirstResult, indexOfLastResult);
-
   // Change page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -176,6 +175,7 @@ const UserNetwork = () => {
                 <Col md={4} key={user.userId} className="mb-3">
                   <Card>
                     <Card.Body>
+                      <Card.Img variant="top" src={`data:${user.photoMimeType};base64,${user.photoData}`} style={{width: '30%'}} />
                       <Card.Title>{user.firstName} {user.lastName}</Card.Title>
                       <Card.Text>Email: {user.email}</Card.Text>
                       <Button variant="primary" onClick={() => handleViewProfile(user.userId)}>View Profile</Button>
