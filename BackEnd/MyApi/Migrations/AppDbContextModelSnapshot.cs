@@ -384,6 +384,31 @@ namespace MyApi.Migrations
                     b.ToTable("MessageReadStatuses");
                 });
 
+            modelBuilder.Entity("MyApi.Models.NoteOfInterest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("NotesOfInterest");
+                });
+
             modelBuilder.Entity("MyApi.Models.Skill", b =>
                 {
                     b.Property<int>("SkillId")
@@ -608,6 +633,17 @@ namespace MyApi.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("MyApi.Models.NoteOfInterest", b =>
+                {
+                    b.HasOne("MyApi.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MyApi.Models.Skill", b =>

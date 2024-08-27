@@ -10,6 +10,7 @@ export const SignalRProvider = ({ children }) => {
   const [connected, setConnected] = useState(false);
   const [message, setMessage] = useState(null);  // Store messages globally
   const [friendRequests, setFriendRequests] = useState(0);  // Store friend requests globally
+  const [notesOfInterest, setNotesOfInterest] = useState(0);  // Store notes of interest globally
 
   useEffect(() => {
     const connection = new signalR.HubConnectionBuilder()
@@ -35,6 +36,14 @@ export const SignalRProvider = ({ children }) => {
         setFriendRequests((prev) => prev + 1); 
       }
     });
+
+    // Handle incoming notes of interest
+    connection.on("ReceiveNoteOfInterest", (recipientUserId) => {
+      if (recipientUserId === currentUser?.userId ){
+        setNotesOfInterest((prev) => prev + 1); 
+      }
+    });
+
     connectionRef.current = connection;
 
     return () => {
@@ -48,8 +57,13 @@ export const SignalRProvider = ({ children }) => {
   const resetFriendRequests = () => {
     setFriendRequests(0);
   }
+
+  // Function to reset notes of interest count
+  const resetNotesOfInterest = () => {
+    setNotesOfInterest(0);
+  }
   return (
-    <SignalRContext.Provider value={{ connection: connectionRef.current, connected, message, friendRequests, resetFriendRequests }}>
+    <SignalRContext.Provider value={{ connection: connectionRef.current, connected, message, friendRequests, resetFriendRequests, notesOfInterest, resetNotesOfInterest }}>
       {children}
     </SignalRContext.Provider>
   );

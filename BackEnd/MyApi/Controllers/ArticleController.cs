@@ -105,9 +105,9 @@ namespace MyApi.Controllers
 
         // Add a like to an article 
         [HttpPost("{id}/like")]
-        public IActionResult LikeArticle(int id, [FromBody] LikeRequest likeRequest)
+        public async Task<IActionResult> LikeArticle(int id, [FromBody] LikeRequest likeRequest)
         {
-            var result = _articleService.LikeArticle(id, likeRequest.UserId);
+            var result = await _articleService.LikeArticleAsync(id, likeRequest.UserId);
             if (!result) return NotFound();
             return Ok();
         }

@@ -1,17 +1,22 @@
 using MyApi.Data;
 using MyApi.Models;
 using MyApi.DTOs;
+using MyApi.Hubs;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
 
 namespace MyApi.Services
 {
     public class ArticleService
     {
         private readonly AppDbContext _context;
+
+        private readonly IHubContext<ChatHub> _chatHubContext;
         
-        public ArticleService(AppDbContext context)
+        public ArticleService(AppDbContext context, IHubContext<ChatHub> chatHubContext)
         {
             _context = context;
+            _chatHubContext = chatHubContext;
         }
 
         // Get all articles
@@ -93,7 +98,7 @@ namespace MyApi.Services
         }
 
         // Like an article
-        public bool LikeArticle(int articleId, int userId)
+        public async Task<bool> LikeArticleAsync(int articleId, int userId)
         {
             var article = _context.Articles.FirstOrDefault(a => a.ArticleId == articleId);
             if (article == null) return false;
@@ -104,7 +109,21 @@ namespace MyApi.Services
 
             var like = new Like { ArticleId = articleId, LikerId = userId };
             _context.Likes.Add(like);
-            _context.SaveChanges();
+            
+            // Create a notification (NoteOfInterest) for the article author
+            var liker = _context.Users.FirstOrDefault(u => u.UserId == userId);
+            var noteOfInterest = new NoteOfInterest
+            {
+                UserId = article.AuthorId,
+                Content = $"{liker?.FirstName} {liker?.LastName} liked your article '{article.Title}'",
+                CreatedAt = DateTime.Now,
+                IsRead = false
+            };
+            _context.NotesOfInterest.Add(noteOfInterest);
+            await _context.SaveChangesAsync();
+            
+            // Notify the article author
+            await _chatHubContext.Clients.All.SendAsync("ReceiveNoteOfInterest", article.AuthorId);
             return true;
         }
 
