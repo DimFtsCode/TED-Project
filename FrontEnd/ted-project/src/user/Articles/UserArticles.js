@@ -16,17 +16,22 @@ const UserArticles = () => {
   const [expandedComments, setExpandedComments] = useState([]); // Track the expanded comments for each article
   const [showModal, setShowModal] = useState(false);
   const [modalImageSrc, setModalImageSrc] = useState('');
+  const [pageNumber, setPageNumber] = useState(1); // track the current page number
 
   useEffect(() => {
     const fetchArticles = async () => {
       try {
+        console.log("Fetching articles with page number: ", pageNumber);
         const [articlesResponse, likedArticlesResponse] = await Promise.all([
-          axios.get('https://localhost:7176/api/article'),
+          axios.get(`https://localhost:7176/api/article?pageNumber=${pageNumber}&pageSize=5`),
           axios.get(`https://localhost:7176/api/article/liked/${user.userId}`)
         ]);
-        // log the first article to see the structure
         const sortedArticles = articlesResponse.data.sort((a, b) => new Date(b.postedDate) - new Date(a.postedDate));
-        setArticles(sortedArticles);
+        
+        // If it's the first page, replace the articles array
+        // If it's subsequent pages, append the new articles
+        setArticles(prevArticles => pageNumber === 1 ? articlesResponse.data : [...prevArticles, ...sortedArticles]);
+        //setArticles(prevArticles => [...prevArticles, ...sortedArticles]);
         
         // Set the liked articles from the response
         setLikedArticles(likedArticlesResponse.data);
@@ -35,10 +40,10 @@ const UserArticles = () => {
       } finally {
         setInitialLoading(false); // Hide the spinner after fetching
       }
+      setLoadingMoreArticles(false); // Reset the loading state after fetching
     };
-  
     fetchArticles();
-  }, [user]);
+  }, [user, pageNumber]);
 
   const handleLike = async (articleId) => {
     const articleIndex = articles.findIndex(article => article.articleId === articleId);
@@ -125,17 +130,20 @@ const UserArticles = () => {
 
   const loadMoreArticles = () => {
     setLoadingMoreArticles(true);
+    setPageNumber(prevPageNumber => prevPageNumber + 1);
+    setArticlesToShow(prevArticlesToShow => prevArticlesToShow + 5); // load 5 more articles
   }
 
-  // simulate loading more articles 
-  useEffect(() => {
-    if (loadingMoreArticles) {
-      setTimeout(() => {
-        setArticlesToShow(prevArticlesToShow => prevArticlesToShow + 5); // load 5 more articles
-        setLoadingMoreArticles(false);
-      }, 1000);
-    }
-  }, [loadingMoreArticles]);
+  // // simulate loading more articles 
+  // useEffect(() => {
+  //   if (loadingMoreArticles) {
+  //     setTimeout(() => {
+  //       setPageNumber(prevPageNumber => prevPageNumber + 1);
+  //       setArticlesToShow(prevArticlesToShow => prevArticlesToShow + 5); // load 5 more articles
+  //       setLoadingMoreArticles(false);
+  //     }, 1000);
+  //   }
+  // }, [loadingMoreArticles]);
 
   const handleImageClick = (imageSrc) => {
     setModalImageSrc(imageSrc);
@@ -250,14 +258,20 @@ const UserArticles = () => {
                       </Card.Body>
                     </Card>
                   ))}
-                  {articlesToShow < articles.length && (
+                  <Button variant="primary" onClick={loadMoreArticles}>
+                    {loadingMoreArticles ? (
+                      <>
+                      <Spinner animation="border" size="sm" /> Loading...
+                      </>) : ('Load more...')}
+                    </Button>
+                  {/* {articlesToShow < articles.length && (
                     <Button variant="primary" onClick={loadMoreArticles}>
                     {loadingMoreArticles ? (
                       <>
                       <Spinner animation="border" size="sm" /> Loading...
                       </>) : ('Load more...')}
                     </Button>
-                  )}
+                  )} */}
                 </>
               ) : (
                 <p>No articles found.</p>

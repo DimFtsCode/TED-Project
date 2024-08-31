@@ -20,13 +20,17 @@ namespace MyApi.Services
         }
 
         // Get all articles
-        public List<ArticleDto> GetAllArticles()
+        public List<ArticleDto> GetAllArticles(int pageNumber, int pageSize)
         {
+            Console.WriteLine("Getting articles with page number: " + pageNumber + " and page size: " + pageSize);
             return _context.Articles
                 .Include(a => a.Author)
                 .Include(a => a.Likes)
                 .Include(a => a.Comments)
                 .ThenInclude(c => c.Commenter)
+                .OrderByDescending(a => a.PostedDate)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .Select(a => new ArticleDto
                 {
                     ArticleId = a.ArticleId,

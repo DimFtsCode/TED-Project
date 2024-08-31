@@ -11,43 +11,67 @@ namespace UserCreationScript
 {
     class Program
     {
-        // Static variables to ensure unique IDs
 
         static void Main(string[] args)
         {
+            
+            /*** DEFAULT VALUES ***/ 
+            int userCount = 100;        // Default to 100 users 
+            // amount of connections for each user
+            int leastConnectionCount = 15;
+            int mostConnectionCount = 30;
+            // amount of articles the user has posted
+            int leastArticleCount = 2;  
+            int mostArticleCount = 5;
+            // amount of likes the user has given
+            int leastLikeCount = 15;    
+            int mostLikeCount = 30;
+            // amount of comments the user has given
+            int leastCommentCount = 5; 
+            int mostCommentCount = 15;
+            
+            
             // Σύνδεση με τη βάση δεδομένων
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
             //optionsBuilder.UseSqlite("Data Source=D:/desktop/TED/Project/backend/MyApi/database.db");
-            optionsBuilder.UseSqlite(@"Data Source=C:\Users\ziziz\Documents\ΕΚΠΑ\6ο εξάμηνο\ΤΕΔΙ\TED-Project\BackEnd\MyApi\database.db");
+            optionsBuilder.UseSqlite(@"Data Source=C:\Users\ziziz\Documents\DI\6ο εξάμηνο\ΤΕΔΙ\TED-Project\BackEnd\MyApi\database.db");
 
             using (var context = new AppDbContext(optionsBuilder.Options))
             {
-                int userCount = 100; // Default to 100 users
-
                 if (args.Length > 0 && int.TryParse(args[0], out int parsedCount))
                 {
-                    userCount = parsedCount;
+                    userCount = parsedCount; // get the user count from the command line 
                 }
 
                 // Create users
                 List<User> users = CreateUsers(context, userCount);
                 context.SaveChanges(); // Save once before generating interactions, to avoid foreign key conflicts
                 System.Threading.Thread.Sleep(1000); // Sleep for 1 second
+                Console.WriteLine($"Created {userCount} users.");
+
+
+                // Generate sample connections between users (skip the admin)
+                GenerateSampleConnections(context, users.Skip(1).ToList(), leastConnectionCount, mostConnectionCount);
+                context.SaveChanges(); // Save all changes to the database
+                System.Threading.Thread.Sleep(1000); // Sleep for 1 second
+                Console.WriteLine($"Created {leastConnectionCount} to {mostConnectionCount} connections for each user.");
 
                 // Generate sample articles 
-                List<Article> articles = GenerateSampleArticles(context, users);
+                List<Article> articles = GenerateSampleArticles(context, users.Skip(1).ToList(), leastArticleCount, mostArticleCount);
                 context.SaveChanges(); 
                 System.Threading.Thread.Sleep(1000); 
+                Console.WriteLine($"Created {leastArticleCount} to {mostArticleCount} articles for each user.");
                 
                 // Generate sample interactions to articles
-                GenerateSampleInteractions(context, users, articles);
+                GenerateSampleInteractions(context, users.Skip(1).ToList(), articles, leastLikeCount, mostLikeCount, leastCommentCount, mostCommentCount);
                 context.SaveChanges(); // Save all changes to the database
+                Console.WriteLine("Created interactions between users and articles.");
 
-                // Print the created users 
-                foreach (var user in users)
-                {
-                    Console.WriteLine($"Created user: {user.FirstName} {user.LastName}, Email: {user.Email}, UserId: {user.UserId}");
-                }
+                // // Print the created users 
+                // foreach (var user in users)
+                // {
+                //     Console.WriteLine($"Created user: {user.FirstName} {user.LastName}, Email: {user.Email}, UserId: {user.UserId}");
+                // }
             }
         }
 
@@ -216,18 +240,18 @@ namespace UserCreationScript
                 if (user.Jobs.Any())
                 {
                     var lastJob = user.Jobs.Last();
-                    Console.WriteLine($"User: {user.Email}, Last Job: {lastJob.Position}, Level: {lastJob.Level}");
+                    //Console.WriteLine($"User: {user.Email}, Last Job: {lastJob.Position}, Level: {lastJob.Level}");
 
                     if ((int)lastJob.Level > (int)JobLevel.Senior)
                     {
-                        Console.WriteLine("Creating advertisement for user: " + user.Email);
+                        //Console.WriteLine("Creating advertisement for user: " + user.Email);
                         Advertisement advertisement = CreateAdvertisementForUser(user, random);
                         user.Advertisements.Add(advertisement); // Προσθήκη αγγελίας στη λίστα του χρήστη
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"User: {user.Email} has no jobs.");
+                    //Console.WriteLine($"User: {user.Email} has no jobs.");
                 }
 
                 users.Add(user);
@@ -506,21 +530,77 @@ namespace UserCreationScript
             }
         }
     
-        static List<Article> GenerateSampleArticles(AppDbContext context, List<User> users)
+        
+        static void GenerateSampleConnections(AppDbContext context, List<User> users, int leastConnectionCount, int mostConnectionCount)
+        {
+            Random random = new Random();
+            var friendships = new List<Friendship>();
+
+            foreach (var user in users)
+            {
+                // determine the number of connections to create for the user
+                int connectionsCount = random.Next(leastConnectionCount, mostConnectionCount + 1);
+
+                var potentialConnections = users
+                    .Where(u => u.UserId != user.UserId && // exclude the user itself
+                                (u.Jobs.Any(job => user.Jobs.Any(uj => uj.Industry == job.Industry)) || // same industry
+                                u.Education.Any(ed => user.Education.Any(ue => ed.Degree == ue.Degree)) || // same degree
+                                u.Skills.Any(skill => user.Skills.Contains(skill)))) // same skills
+                    .ToList();
+
+                if (potentialConnections.Count < connectionsCount)
+                {
+                    connectionsCount = potentialConnections.Count;
+                }
+                if (connectionsCount == 0)
+                {
+                    // connect to 2 random users if no potential connections found
+                    potentialConnections = users
+                        .Where(u => u.UserId != user.UserId) // exclude user itself
+                        .OrderBy(u => random.Next()) // shuffle the users
+                        .Take(2)
+                        .ToList();
+
+                    connectionsCount = potentialConnections.Count; // == 2 
+                }
+            
+                for (int i = 0; i < connectionsCount; i++)
+                {
+                    var connection = potentialConnections[random.Next(potentialConnections.Count)];
+
+                    friendships.Add(new Friendship
+                    {
+                        UserId = user.UserId,
+                        FriendId = connection.UserId,
+                        FriendshipDate = DateTime.Now.AddDays(-random.Next(1, 365)),
+                        IsAccepted = true // Automatically accept the connection
+                    });
+
+                    // Remove the connected user from the list to prevent duplicate connections
+                    potentialConnections.Remove(connection);
+                }
+            }
+            
+            context.Friendships.AddRange(friendships);
+        }
+        
+        static List<Article> GenerateSampleArticles(AppDbContext context, List<User> users, int leastArticleCount, int mostArticleCount)
         {
             var articles = new List<Article>();
             Random random = new Random();
 
             foreach (var user in users)
             {
-                int articleCount = random.Next(1, 5); // Each user creates 1 to 4 articles
+                int articleCount = random.Next(leastArticleCount, mostArticleCount + 1); 
 
                 for (int i = 0; i < articleCount; i++)
                 {
+                    // Generate a contextually consistent title and content
+                    (string title, string content) = GenerateArticle(user, random);
                     var article = new Article
                     {
-                        Title = $"Sample Article {i + 1} by {user.FirstName}",
-                        Content = "This is a sample article content.",
+                        Title = title,
+                        Content = content,
                         PostedDate = DateTime.Now.AddDays(-random.Next(1, 365)),
                         AuthorId = user.UserId
                     };
@@ -532,51 +612,80 @@ namespace UserCreationScript
             context.Articles.AddRange(articles);
             return articles;
         }
-        static void GenerateSampleInteractions(AppDbContext context, List<User> users, List<Article> articles)
+        
+        static void GenerateSampleInteractions(AppDbContext context, List<User> users, List<Article> articles, int leastLikeCount, int mostLikeCount, int leastCommentCount, int mostCommentCount)
         {
             var likes = new List<Like>();
             var comments = new List<Comment>();
             Random random = new Random();
 
-            foreach (var article in articles)
+            foreach (var user in users)
             {
-                int likeCount = random.Next(1, 10); // Each article gets 1 to 21 likes
-                int commentCount = random.Next(1, 5); // Each article gets 1 to 4 comments
+                // Get connected users' articles
+                var connectedUserIds = context.Friendships.Where(f => f.UserId == user.UserId).Select(f => f.FriendId).ToList();
+                var connectedArticles = articles.Where(a => connectedUserIds.Contains(a.AuthorId)).ToList();
+                var otherArticles = articles.Except(connectedArticles).ToList();    // articles of the rest of the users
 
-                // Generate Likes
-                for (int i = 0; i < likeCount; i++)
-                {
-                    var liker = users[random.Next(users.Count)];
-
-                    var like = new Like
-                    {
-                        ArticleId = article.ArticleId,
-                        LikerId = liker.UserId 
-                    };
-
-                    likes.Add(like);
-                }
+                // Generate Likes 
+                int likeCount = random.Next(leastLikeCount, mostLikeCount + 1);
+                int connectedLikes = (int)(likeCount * 0.8); // 80% of likes are on connected users' articles
+                int otherLikes = likeCount - connectedLikes;
+                
+                likes.AddRange(GenerateLikesForArticles(user.UserId, connectedArticles, connectedLikes, random));      
+                likes.AddRange(GenerateLikesForArticles(user.UserId, otherArticles, otherLikes, random));
 
                 // Generate Comments
-                for (int i = 0; i < commentCount; i++)
-                {
-                    var commenter = users[random.Next(users.Count)];
+                int commentCount = random.Next(leastCommentCount, mostCommentCount + 1);
+                int connectedComments = (int)(commentCount * 0.8); // 80% of comments are on connected users' articles
+                int otherComments = commentCount - connectedComments;
 
-                    var comment = new Comment
-                    {
-                        ArticleId = article.ArticleId,
-                        CommenterId = commenter.UserId,
-                        Content = "This is a sample comment.",
-                        PostedDate = DateTime.Now.AddDays(-random.Next(1, 365))
-                    };
-
-                    comments.Add(comment);
-                }
+                comments.AddRange(GenerateCommentsForArticles(user.UserId, connectedArticles, connectedComments, random));
+                comments.AddRange(GenerateCommentsForArticles(user.UserId, otherArticles, otherComments, random));
             }
 
             context.Likes.AddRange(likes);
             context.Comments.AddRange(comments);
         }
+
+        static List<Like> GenerateLikesForArticles(int userId, List<Article> articles, int likeCount, Random random)
+        {
+            var likes = new List<Like>();
+
+            for (int i = 0; i < likeCount; i++)
+            {
+                var article = articles[random.Next(articles.Count)];
+
+                likes.Add(new Like
+                {
+                    ArticleId = article.ArticleId,
+                    LikerId = userId
+                    
+                });
+            }
+
+            return likes;
+        }
+
+        static List<Comment> GenerateCommentsForArticles(int userId, List<Article> articles, int commentCount, Random random)
+        {
+            var comments = new List<Comment>();
+
+            for (int i = 0; i < commentCount; i++)
+            {
+                var article = articles[random.Next(articles.Count)];
+
+                comments.Add(new Comment
+                {
+                    ArticleId = article.ArticleId,
+                    CommenterId = userId,
+                    Content = GenerateCommentContent(random),
+                    PostedDate = DateTime.Now.AddDays(-random.Next(1, 365))
+                });
+            }
+
+            return comments;
+        }
+        
         static byte[] LoadRadomProfilePicture(string[] stockProfilePictures, string stockProfilesPath, Random random)
         {   
             if (stockProfilePictures.Length == 0)
@@ -586,6 +695,62 @@ namespace UserCreationScript
             // Τυχαία επιλογή εικόνας προφίλ από τον κατάλογο stockProfiles
             string selectedProfilePath = stockProfilePictures[random.Next(stockProfilePictures.Length)];
             return File.ReadAllBytes(selectedProfilePath);
+        }
+    
+        static (string title, string content) GenerateArticle(User user, Random random)
+        {
+            List<(string title, string content)> articleOptions = new List<(string title, string content)>();
+
+            // Check if the user has a recent job and generate an article based on it
+            var latestJob = user.Jobs.LastOrDefault();
+            if (latestJob != null)
+            {
+                articleOptions.Add(($"Excited to start my new role at {latestJob.Company}",
+                    $"I’m thrilled to share that I’ve joined {latestJob.Company} as a {latestJob.Position}. Looking forward to the journey ahead!"));
+                
+                articleOptions.Add(($"Reflecting on my journey at {latestJob.Company}",
+                    $"After {user.Jobs.Sum(j => (j.EndDate - j.StartDate).Days / 365)} years at {latestJob.Company}, I’ve learned so much about {latestJob.Industry}. Here are some key takeaways..."));
+                
+                articleOptions.Add(($"Key learnings from my time at {latestJob.Company}",
+                    $"Reflecting on my time at {latestJob.Company}, I’ve realized how much I’ve grown both personally and professionally. Here’s what I’ve learned..."));
+            }
+
+            // Check if the user has recently completed a degree and generate an article based on it
+            var latestEducation = user.Education.LastOrDefault();
+            if (latestEducation != null)
+            {
+                articleOptions.Add(($"Just finished my {latestEducation.Degree}",
+                    $"Today, I officially completed my {latestEducation.Degree} from {latestEducation.Institution}. Excited for what the future holds!"));
+            }
+
+            // Add more custom article options based on the user context as needed
+            articleOptions.Add(("Sharing some thoughts on my recent project",
+                "It’s been an incredible journey working on these projects. I’ve gained invaluable experience and can’t wait to apply this knowledge moving forward."));
+            
+            articleOptions.Add(("Just wrapped up a major project",
+                "Just wrapped up a major project and wanted to share some insights on what we accomplished and the lessons learned along the way."));
+
+            // Randomly select one of the contextually consistent articles
+            return articleOptions[random.Next(articleOptions.Count)];
+        }
+    
+        static string GenerateCommentContent(Random random)
+        {
+            List<string> commentOptions = new List<string>
+            {
+                "Great article!",
+                "I found this very insightful.",
+                "Thanks for sharing!",
+                "Really enjoyed reading this.",
+                "This was very helpful.",
+                "Keep up the good work!",
+                "This was a great read.",
+                "wow, amazing!",
+                "Nice",
+                "Good job!",
+            };
+
+            return commentOptions[random.Next(commentOptions.Count)];
         }
     }
 }
