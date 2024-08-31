@@ -33,19 +33,81 @@ namespace MyApi.Controllers
             return Ok(article);
         }
 
-        // Create a new article
         [HttpPost]
-        public IActionResult CreateArticle([FromBody] Article article)
+        public IActionResult CreateArticle([FromForm] IFormCollection form)
         {
+            // Extract form data
+            string title = form["Title"].FirstOrDefault() ?? string.Empty;
+            string content = form["Content"].FirstOrDefault() ?? string.Empty;
+            if (!int.TryParse(form["AuthorId"].FirstOrDefault(), out int authorId))
+            {
+                return BadRequest("Invalid author ID");
+            }
+
+            // Extract files (photo and video)
+            IFormFile? photo = form.Files.GetFile("Photo");
+            IFormFile? video = form.Files.GetFile("Video");
+
+            // Prepare the article object
+            var article = new Article
+            {
+                Title = title,
+                Content = content,
+                PostedDate = DateTime.Now,
+                AuthorId = authorId,
+            };
+
+            // Process the photo if provided
+            if (photo != null)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    photo.CopyTo(memoryStream);
+                    article.PhotoData = memoryStream.ToArray();
+                    article.PhotoMimeType = photo.ContentType;
+                }
+            }
+
+            // Process the video if provided
+            if (video != null)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    video.CopyTo(memoryStream);
+                    article.VideoData = memoryStream.ToArray();
+                    article.VideoMimeType = video.ContentType;
+                }
+            }
+
+            // Save the article using the service
             var createdArticle = _articleService.CreateArticle(article);
-            return CreatedAtAction(nameof(GetArticleById), new { id = createdArticle.ArticleId }, createdArticle);
+
+            // Convert the created article back to a DTO to return it in the response
+            var createdArticleDto = new ArticleDto
+            {
+                ArticleId = createdArticle.ArticleId,
+                Title = createdArticle.Title,
+                Content = createdArticle.Content,
+                PostedDate = createdArticle.PostedDate,
+                AuthorId = createdArticle.AuthorId, // Send back author ID
+                PhotoData = createdArticle.PhotoData,
+                PhotoMimeType = createdArticle.PhotoMimeType,
+                VideoData = createdArticle.VideoData,
+                VideoMimeType = createdArticle.VideoMimeType,
+                LikesCount = 0, // New article, so no likes yet
+                Comments = new List<CommentDto>() // New article, so no comments yet
+            };
+
+            return Ok(createdArticleDto);
         }
+            
+        
 
         // Add a like to an article 
         [HttpPost("{id}/like")]
-        public IActionResult LikeArticle(int id, [FromBody] LikeRequest likeRequest)
+        public async Task<IActionResult> LikeArticle(int id, [FromBody] LikeRequest likeRequest)
         {
-            var result = _articleService.LikeArticle(id, likeRequest.UserId);
+            var result = await _articleService.LikeArticleAsync(id, likeRequest.UserId);
             if (!result) return NotFound();
             return Ok();
         }

@@ -60,25 +60,6 @@ namespace MyApi.Controllers
 
             return Ok(discussionsWithUnreadCount);
         }
-        // [HttpGet("user/{userId}")]
-        // public IActionResult GetDiscussionsByUser(int userId)
-        // {
-        //     var discussions = _discussionService.GetDiscussionsByUser(userId);
-
-        //     var discussionsWithUnreadCount = discussions.Select( d => new 
-        //     {
-        //         d.Id,
-        //         d.Title,
-        //         UnreadCount = d.Messages.SelectMany(m => m.ReadStatuses).Count(rs => !rs.IsRead && rs.UserId == userId)
-
-        //     }).ToList();
-
-        //     Console.WriteLine($"Discussions fetched for user {userId}: {string.Join(", ", discussionsWithUnreadCount.Select(d => $"DiscussionId: {d.Id}, UnreadCount: {d.UnreadCount}"))}");
-
-        //     return Ok(discussionsWithUnreadCount);
-        // }
-
-
         
 
         [HttpPost("{id}/add-participant")]

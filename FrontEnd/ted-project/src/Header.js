@@ -13,8 +13,10 @@ const Header = () => {
   const { user, logout } = useContext(UserContext);
   const {unreadCount, setUnreadCount} = useContext(UnreadMessagesContext);
   const { selectedDiscussionId } = useContext(SelectedDiscussionContext);
-  const { message, friendRequests } = useContext(SignalRContext);
+  const { message, friendRequests, notesOfInterest } = useContext(SignalRContext);
   const [ pendingFriendRequests, setPendingFriendRequests] = useState(0);
+  const [ pendingNotesOfInterest, setPendingNotesOfInterest] = useState(0);
+  const [ totalNotifications, setTotalNotifications] = useState(0);
   const navigate = useNavigate();
   
   const fetchUnreadCount = async () => {
@@ -50,15 +52,34 @@ const Header = () => {
     }
   };
 
+  // Function to fetch pending notes of interest
+  const fetchUserNotesOfInterest = async () => {
+    if (user && user.userId) {
+      try {
+        const response = await axios.get(`https://localhost:7176/api/noteofinterest/${user.userId}/unread`);
+        console.log("User : ", user.userId, "Notes of Interest Response:", response.data); // Log the response
+        setPendingNotesOfInterest(response.data.length); 
+      } catch (error) {
+        console.error('Error fetching notes of interest:', error);
+      }
+    }
+  }
+
   // fetch unread count and friend requests on component mount
   useEffect(() => {
     fetchUnreadCount();
-    if (friendRequests > 0) {
-      fetchUserFriendRequests();
-    }
+    // if (friendRequests > 0) {
+    //   fetchUserFriendRequests();
+    // }
+    fetchUserFriendRequests();
+    // if (notesOfInterest > 0) {
+    //   fetchUserNotesOfInterest();
+    // }
+    fetchUserNotesOfInterest();
+    setTotalNotifications(pendingFriendRequests + pendingNotesOfInterest);
   }, [user]);
 
-  // fetch the user's pending friend requests when the friendRequests state changes
+  // fetch the user's pending friend requests / notes of interest/ messages when the state changes
   useEffect( () => {
     if (friendRequests > 0) {
       fetchUserFriendRequests();
@@ -66,6 +87,14 @@ const Header = () => {
       setPendingFriendRequests(0);
     }
   }, [friendRequests]);
+
+  useEffect( () => {
+    if (notesOfInterest > 0) {
+      fetchUserNotesOfInterest();
+    } else {
+      setPendingNotesOfInterest(0);
+    }
+  }, [notesOfInterest]);
 
   useEffect(() => {
     if (message){
@@ -82,6 +111,11 @@ const Header = () => {
     return () => clearInterval(intervalId);
   }, [user]);
 
+  // calculate total notifications (friend requests + notes of interest)
+  useEffect(() => {
+    setTotalNotifications(pendingFriendRequests + pendingNotesOfInterest);
+  }, [pendingFriendRequests, pendingNotesOfInterest]);
+  
   const handleLogout = () => {
     logout();
     navigate('/'); // Ανακατεύθυνση στην αρχική σελίδα
@@ -133,7 +167,7 @@ const Header = () => {
                     </li>
                     <li className="nav-item">
                       <Link className="nav-link" to="/user/notifications">
-                        Notifications {pendingFriendRequests > 0 && <Badge pill bg="primary">{pendingFriendRequests}</Badge>}
+                        Notifications {totalNotifications > 0 && <Badge pill bg="primary">{totalNotifications}</Badge>}
                       </Link>
                     </li>
                     <li className="nav-item">

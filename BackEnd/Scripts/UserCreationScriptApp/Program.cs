@@ -18,7 +18,7 @@ namespace UserCreationScript
             // Σύνδεση με τη βάση δεδομένων
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
             //optionsBuilder.UseSqlite("Data Source=D:/desktop/TED/Project/backend/MyApi/database.db");
-            optionsBuilder.UseSqlite(@"Data Source=C:\Users\ziziz\Documents\DI\6ο εξάμηνο\ΤΕΔΙ\TED-Project\BackEnd\MyApi\database.db");
+            optionsBuilder.UseSqlite(@"Data Source=C:\Users\ziziz\Documents\ΕΚΠΑ\6ο εξάμηνο\ΤΕΔΙ\TED-Project\BackEnd\MyApi\database.db");
 
             using (var context = new AppDbContext(optionsBuilder.Options))
             {
@@ -29,10 +29,17 @@ namespace UserCreationScript
                     userCount = parsedCount;
                 }
 
+                // Create users
                 List<User> users = CreateUsers(context, userCount);
                 context.SaveChanges(); // Save once before generating interactions, to avoid foreign key conflicts
+                System.Threading.Thread.Sleep(1000); // Sleep for 1 second
+
+                // Generate sample articles 
                 List<Article> articles = GenerateSampleArticles(context, users);
-                context.SaveChanges(); // Save once before generating interactions, to avoid foreign key conflicts
+                context.SaveChanges(); 
+                System.Threading.Thread.Sleep(1000); 
+                
+                // Generate sample interactions to articles
                 GenerateSampleInteractions(context, users, articles);
                 context.SaveChanges(); // Save all changes to the database
 
