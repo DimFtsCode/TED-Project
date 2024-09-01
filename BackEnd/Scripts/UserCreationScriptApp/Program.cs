@@ -617,6 +617,8 @@ namespace UserCreationScript
         {
             var likes = new List<Like>();
             var comments = new List<Comment>();
+            var vectors = new List<ArticleVector>();
+
             Random random = new Random();
 
             foreach (var user in users)
@@ -631,23 +633,24 @@ namespace UserCreationScript
                 int connectedLikes = (int)(likeCount * 0.8); // 80% of likes are on connected users' articles
                 int otherLikes = likeCount - connectedLikes;
                 
-                likes.AddRange(GenerateLikesForArticles(user.UserId, connectedArticles, connectedLikes, random));      
-                likes.AddRange(GenerateLikesForArticles(user.UserId, otherArticles, otherLikes, random));
+                likes.AddRange(GenerateLikesForArticles(user.UserId, connectedArticles, connectedLikes, vectors, random));      
+                likes.AddRange(GenerateLikesForArticles(user.UserId, otherArticles, otherLikes, vectors, random));
 
                 // Generate Comments
                 int commentCount = random.Next(leastCommentCount, mostCommentCount + 1);
                 int connectedComments = (int)(commentCount * 0.8); // 80% of comments are on connected users' articles
                 int otherComments = commentCount - connectedComments;
 
-                comments.AddRange(GenerateCommentsForArticles(user.UserId, connectedArticles, connectedComments, random));
-                comments.AddRange(GenerateCommentsForArticles(user.UserId, otherArticles, otherComments, random));
+                comments.AddRange(GenerateCommentsForArticles(user.UserId, connectedArticles, connectedComments, vectors, random));
+                comments.AddRange(GenerateCommentsForArticles(user.UserId, otherArticles, otherComments, vectors, random));
             }
 
             context.Likes.AddRange(likes);
             context.Comments.AddRange(comments);
+            context.ArticleVectors.AddRange(vectors);
         }
 
-        static List<Like> GenerateLikesForArticles(int userId, List<Article> articles, int likeCount, Random random)
+        static List<Like> GenerateLikesForArticles(int userId, List<Article> articles, int likeCount, List<ArticleVector> vectors, Random random)
         {
             var likes = new List<Like>();
 
@@ -661,12 +664,21 @@ namespace UserCreationScript
                     LikerId = userId
                     
                 });
+
+                // Create and add a vector for the like interaction
+                vectors.Add(new ArticleVector
+                {
+                    ArticleId = article.ArticleId,
+                    AuthorId = article.AuthorId,
+                    UserId = userId,
+                    InteractionType = 1 // 1 for like
+                });
             }
 
             return likes;
         }
 
-        static List<Comment> GenerateCommentsForArticles(int userId, List<Article> articles, int commentCount, Random random)
+        static List<Comment> GenerateCommentsForArticles(int userId, List<Article> articles, int commentCount, List<ArticleVector> vectors, Random random)
         {
             var comments = new List<Comment>();
 
@@ -680,6 +692,15 @@ namespace UserCreationScript
                     CommenterId = userId,
                     Content = GenerateCommentContent(random),
                     PostedDate = DateTime.Now.AddDays(-random.Next(1, 365))
+                });
+
+                // Create and add a vector for the comment interaction
+                vectors.Add(new ArticleVector
+                {
+                    ArticleId = article.ArticleId,
+                    AuthorId = article.AuthorId,
+                    UserId = userId,
+                    InteractionType = 2 // 2 for comment
                 });
             }
 
@@ -712,7 +733,7 @@ namespace UserCreationScript
                     $"After {user.Jobs.Sum(j => (j.EndDate - j.StartDate).Days / 365)} years at {latestJob.Company}, I’ve learned so much about {latestJob.Industry}. Here are some key takeaways..."));
                 
                 articleOptions.Add(($"Key learnings from my time at {latestJob.Company}",
-                    $"Reflecting on my time at {latestJob.Company}, I’ve realized how much I’ve grown both personally and professionally. Here’s what I’ve learned..."));
+                    $"Reflecting on my time at {latestJob.Company} as a {latestJob.Position}, I’ve realized how much I’ve grown both personally and professionally. Here’s what I’ve learned..."));
             }
 
             // Check if the user has recently completed a degree and generate an article based on it

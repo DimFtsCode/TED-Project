@@ -36,12 +36,14 @@ namespace MyApi.Models
         public List<Message> SentMessages { get; set; } = new List<Message>(); // One-to-Many relationship with Message
         public List<Advertisement> Advertisements { get; set; } = new List<Advertisement>();
 
-        public List<AdvertisementVector> InteractionVectors { get; set; } = new List<AdvertisementVector>();
-
+        public List<AdvertisementVector> AdvertisementVectors { get; set; } = new List<AdvertisementVector>();
+        public ICollection<ArticleVector> AuthoredVectors { get; set; } = new List<ArticleVector>(); // For AuthorId in article vectors
+        public ICollection<ArticleVector> ArticleVectors { get; set; } = new List<ArticleVector>();    // For UserId in article vectors
         // New navigation properties
         public ICollection<Article> Articles { get; set; } = new List<Article>();
         public ICollection<Like> Likes { get; set; } = new List<Like>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public ICollection<View> Views { get; set; } = new List<View>();
         public bool IsValid()
         {
             return Password == Password;

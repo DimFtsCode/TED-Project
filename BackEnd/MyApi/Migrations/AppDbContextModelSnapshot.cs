@@ -191,6 +191,33 @@ namespace MyApi.Migrations
                     b.ToTable("Articles");
                 });
 
+            modelBuilder.Entity("MyApi.Models.ArticleVector", b =>
+                {
+                    b.Property<int>("ArticleVectorId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ArticleId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("InteractionType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ArticleVectorId");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ArticleVectors");
+                });
+
             modelBuilder.Entity("MyApi.Models.Comment", b =>
                 {
                     b.Property<int>("CommentId")
@@ -480,6 +507,27 @@ namespace MyApi.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("MyApi.Models.View", b =>
+                {
+                    b.Property<int>("ViewId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ArticleId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ViewerId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ViewId");
+
+                    b.HasIndex("ArticleId");
+
+                    b.HasIndex("ViewerId");
+
+                    b.ToTable("Views");
+                });
+
             modelBuilder.Entity("ConnectionRequest", b =>
                 {
                     b.HasOne("MyApi.Models.User", "Receiver")
@@ -532,7 +580,7 @@ namespace MyApi.Migrations
             modelBuilder.Entity("MyApi.Models.AdvertisementVector", b =>
                 {
                     b.HasOne("MyApi.Models.User", null)
-                        .WithMany("InteractionVectors")
+                        .WithMany("AdvertisementVectors")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -547,6 +595,25 @@ namespace MyApi.Migrations
                         .IsRequired();
 
                     b.Navigation("Author");
+                });
+
+            modelBuilder.Entity("MyApi.Models.ArticleVector", b =>
+                {
+                    b.HasOne("MyApi.Models.User", "Author")
+                        .WithMany("AuthoredVectors")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyApi.Models.User", "User")
+                        .WithMany("ArticleVectors")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MyApi.Models.Comment", b =>
@@ -655,11 +722,32 @@ namespace MyApi.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MyApi.Models.View", b =>
+                {
+                    b.HasOne("MyApi.Models.Article", "Article")
+                        .WithMany("Views")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyApi.Models.User", "Viewer")
+                        .WithMany("Views")
+                        .HasForeignKey("ViewerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("Viewer");
+                });
+
             modelBuilder.Entity("MyApi.Models.Article", b =>
                 {
                     b.Navigation("Comments");
 
                     b.Navigation("Likes");
+
+                    b.Navigation("Views");
                 });
 
             modelBuilder.Entity("MyApi.Models.Discussion", b =>
@@ -674,15 +762,19 @@ namespace MyApi.Migrations
 
             modelBuilder.Entity("MyApi.Models.User", b =>
                 {
+                    b.Navigation("AdvertisementVectors");
+
                     b.Navigation("Advertisements");
 
+                    b.Navigation("ArticleVectors");
+
                     b.Navigation("Articles");
+
+                    b.Navigation("AuthoredVectors");
 
                     b.Navigation("Comments");
 
                     b.Navigation("Education");
-
-                    b.Navigation("InteractionVectors");
 
                     b.Navigation("Jobs");
 
@@ -691,6 +783,8 @@ namespace MyApi.Migrations
                     b.Navigation("SentMessages");
 
                     b.Navigation("Skills");
+
+                    b.Navigation("Views");
                 });
 #pragma warning restore 612, 618
         }
