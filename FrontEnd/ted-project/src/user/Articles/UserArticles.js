@@ -31,6 +31,7 @@ const UserArticles = () => {
           setInitialLoading(false);
           setLoadingMoreArticles(false);
           console.log("First fetch: ", recommendedArticlesResponse.data[3]);
+          console.log("bringing ", recommendedArticlesResponse.data.length, " articles");
         } else {
           fetchRegularArticles();
         }
@@ -163,8 +164,6 @@ const UserArticles = () => {
 
   const loadMoreArticles = () => {
     setLoadingMoreArticles(true);
-    setPageNumber(prevPageNumber => prevPageNumber + 1);
-    setArticlesToShow(prevArticlesToShow => prevArticlesToShow + 5); // load 5 more articles
   };
 
   // simulate loading more articles 
