@@ -18,9 +18,9 @@ namespace MyApi.Controllers
 
         // Get all articles \
         [HttpGet]
-        public IActionResult GetAllArticles()
+        public IActionResult GetAllArticles(int pageNumber = 1, int pageSize = 10)
         {
-            List<ArticleDto> articles = _articleService.GetAllArticles();
+            List<ArticleDto> articles = _articleService.GetAllArticles(pageNumber, pageSize);
             return Ok(articles);
         }
 

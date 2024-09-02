@@ -26,6 +26,7 @@ builder.Services.AddScoped<EnumService>();
 builder.Services.AddScoped<AdvertisementService>();
 builder.Services.AddScoped<AdvertisementVectorService>();
 builder.Services.AddScoped<ArticleService>();
+builder.Services.AddScoped<ArticleVectorService>();
 
 
 // Προσθήκη του SignalR
@@ -42,6 +43,9 @@ builder.Services.AddCors(options =>
                           .AllowAnyHeader()
                           .AllowCredentials());
 });
+
+// Προσθήκη της μνήμης cache
+builder.Services.AddMemoryCache();
 
 // Ρύθμιση των ακροατών (listeners)
 builder.WebHost.ConfigureKestrel(options =>

@@ -1,5 +1,6 @@
 using MyApi.Data;
 using MyApi.Models;
+using MyApi.DTOs;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
