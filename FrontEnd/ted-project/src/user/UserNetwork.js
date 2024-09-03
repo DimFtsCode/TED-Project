@@ -119,7 +119,7 @@ const UserNetwork = () => {
   return (
     <Container fluid>
       <Row>
-        <Col md={2} className="bg-light sidebar">
+        <Col md={1} className="sidebar">
           <Nav className="flex-column">
             <Nav.Link as={Link} to="/user/profile" className="nav-link-custom">
               <FontAwesomeIcon icon={faUser} className="me-2" />

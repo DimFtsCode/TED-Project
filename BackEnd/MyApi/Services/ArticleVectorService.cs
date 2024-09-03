@@ -138,7 +138,8 @@ namespace MyApi.Services
             var recommededArticles = articles
                 .Select((article, index) => new { Article = article, Rating = predictedRatings[0, index] })
                 .OrderByDescending(a => a.Rating)
-                .Take(50) // return the top 50 recommended articles
+                .Take(30) // return the top 30 recommended articles
+                .OrderByDescending(a => a.Article.PostedDate)
                 .Select(x => new ArticleDto
                 {
                     ArticleId = x.Article.ArticleId,
@@ -172,9 +173,16 @@ namespace MyApi.Services
             double commonFeatures = 0;
 
             if (article.AuthorId == vector.AuthorId) commonFeatures += 1.0;
+            if (article.AuthorId == vector.UserId) commonFeatures += 3.0; // if the user is the author
             if (vector.InteractionType == 1) commonFeatures += 1.0; // Like
             if (vector.InteractionType == 2) commonFeatures += 2.0; // Comment (the strongest form of interaction)
             if (vector.InteractionType == 3) commonFeatures += 0.5; // View
+
+            // if (article.ArticleId == vector.ArticleId){
+            //     if (vector.InteractionType == 1) commonFeatures += 1.0; // Like
+            //     if (vector.InteractionType == 2) commonFeatures += 2.0; // Comment (the strongest form of interaction)
+            //     if (vector.InteractionType == 3) commonFeatures += 0.5; // View
+            // }
 
             return commonFeatures;
         }

@@ -34,7 +34,7 @@ const User = () => {
   return (
     <Container fluid>
       <Row>
-        <Col md={2} className="bg-light sidebar" style={{height: '100vh', position: 'sticky', top: 0}}>
+        <Col md={1} className="sidebar" style={{height: '100vh', position: 'sticky', top: 0}}>
           <Nav className="flex-column">
             <Nav.Link as={Link} to="/user/profile" className="nav-link-custom">
               <FontAwesomeIcon icon={faUser} className="me-2" />
