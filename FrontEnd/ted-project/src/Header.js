@@ -57,7 +57,7 @@ const Header = () => {
     if (user && user.userId) {
       try {
         const response = await axios.get(`https://localhost:7176/api/noteofinterest/${user.userId}/unread`);
-        console.log("User : ", user.userId, "Notes of Interest Response:", response.data); // Log the response
+        // console.log("User : ", user.userId, "Notes of Interest Response:", response.data); // Log the response
         setPendingNotesOfInterest(response.data.length); 
       } catch (error) {
         console.error('Error fetching notes of interest:', error);

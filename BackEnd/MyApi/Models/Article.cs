@@ -25,6 +25,7 @@ namespace MyApi.Models
         // Navigation properties for Interactions
         public ICollection<Like> Likes { get; set; } = new List<Like>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public ICollection<View> Views { get; set; } = new List<View>();
     }
 
     public class Like
@@ -49,6 +50,19 @@ namespace MyApi.Models
         // Foreign key to User (Commenter)
         public int CommenterId { get; set; }
         public User? Commenter { get; set; }
+
+        // Foreign key to Article
+        public int ArticleId { get; set; }
+        public Article? Article { get; set; }
+    }
+
+    public class View
+    {
+        public int ViewId { get; set; }
+
+        // Foreign key to User (Viewer)
+        public int ViewerId { get; set; }
+        public User? Viewer { get; set; }
 
         // Foreign key to Article
         public int ArticleId { get; set; }

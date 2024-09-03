@@ -22,11 +22,13 @@ namespace MyApi.Data
 
         public DbSet<MessageReadStatus> MessageReadStatuses { get; set; }
         public DbSet<Advertisement> Advertisements { get; set; } 
-        public DbSet<AdvertisementVector> AdvertisementVectors { get; set; } // Προσθήκη του DbSet
+        public DbSet<AdvertisementVector> AdvertisementVectors { get; set; }
+        public DbSet<ArticleVector> ArticleVectors { get; set; }
 
         public DbSet<Article> Articles { get; set; }
         public DbSet<Like> Likes { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<View> Views { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -54,7 +56,13 @@ namespace MyApi.Data
 
 
             modelBuilder.Entity<User>()
-                .HasMany(u => u.InteractionVectors)
+                .HasMany(u => u.AdvertisementVectors)
+                .WithOne()
+                .HasForeignKey(av => av.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.ArticleVectors)
                 .WithOne()
                 .HasForeignKey(av => av.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
@@ -121,6 +129,9 @@ namespace MyApi.Data
             modelBuilder.Entity<AdvertisementVector>()
                 .HasKey(av => av.AdvertisementVectorId);
 
+            modelBuilder.Entity<ArticleVector>()
+                .HasKey(av => av.ArticleVectorId);
+
             // New relationships for Article, Like, and Comment
             modelBuilder.Entity<Article>()
                 .HasOne(a => a.Author)
@@ -150,6 +161,32 @@ namespace MyApi.Data
                 .HasOne(c => c.Article)
                 .WithMany(a => a.Comments)
                 .HasForeignKey(c => c.ArticleId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            modelBuilder.Entity<View>()
+                .HasOne(v => v.Viewer)
+                .WithMany(u => u.Views)
+                .HasForeignKey(v => v.ViewerId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            modelBuilder.Entity<View>()
+                .HasOne(v => v.Article)
+                .WithMany(a => a.Views)
+                .HasForeignKey(v => v.ArticleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Relationship between ArticleVector and User (AuthorId as foreign key)
+            modelBuilder.Entity<ArticleVector>()
+                .HasOne<User>(av => av.Author)  
+                .WithMany(u => u.AuthoredVectors) 
+                .HasForeignKey(av => av.AuthorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Relationship between ArticleVector and User (UserId as foreign key)
+            modelBuilder.Entity<ArticleVector>()
+                .HasOne<User>(av => av.User) 
+                .WithMany(u => u.ArticleVectors) 
+                .HasForeignKey(av => av.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<NoteOfInterest>()
