@@ -22,7 +22,7 @@ const Admin = () => {
     const [selectAllNonAdmins, setSelectAllNonAdmins] = useState(false);
     const [key, setKey] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [rowsPerPage, setRowsPerPage] = useState(50);
     const [showEditModal, setShowEditModal] = useState(false);
     const [editUser, setEditUser] = useState(null);
 
@@ -256,9 +256,9 @@ const Admin = () => {
             <Row className="my-3">
                 <Col md="auto">
                     <FormControl as="select" value={rowsPerPage} onChange={(e) => setRowsPerPage(Number(e.target.value))}>
-                        <option value={10}>10</option>
-                        <option value={25}>25</option>
                         <option value={50}>50</option>
+                        <option value={100}>100</option>
+                        <option value={200}>200</option>
                     </FormControl>
                 </Col>
                 <Col>

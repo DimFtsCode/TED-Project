@@ -56,7 +56,7 @@ namespace MyApi.Controllers
             }
 
             // Log the result for debugging
-            Console.WriteLine($"Discussions fetched for user {userId}: {string.Join(", ", discussionsWithUnreadCount.Select(d => $"DiscussionId: {d.Id}, UnreadCount: {d.UnreadCount}"))}");
+            //Console.WriteLine($"Discussions fetched for user {userId}: {string.Join(", ", discussionsWithUnreadCount.Select(d => $"DiscussionId: {d.Id}, UnreadCount: {d.UnreadCount}"))}");
 
             return Ok(discussionsWithUnreadCount);
         }
