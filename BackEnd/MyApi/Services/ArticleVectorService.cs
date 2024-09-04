@@ -112,16 +112,16 @@ namespace MyApi.Services
 
                 foreach (var vector in interactionVectors)
                 {
-                    totalCommonFeatures += CalculateCommonFeatures(article, vector); // calculate common features based on interactions
+                    // calculate common features based on interaction vectors
+                    totalCommonFeatures += CalculateCommonFeatures(article, vector); 
                 }
 
                 if (connectedFriendsIds.Contains(article.AuthorId)) totalCommonFeatures += 0.5; // Boost articles authored by connected friends
-                else totalCommonFeatures += 0.1; // Base value for the rest of the articles
-
-                if (article.AuthorId == userId) totalCommonFeatures += 2.0; // Boost articles authored by the user
-
+                else totalCommonFeatures += 0.1;                                                // Base value for the rest of the articles to avoid zeros
+                if (article.AuthorId == userId) totalCommonFeatures += 5.0;                     // Boost articles authored by the user
+                totalCommonFeatures *= CalculateTimeDecay(article.PostedDate);                  // Apply time decay to the total common features score
                 ratings[0, i] = totalCommonFeatures;
-                articlesWithCommonFeatures.Add((article, totalCommonFeatures)); // Store common features for writing to file
+                articlesWithCommonFeatures.Add((article, totalCommonFeatures)); // Store common features for debugging
             }
 
             // Normalize the ratings
@@ -200,6 +200,8 @@ namespace MyApi.Services
 
             return commonFeatures;
         }
+        
+        // Function to write the recommended articles to a file (for debugging purposes)
         private void WriteRecommendationsToFile(List<(Article Article, double Rating)> recommendedArticles)
         {
             string filePath = "recommended_articles.txt"; // Define the file path
@@ -213,7 +215,7 @@ namespace MyApi.Services
             }
         }
 
-        // New method to write common features and normalized ratings to a file
+        // Function to write common features and normalized ratings to a file (for debugging purposes)
         private void WriteCommonFeaturesToFile(List<(Article article, double totalCommonFeatures)> articlesWithCommonFeatures, double[,] ratings, double maxScore)
         {
             string filePath = "article_common_features.txt"; // Define the file path
@@ -235,6 +237,15 @@ namespace MyApi.Services
                     writer.WriteLine($"ArticleId: {articleWithIndex.Article.ArticleId}, AuthorId: {articleWithIndex.Article.AuthorId}, PostedDate: {articleWithIndex.Article.PostedDate}, Title: {articleWithIndex.Article.Title}, CommonFeatures: {articleWithIndex.TotalCommonFeatures}, Rating: {ratings[0, originalIndex]}");
                 }
             }
+        }
+
+        private double CalculateTimeDecay(DateTime postedDate)
+        {
+            var daysSincePosted = (DateTime.Now - postedDate).TotalDays;
+            // exponential decay, older articles get lower scores
+            // Every 30 days, the score reduces by approximately 63%, since e^(-1) = 0.367
+            double decayFactor = Math.Exp(-daysSincePosted / 30); 
+            return decayFactor;
         }
     }
 }
