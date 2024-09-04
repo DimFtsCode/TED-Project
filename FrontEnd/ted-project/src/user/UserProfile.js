@@ -259,7 +259,7 @@ const UserProfile = () => {
   return (
     <Container fluid style={{ padding: '20px', height: '800px', overflowY: 'auto' }}>
         <Row>
-            <Col md={2} className="bg-light sidebar">
+            <Col md={1} className="sidebar" style={{ border: '1px solid black', borderRadius: '10px'}}>
                 <Nav className="flex-column">
                     <Nav.Link as={Link} to="/user/profile" className="nav-link-custom">
                         <FontAwesomeIcon icon={faUser} className="me-2" />
