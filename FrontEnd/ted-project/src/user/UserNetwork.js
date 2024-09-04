@@ -132,7 +132,6 @@ const UserNetwork = () => {
           </Nav>
         </Col>
         <Col md={10}>
-          <h2>User Network</h2>
           <Container className="mt-4">
             {error && <div className="alert alert-danger mt-3">{error}</div>}
             <h3>Connected Friends</h3>
@@ -168,7 +167,7 @@ const UserNetwork = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <Button variant="outline-success" type="submit">Search</Button>
+              <Button variant="success" type="submit">Search</Button>
             </Form>
             <Row className="mt-3">
               {currentResults.map((user) => (
