@@ -18,20 +18,56 @@ namespace MyApi.Services
         }
 
         // Δημιουργία αγγελίας
-        public Advertisement CreateAdvertisement(Advertisement advertisement)
+        public AdvertisementDto CreateAdvertisement(AdvertisementDto advertisementDto)
         {
-            var user = _context.Users.Include(u => u.Advertisements).FirstOrDefault(u => u.UserId == advertisement.UserId);
+            // Εύρεση του χρήστη από το userId που περιλαμβάνεται στο DTO
+            var user = _context.Users.FirstOrDefault(u => u.UserId == advertisementDto.UserId);
 
+            // Έλεγχος αν ο χρήστης είναι null
             if (user == null)
             {
                 throw new KeyNotFoundException("User not found");
             }
 
-            user.Advertisements.Add(advertisement);
+            // Μετατροπή του AdvertisementDto σε Advertisement
+            var advertisement = new Advertisement
+            {
+                Title = advertisementDto.Title ?? throw new ArgumentNullException(nameof(advertisementDto.Title)),
+                Description = advertisementDto.Description ?? throw new ArgumentNullException(nameof(advertisementDto.Description)),
+                PostedDate = advertisementDto.PostedDate,
+                RequiredDegree = advertisementDto.RequiredDegree,
+                RequiredEducationLevel = advertisementDto.RequiredEducationLevel,
+                RequiredPosition = advertisementDto.RequiredPosition,
+                RequiredIndustry = advertisementDto.RequiredIndustry,
+                RequiredJobLevel = advertisementDto.RequiredJobLevel,
+                MinimumYearsExperience = advertisementDto.MinimumYearsExperience,
+                RequiredSkill = advertisementDto.RequiredSkill,
+                UserId = advertisementDto.UserId
+            };
+
+            // Προσθήκη της νέας διαφήμισης στο χρήστη
+            _context.Advertisements.Add(advertisement);
             _context.SaveChanges();
 
-            return advertisement;
+            // Επιστροφή του νέου αντικειμένου σε μορφή DTO
+            return new AdvertisementDto
+            {
+                AdvertisementId = advertisement.AdvertisementId,
+                Title = advertisement.Title,
+                Description = advertisement.Description,
+                PostedDate = advertisement.PostedDate,
+                RequiredDegree = advertisement.RequiredDegree,
+                RequiredEducationLevel = advertisement.RequiredEducationLevel,
+                RequiredPosition = advertisement.RequiredPosition,
+                RequiredIndustry = advertisement.RequiredIndustry,
+                RequiredJobLevel = advertisement.RequiredJobLevel,
+                MinimumYearsExperience = advertisement.MinimumYearsExperience,
+                RequiredSkill = advertisement.RequiredSkill,
+                UserId = advertisement.UserId
+            };
         }
+
+
 
 
         // Ενημέρωση αγγελίας

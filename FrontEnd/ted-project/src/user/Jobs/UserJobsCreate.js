@@ -70,19 +70,45 @@ const UserJobsCreate = () => {
       <Row>
         
         <Col xs={3} md={2} style={{ padding: '20px' }}>
-          <h5 className="mt-4">Job Menu</h5>
+          <h5 className="mt-4" style={{ border: '2px solid black', padding: '10px', borderRadius: '5px', textAlign: 'center' }}>
+            <strong>Job Menu</strong>
+          </h5>
           <Nav className="flex-column">
-            <Nav.Item>
-              <Nav.Link as={Link} to="/user/jobs">Home Job Page</Nav.Link>
+            <Nav.Item className="mb-2">
+              <Button 
+                as={Link} 
+                to="/user/jobs" 
+                style={{ backgroundColor: '#3498db', color: 'white', width: '100%' }} 
+              >
+                Home Job Page
+              </Button>
             </Nav.Item>
-            <Nav.Item>
-              <Nav.Link as={Link} to="/user/jobs/create-ad">Create a New Job Advertise</Nav.Link>
+            <Nav.Item className="mb-2">
+              <Button 
+                as={Link} 
+                to="/user/jobs/create-ad" 
+                style={{ backgroundColor: '#3498db', color: 'white', width: '100%' }} 
+              >
+                Create a New Job Advertise
+              </Button>
             </Nav.Item>
-            <Nav.Item>
-              <Nav.Link as={Link} to="/user/jobs/view-ad">View Your Own Advertises</Nav.Link>
+            <Nav.Item className="mb-2">
+              <Button 
+                as={Link} 
+                to="/user/jobs/view-ad" 
+                style={{ backgroundColor: '#3498db', color: 'white', width: '100%' }} 
+              >
+                View Your Own Advertises
+              </Button>
             </Nav.Item>
-            <Nav.Item>
-              <Nav.Link as={Link} to="/user/jobs/participants">View Participants By Advertise</Nav.Link>
+            <Nav.Item className="mb-2">
+              <Button 
+                as={Link} 
+                to="/user/jobs/participants" 
+                style={{ backgroundColor: '#3498db', color: 'white', width: '100%' }} 
+              >
+                View Participants By Advertise
+              </Button>
             </Nav.Item>
           </Nav>
         </Col>

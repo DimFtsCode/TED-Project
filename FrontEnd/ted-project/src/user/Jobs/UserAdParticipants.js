@@ -161,33 +161,60 @@ const UserAdParticipants = () => {
     <Container fluid style={{ height: '100vh' }}>
       <Row>
         <Col xs={3} md={2} style={{ padding: '20px' }}>
-          <h5 className="mt-4">Job Menu</h5>
+          <h5 className="mt-4" style={{ border: '2px solid black', padding: '10px', borderRadius: '5px', textAlign: 'center' }}><strong>Job Menu</strong></h5>
           <Nav className="flex-column">
-            <Nav.Item>
-              <Nav.Link as={Link} to="/user/jobs">Home Job Page</Nav.Link>
+            <Nav.Item className="mb-2">
+              <Button 
+                as={Link} 
+                to="/user/jobs" 
+                style={{ backgroundColor: '#3498db', color: 'white', width: '100%' }} 
+              >
+                Home Job Page
+              </Button>
             </Nav.Item>
-            <Nav.Item>
-              <Nav.Link as={Link} to="/user/jobs/create-ad">Create a New Job Advertise</Nav.Link>
+            <Nav.Item className="mb-2">
+              <Button 
+                as={Link} 
+                to="/user/jobs/create-ad" 
+                style={{ backgroundColor: '#3498db', color: 'white', width: '100%' }} 
+              >
+                Create a New Job Advertise
+              </Button>
             </Nav.Item>
-            <Nav.Item>
-              <Nav.Link as={Link} to="/user/jobs/view-ad">View Your Own Advertises</Nav.Link>
+            <Nav.Item className="mb-2">
+              <Button 
+                as={Link} 
+                to="/user/jobs/view-ad" 
+                style={{ backgroundColor: '#3498db', color: 'white', width: '100%' }} 
+              >
+                View Your Own Advertises
+              </Button>
             </Nav.Item>
-            <Nav.Item>
-              <Nav.Link as={Link} to="/user/jobs/participants">View Participants By Advertise</Nav.Link>
+            <Nav.Item className="mb-2">
+              <Button 
+                as={Link} 
+                to="/user/jobs/participants" 
+                style={{ backgroundColor: '#3498db', color: 'white', width: '100%' }} 
+              >
+                View Participants By Advertise
+              </Button>
             </Nav.Item>
           </Nav>
-
-          <h5 className="mt-4">Select a Job Advertisement</h5>
-
+          <h5 className="mt-4" style={{ border: '2px solid black', padding: '10px', borderRadius: '5px', textAlign: 'center' }}><strong>Select a Job Ad.</strong></h5>
           <ListGroup variant="flush" className="mt-4">
             {jobs.map(job => (
-              <ListGroup.Item key={job.advertisementId} action onClick={() => handleJobClick(job.advertisementId)}>
-                {job.title}
+              <ListGroup.Item key={job.advertisementId} className="p-0" style={{ backgroundColor: 'transparent', border: 'none' }}>
+                <Button 
+                  style={{ backgroundColor: '#3498db', color: 'white', width: '100%' }} 
+                  variant="outline-primary" 
+                  onClick={() => handleJobClick(job.advertisementId)}
+                >
+                  {job.title}
+                </Button>
               </ListGroup.Item>
             ))}
           </ListGroup>
         </Col>
-
         <Col xs={12} md={{ span: 8, offset: 1 }} style={{ padding: '20px', height: '800px', overflowY: 'auto' }}>
         <Card>
             <Card.Body>

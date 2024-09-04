@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using MyApi.Models;
 using MyApi.Services;
+using MyApi.DTOs;
+
 
 namespace MyApi.Controllers
 {
@@ -17,11 +19,23 @@ namespace MyApi.Controllers
 
         // Δημιουργία αγγελίας
         [HttpPost]
-        public IActionResult CreateAdvertisement([FromBody] Advertisement advertisement)
+        public IActionResult CreateAdvertisement([FromBody] AdvertisementDto advertisementDto)
         {
-            var createdAd = _advertisementService.CreateAdvertisement(advertisement);
-            return CreatedAtAction(nameof(GetAdvertisement), new { id = createdAd.AdvertisementId }, createdAd);
+            try
+            {
+                var createdAdvertisement = _advertisementService.CreateAdvertisement(advertisementDto);
+                return Ok(createdAdvertisement); // Επιστροφή του DTO αντί για το πλήρες μοντέλο
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Error creating advertisement: " + ex.Message);
+            }
         }
+
 
         // Ενημέρωση αγγελίας
         [HttpPut("{id}")]

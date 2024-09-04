@@ -33,8 +33,8 @@ namespace UserCreationScript
             
             // Σύνδεση με τη βάση δεδομένων
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            //optionsBuilder.UseSqlite("Data Source=D:/desktop/TED/Project/backend/MyApi/database.db");
-            optionsBuilder.UseSqlite(@"Data Source=C:\Users\ziziz\Documents\DI\6ο εξάμηνο\ΤΕΔΙ\TED-Project\BackEnd\MyApi\database.db");
+            optionsBuilder.UseSqlite("Data Source=D:/desktop/TED/Project/backend/MyApi/database.db");
+            // optionsBuilder.UseSqlite(@"Data Source=C:\Users\ziziz\Documents\DI\6ο εξάμηνο\ΤΕΔΙ\TED-Project\BackEnd\MyApi\database.db");
 
             using (var context = new AppDbContext(optionsBuilder.Options))
             {

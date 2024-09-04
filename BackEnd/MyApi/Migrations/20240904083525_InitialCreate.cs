@@ -79,6 +79,86 @@ namespace MyApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AdvertisementVectors",
+                columns: table => new
+                {
+                    AdvertisementVectorId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    AdvertisementId = table.Column<int>(type: "INTEGER", nullable: false),
+                    RequiredDegree = table.Column<int>(type: "INTEGER", nullable: false),
+                    RequiredEducationLevel = table.Column<int>(type: "INTEGER", nullable: false),
+                    RequiredPosition = table.Column<int>(type: "INTEGER", nullable: false),
+                    RequiredIndustry = table.Column<int>(type: "INTEGER", nullable: false),
+                    RequiredJobLevel = table.Column<int>(type: "INTEGER", nullable: false),
+                    RequiredSkill = table.Column<int>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AdvertisementVectors", x => x.AdvertisementVectorId);
+                    table.ForeignKey(
+                        name: "FK_AdvertisementVectors_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Articles",
+                columns: table => new
+                {
+                    ArticleId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Title = table.Column<string>(type: "TEXT", nullable: true),
+                    Content = table.Column<string>(type: "TEXT", nullable: true),
+                    PostedDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    AuthorId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PhotoData = table.Column<byte[]>(type: "BLOB", nullable: true),
+                    PhotoMimeType = table.Column<string>(type: "TEXT", nullable: true),
+                    VideoData = table.Column<byte[]>(type: "BLOB", nullable: true),
+                    VideoMimeType = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Articles", x => x.ArticleId);
+                    table.ForeignKey(
+                        name: "FK_Articles_Users_AuthorId",
+                        column: x => x.AuthorId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ArticleVectors",
+                columns: table => new
+                {
+                    ArticleVectorId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ArticleId = table.Column<int>(type: "INTEGER", nullable: false),
+                    AuthorId = table.Column<int>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    InteractionType = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ArticleVectors", x => x.ArticleVectorId);
+                    table.ForeignKey(
+                        name: "FK_ArticleVectors_Users_AuthorId",
+                        column: x => x.AuthorId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ArticleVectors_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ConnectionRequests",
                 columns: table => new
                 {
@@ -213,6 +293,28 @@ namespace MyApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "NotesOfInterest",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Content = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsRead = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NotesOfInterest", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_NotesOfInterest_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Skills",
                 columns: table => new
                 {
@@ -229,6 +331,86 @@ namespace MyApi.Migrations
                     table.ForeignKey(
                         name: "FK_Skills_Users_UserId",
                         column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Comments",
+                columns: table => new
+                {
+                    CommentId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Content = table.Column<string>(type: "TEXT", nullable: true),
+                    PostedDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CommenterId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ArticleId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Comments", x => x.CommentId);
+                    table.ForeignKey(
+                        name: "FK_Comments_Articles_ArticleId",
+                        column: x => x.ArticleId,
+                        principalTable: "Articles",
+                        principalColumn: "ArticleId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Comments_Users_CommenterId",
+                        column: x => x.CommenterId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Likes",
+                columns: table => new
+                {
+                    LikeId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    LikerId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ArticleId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Likes", x => x.LikeId);
+                    table.ForeignKey(
+                        name: "FK_Likes_Articles_ArticleId",
+                        column: x => x.ArticleId,
+                        principalTable: "Articles",
+                        principalColumn: "ArticleId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Likes_Users_LikerId",
+                        column: x => x.LikerId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Views",
+                columns: table => new
+                {
+                    ViewId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ViewerId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ArticleId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Views", x => x.ViewId);
+                    table.ForeignKey(
+                        name: "FK_Views_Articles_ArticleId",
+                        column: x => x.ArticleId,
+                        principalTable: "Articles",
+                        principalColumn: "ArticleId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Views_Users_ViewerId",
+                        column: x => x.ViewerId,
                         principalTable: "Users",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
@@ -267,6 +449,36 @@ namespace MyApi.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AdvertisementVectors_UserId",
+                table: "AdvertisementVectors",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Articles_AuthorId",
+                table: "Articles",
+                column: "AuthorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ArticleVectors_AuthorId",
+                table: "ArticleVectors",
+                column: "AuthorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ArticleVectors_UserId",
+                table: "ArticleVectors",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comments_ArticleId",
+                table: "Comments",
+                column: "ArticleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comments_CommenterId",
+                table: "Comments",
+                column: "CommenterId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ConnectionRequests_ReceiverId",
                 table: "ConnectionRequests",
                 column: "ReceiverId");
@@ -292,6 +504,16 @@ namespace MyApi.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Likes_ArticleId",
+                table: "Likes",
+                column: "ArticleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Likes_LikerId",
+                table: "Likes",
+                column: "LikerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MessageReadStatuses_MessageId",
                 table: "MessageReadStatuses",
                 column: "MessageId");
@@ -312,9 +534,24 @@ namespace MyApi.Migrations
                 column: "SenderId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_NotesOfInterest_UserId",
+                table: "NotesOfInterest",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Skills_UserId",
                 table: "Skills",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Views_ArticleId",
+                table: "Views",
+                column: "ArticleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Views_ViewerId",
+                table: "Views",
+                column: "ViewerId");
         }
 
         /// <inheritdoc />
@@ -322,6 +559,15 @@ namespace MyApi.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Advertisements");
+
+            migrationBuilder.DropTable(
+                name: "AdvertisementVectors");
+
+            migrationBuilder.DropTable(
+                name: "ArticleVectors");
+
+            migrationBuilder.DropTable(
+                name: "Comments");
 
             migrationBuilder.DropTable(
                 name: "ConnectionRequests");
@@ -336,13 +582,25 @@ namespace MyApi.Migrations
                 name: "Jobs");
 
             migrationBuilder.DropTable(
+                name: "Likes");
+
+            migrationBuilder.DropTable(
                 name: "MessageReadStatuses");
+
+            migrationBuilder.DropTable(
+                name: "NotesOfInterest");
 
             migrationBuilder.DropTable(
                 name: "Skills");
 
             migrationBuilder.DropTable(
+                name: "Views");
+
+            migrationBuilder.DropTable(
                 name: "Messages");
+
+            migrationBuilder.DropTable(
+                name: "Articles");
 
             migrationBuilder.DropTable(
                 name: "Discussions");
