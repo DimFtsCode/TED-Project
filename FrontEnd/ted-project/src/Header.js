@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import Badge from 'react-bootstrap/Badge';
 import { Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './Header.css';
 import transparent_logo from './images/transparent-logo.png';
 import { UserContext } from './UserContext';
 import { UnreadMessagesContext } from './UnreadMessagesContext';
@@ -122,7 +123,7 @@ const Header = () => {
   };
 
   return (
-    <header className="container-fluid">
+    <header className="header">
       <div className="row align-items-center d-flex justify-content-between">
         <div className="col-1">
           <Link className="navbar-brand" to={user ? "/user" : "/"}>

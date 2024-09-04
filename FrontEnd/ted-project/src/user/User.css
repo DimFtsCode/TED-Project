@@ -1,4 +1,8 @@
 /* src/user/User.css */
+
+.sidebar {
+  background-color: rgba(11, 33, 75, 0.171) ;
+}
 .sidebar .nav-link-custom {
     color: black !important;
     font-weight: bold !important;

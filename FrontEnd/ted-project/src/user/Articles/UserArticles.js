@@ -9,6 +9,7 @@ import './UserArticles.css';
 const UserArticles = () => {
   const [articles, setArticles] = useState([]);
   const { user } = useContext(UserContext);
+  const [currUserName, setCurrUserName] = useState('');
   const [initialLoading, setInitialLoading] = useState(true); // for the initial spinner
   const [likedArticles, setLikedArticles] = useState([]); // Track the liked articles.
   const [articlesToShow, setArticlesToShow] = useState(5); // Track the articles to show on the page
@@ -23,8 +24,9 @@ const UserArticles = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
+        console.log("user: ", user);
         const recommendedArticlesResponse = await axios.get(`https://localhost:7176/api/articlevector/recommendations/${user.userId}?pageNumber=${pageNumber}&pageSize=5`);
-        
+        //console.log("fetching pagenumber: ", pageNumber);
         if (recommendedArticlesResponse.data && recommendedArticlesResponse.data.length > 0) {
           //setArticles(recommendedArticlesResponse.data);
           setArticles(prevArticles => pageNumber === 1 ? recommendedArticlesResponse.data : [...prevArticles, ...recommendedArticlesResponse.data]);
@@ -34,6 +36,7 @@ const UserArticles = () => {
           console.log("bringing ", recommendedArticlesResponse.data.length, " articles");
         } else {
           fetchRegularArticles();
+          //console.log("No recommendations found, falling back to regular articles");
         }
       } catch (error) {
         console.error('Error fetching recommendations, falling back to regular articles:', error);
@@ -66,6 +69,20 @@ const UserArticles = () => {
     fetchLikedArticles();
     fetchArticles();
   }, [user, pageNumber]);
+
+  // fetch the details of the logged in user on component mount
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const response = await axios.get(`https://localhost:7176/api/users/${user.userId}`);
+        setCurrUserName(response.data.firstName + " " + response.data.lastName);
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+
+    fetchUserDetails();
+  }, [user]);
 
   const handleLike = async (articleId) => {
     const articleIndex = articles.findIndex(article => article.articleId === articleId);
@@ -288,7 +305,8 @@ const UserArticles = () => {
                                             style={{ width: '40px', height: '40px', marginRight: '10px' }}
                                           />
                                           <div>
-                                            <strong>{comment.commenterName == (user.firstName + " " + user.lastName) ? 'Me' : comment.commenterName}</strong>
+                                            <strong>{comment.commenterName === currUserName ? 'Me' : comment.commenterName}</strong>
+                                            {/* <strong>{currUserName}</strong> */}
                                             <p>{comment.content}</p>
                                           </div>
                                         </div>
