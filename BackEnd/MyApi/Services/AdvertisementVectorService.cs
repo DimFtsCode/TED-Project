@@ -46,6 +46,7 @@ namespace MyApi.Services
 
             int numItems = advertisements.Count;
             double[,] ratings = new double[1, numItems]; // Δημιουργία μήτρας βαθμολογίας για έναν χρήστη
+            List<(Advertisement ad, double totalCommonFeatures)> adswithCommonFeatures = new List<(Advertisement, double)>();
 
             for (int i = 0; i < numItems; i++)
             {
@@ -57,7 +58,10 @@ namespace MyApi.Services
                     totalCommonFeatures += CalculateCommonFeatures(ad, vector);
                 }
 
+                if (totalCommonFeatures == 0) totalCommonFeatures = 0.1; // avoid 0 values
+
                 ratings[0, i] = totalCommonFeatures;
+                adswithCommonFeatures.Add((ad, totalCommonFeatures));
             }
 
             // Κανονικοποίηση των αποτελεσμάτων (0-1)
@@ -69,6 +73,8 @@ namespace MyApi.Services
                     ratings[0, i] = ratings[0, i] / maxScore;
                 }
             }
+
+            // WriteCommonFeatures(adswithCommonFeatures, ratings, maxScore);
 
             // Δημιουργία αντικειμένου για το Matrix Factorization
             int numLatentFeatures = 10;
@@ -87,7 +93,7 @@ namespace MyApi.Services
             var recommendedAds = advertisements
                 .Select((ad, index) => new { Ad = ad, Rating = predictedRatings[0, index] })
                 .OrderByDescending(x => x.Rating)
-                .Take(15)
+                .Take(30)
                 .Select(x => x.Ad)
                 .ToList();
 
@@ -105,8 +111,31 @@ namespace MyApi.Services
             if ((int)ad.RequiredIndustry == vector.RequiredIndustry) commonFeatures += 1.0;
             if ((int)ad.RequiredJobLevel == vector.RequiredJobLevel) commonFeatures += 1.0;
             if ((int)ad.RequiredSkill == vector.RequiredSkill) commonFeatures += 1.0;
-
+ 
             return commonFeatures;
+        }
+
+        // Μέθοδος για εμφάνιση των κοινών χαρακτηριστικών
+        private void WriteCommonFeatures(List<(Advertisement ad, double totalCommonFeatures)> adswithCommonFeatures, double[,] ratings, double maxScore)
+        {
+            string filePath = "ads_common_features.txt";
+            // Keep the original indices to align with the ratings array
+            var indexedAdsWithCommonFeatures = adswithCommonFeatures
+                .Select((item, index) => (Advertisement: item.ad, TotalCommonFeatures: item.totalCommonFeatures, Index: index)).ToList()
+                .OrderByDescending(x => x.TotalCommonFeatures)
+                .ToList();
+
+            using (StreamWriter writer = new StreamWriter(filePath, false))
+            {
+                writer.WriteLine("Advertisement common featrues and normalized ratings");
+                writer.WriteLine("maxScore: " + maxScore);
+
+                foreach (var adWithIndex in indexedAdsWithCommonFeatures )
+                {
+                    int originalIndex = adWithIndex.Index;
+                    writer.WriteLine($"Ad: {adWithIndex.Advertisement.AdvertisementId}, Common Features: {adWithIndex.TotalCommonFeatures}, Normalized Rating: {ratings[0, originalIndex]}");
+                }
+            }
         }
     }
 }

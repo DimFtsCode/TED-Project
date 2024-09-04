@@ -40,11 +40,6 @@ namespace MyApi.Services
             
             if (vector == null) return false;
 
-            // if (vector.InteractionType != 1){
-            //     Console.WriteLine("Only likes can be removed.");
-            //     return false;
-            // }
-
             _context.ArticleVectors.Remove(vector);
             _context.SaveChanges();
 
@@ -81,26 +76,34 @@ namespace MyApi.Services
 
 
         public List<ArticleDto> CalculateRecommendations(int userId)
-        {   
+        {
             // load the article vectors for the user
             var interactionVectors = _context.ArticleVectors
-                                        .Where(v => v.UserId == userId)
-                                        .ToList();    
+                                            .Where(v => v.UserId == userId)
+                                            .ToList();
             if (interactionVectors.Count < 15) return new List<ArticleDto>();
+
+            // find the id's of the connected friends of the user
+            var connectedFriendsIds = _context.Friendships
+                                        .Where(f => f.UserId == userId)
+                                        .Select(f => f.FriendId)
+                                        .ToList();      
+
             
             // load all articles
             Console.WriteLine("Loading articles...");
             var articles = _context.Articles
-                                .Include(a => a.Author)
-                                .Include(a => a.Likes)
-                                .Include(a => a.Comments)
-                                .ThenInclude(c => c.Commenter)
-                                .AsSplitQuery() // user query splitting to reduce the time it takes to load the articles
-                                .ToList();
+                                    .Include(a => a.Author)
+                                    .Include(a => a.Likes)
+                                    .Include(a => a.Comments)
+                                    .ThenInclude(c => c.Commenter)
+                                    .AsSplitQuery()
+                                    .ToList();
             if (articles.Count == 0) return new List<ArticleDto>();
 
             int numItems = articles.Count;
             double[,] ratings = new double[1, numItems];
+            List<(Article article, double totalCommonFeatures)> articlesWithCommonFeatures = new List<(Article, double)>();
 
             for (int i = 0; i < numItems; i++)
             {
@@ -109,10 +112,16 @@ namespace MyApi.Services
 
                 foreach (var vector in interactionVectors)
                 {
-                    totalCommonFeatures += CalculateCommonFeatures(article, vector);
+                    totalCommonFeatures += CalculateCommonFeatures(article, vector); // calculate common features based on interactions
                 }
 
+                if (connectedFriendsIds.Contains(article.AuthorId)) totalCommonFeatures += 0.5; // Boost articles authored by connected friends
+                else totalCommonFeatures += 0.1; // Base value for the rest of the articles
+
+                if (article.AuthorId == userId) totalCommonFeatures += 2.0; // Boost articles authored by the user
+
                 ratings[0, i] = totalCommonFeatures;
+                articlesWithCommonFeatures.Add((article, totalCommonFeatures)); // Store common features for writing to file
             }
 
             // Normalize the ratings
@@ -125,21 +134,29 @@ namespace MyApi.Services
                 }
             }
 
-            int numLatentFeatures = 10;
+            // write total common featuers and normalized ratings to a file
+            WriteCommonFeaturesToFile(articlesWithCommonFeatures, ratings, maxScore);
+
+            int numLatentFeatures = 5;
             double learningRate = 0.01;
-            double regularization = 0.1;
+            double regularization = 0.05;
             int numIterations = 5000;
-            var mf = new MatrixFactorization(1, numItems, numLatentFeatures, learningRate, regularization, numIterations); 
+            var mf = new MatrixFactorization(1, numItems, numLatentFeatures, learningRate, regularization, numIterations);
 
             mf.Train(ratings);
 
             var predictedRatings = mf.GetPredictedRatings();
 
-            var recommededArticles = articles
-                .Select((article, index) => new { Article = article, Rating = predictedRatings[0, index] })
+            var recommendedArticles = articles
+                .Select((article, index) => (Article: article, Rating: predictedRatings[0, index]))
                 .OrderByDescending(a => a.Rating)
-                .Take(30) // return the top 30 recommended articles
-                .OrderByDescending(a => a.Article.PostedDate)
+                .Take(50) // return the top 30 recommended articles
+                .ToList();
+
+            // Write the recommendations to a file
+            WriteRecommendationsToFile(recommendedArticles);
+
+            return recommendedArticles
                 .Select(x => new ArticleDto
                 {
                     ArticleId = x.Article.ArticleId,
@@ -164,27 +181,60 @@ namespace MyApi.Services
                     }).ToList()
                 })
                 .ToList();
-
-            return recommededArticles;     
         }
-
         private double CalculateCommonFeatures(Article article, ArticleVector vector)
         {
             double commonFeatures = 0;
 
-            if (article.AuthorId == vector.AuthorId) commonFeatures += 1.0;
-            if (article.AuthorId == vector.UserId) commonFeatures += 3.0; // if the user is the author
-            if (vector.InteractionType == 1) commonFeatures += 1.0; // Like
-            if (vector.InteractionType == 2) commonFeatures += 2.0; // Comment (the strongest form of interaction)
-            if (vector.InteractionType == 3) commonFeatures += 0.5; // View
+            // Prioritize interactions with the article
+            if (article.ArticleId == vector.ArticleId)
+            {
+                if (vector.InteractionType == 1) commonFeatures += 1.5; // Like
+                else if (vector.InteractionType == 2) commonFeatures += 2.0; // Comment (strongest interaction)
+                else if (vector.InteractionType == 3) commonFeatures += 1.0; // View
+            }
 
-            // if (article.ArticleId == vector.ArticleId){
-            //     if (vector.InteractionType == 1) commonFeatures += 1.0; // Like
-            //     if (vector.InteractionType == 2) commonFeatures += 2.0; // Comment (the strongest form of interaction)
-            //     if (vector.InteractionType == 3) commonFeatures += 0.5; // View
-            // }
+            // Prioritize articles authored by users the user has interacted with
+            if (article.AuthorId == vector.AuthorId) commonFeatures += 1.0;
+            
 
             return commonFeatures;
+        }
+        private void WriteRecommendationsToFile(List<(Article Article, double Rating)> recommendedArticles)
+        {
+            string filePath = "recommended_articles.txt"; // Define the file path
+
+            using (StreamWriter writer = new StreamWriter(filePath, false)) // false means overwrite the file
+            {
+                foreach (var article in recommendedArticles)
+                {
+                    writer.WriteLine($"Rating: {article.Rating}, ArticleId: {article.Article.ArticleId}, AuthorId: {article.Article.AuthorId}, PostedDate: {article.Article.PostedDate}, Title: {article.Article.Title}");
+                }
+            }
+        }
+
+        // New method to write common features and normalized ratings to a file
+        private void WriteCommonFeaturesToFile(List<(Article article, double totalCommonFeatures)> articlesWithCommonFeatures, double[,] ratings, double maxScore)
+        {
+            string filePath = "article_common_features.txt"; // Define the file path
+            // Keep the original indices to align with the ratings array
+            var indexedArticlesWithCommonFeatures = articlesWithCommonFeatures
+                .Select((item, index) => (Article: item.article, TotalCommonFeatures: item.totalCommonFeatures, Index: index))
+                .OrderByDescending(x => x.TotalCommonFeatures) // sort by common features
+                .ToList();
+
+            using (StreamWriter writer = new StreamWriter(filePath, false)) // false means overwrite the file
+            {
+                writer.WriteLine("Article Common Features and Normalized Ratings:");
+                writer.WriteLine("maxScore: " + maxScore);
+
+                foreach (var articleWithIndex in indexedArticlesWithCommonFeatures)
+                {
+                    // Use the original index from the unsorted list
+                    int originalIndex = articleWithIndex.Index;
+                    writer.WriteLine($"ArticleId: {articleWithIndex.Article.ArticleId}, AuthorId: {articleWithIndex.Article.AuthorId}, PostedDate: {articleWithIndex.Article.PostedDate}, Title: {articleWithIndex.Article.Title}, CommonFeatures: {articleWithIndex.TotalCommonFeatures}, Rating: {ratings[0, originalIndex]}");
+                }
+            }
         }
     }
 }
