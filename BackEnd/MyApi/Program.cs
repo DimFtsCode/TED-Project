@@ -1,18 +1,15 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using MyApi.Data;
 using MyApi.Services;
-using MyApi.Hubs; // Προσθήκη του namespace για το ChatHub
+using MyApi.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Προσθήκη της υπηρεσίας του DbContext
+// Add the DbContext service
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=database.db"));
 
-// Προσθήκη υπηρεσιών στο container
+// Add services to the container
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<UserRegistrationService>();
 builder.Services.AddScoped<UserBioService>();
@@ -29,12 +26,12 @@ builder.Services.AddScoped<ArticleService>();
 builder.Services.AddScoped<ArticleVectorService>();
 
 
-// Προσθήκη του SignalR
+// Add SignalR
 builder.Services.AddSignalR();
 
 builder.Services.AddControllers();
 
-// Προσθήκη CORS policy
+// Add CORS policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
@@ -44,10 +41,10 @@ builder.Services.AddCors(options =>
                           .AllowCredentials());
 });
 
-// Προσθήκη της μνήμης cache
+// Add memory cache
 builder.Services.AddMemoryCache();
 
-// Ρύθμιση των ακροατών (listeners)
+// Configure listeners
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(5297); // HTTP
@@ -56,7 +53,7 @@ builder.WebHost.ConfigureKestrel(options =>
 
 var app = builder.Build();
 
-// Ρύθμιση του HTTP request pipeline
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -64,15 +61,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseRouting();
 
-// Χρήση της CORS policy
+// Use the CORS policy
 app.UseCors("AllowReactApp");
 
-// Χρήση HTTPS redirection
+// Use HTTPS redirection
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-// Καταχώρηση των SignalR hubs
+// Register the SignalR hubs
 app.MapHub<ChatHub>("/chatHub");
 
 app.MapControllers();

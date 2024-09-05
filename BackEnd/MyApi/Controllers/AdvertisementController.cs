@@ -17,27 +17,27 @@ namespace MyApi.Controllers
             _advertisementService = advertisementService;
         }
 
-        // Δημιουργία αγγελίας
+        // Create Advertisement
         [HttpPost]
         public IActionResult CreateAdvertisement([FromBody] AdvertisementDto advertisementDto)
         {
             try
             {
-                var createdAdvertisement = _advertisementService.CreateAdvertisement(advertisementDto);
-                return Ok(createdAdvertisement); // Επιστροφή του DTO αντί για το πλήρες μοντέλο
+            var createdAdvertisement = _advertisementService.CreateAdvertisement(advertisementDto);
+            return Ok(createdAdvertisement); // Return the DTO instead of the full model
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+            return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
-                return BadRequest("Error creating advertisement: " + ex.Message);
+            return BadRequest("Error creating advertisement: " + ex.Message);
             }
         }
 
 
-        // Ενημέρωση αγγελίας
+        // Update Advertisement
         [HttpPut("{id}")]
         public IActionResult UpdateAdvertisement(int id, [FromBody] Advertisement updatedAdvertisement)
         {
@@ -47,7 +47,7 @@ namespace MyApi.Controllers
             return Ok(advertisement);
         }
 
-        // Διαγραφή αγγελίας
+        // Delete Advertisement
         [HttpDelete("{id}")]
         public IActionResult DeleteAdvertisement(int id, int userId)
         {
@@ -57,7 +57,7 @@ namespace MyApi.Controllers
             return NoContent();
         }
 
-        // Εύρεση αγγελίας με βάση το ID
+        // Get Advertisement by ID
         [HttpGet("{id}")]
         public IActionResult GetAdvertisement(int id)
         {
@@ -67,7 +67,7 @@ namespace MyApi.Controllers
             return Ok(advertisement);
         }
 
-        // Λήψη όλων των αγγελιών
+        // Get All Advertisements
         [HttpGet]
         public IActionResult GetAllAdvertisements()
         {

@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace MyApi.Models
 {
     public class Discussion
@@ -7,7 +5,7 @@ namespace MyApi.Models
         public int Id { get; set; }
         public string? Title { get; set; }
 
-        // Απλή λίστα από User IDs αντί για UserDiscussion objects
+        // Simple list of User IDs instead of UserDiscussion objects
         public List<int> Participants { get; set; } = new List<int>();
 
         // One-to-Many relationship with Message

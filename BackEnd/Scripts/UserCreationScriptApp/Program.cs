@@ -97,7 +97,7 @@ namespace UserCreationScript
                 "ETH Zurich", "Peking University", "University of Hong Kong", "Seoul National University", "Tsinghua University", "University of Sydney"
             };
 
-            // Ξεχωριστές λίστες εταιρειών για κάθε JobIndustry
+            // Distinct lists of companies for every JobIndustry
             List<string> technologyCompanies = new List<string>
             {
                 "Google", "Microsoft", "Apple", "Amazon", "Facebook", "Tesla", "Netflix", "IBM", "Intel", "Cisco"
@@ -136,7 +136,7 @@ namespace UserCreationScript
                 "Jones Day", "Sidley Austin", "Hogan Lovells", "Norton Rose Fulbright", "White & Case"
             };
 
-            // Χαρτογράφηση Degree σε JobPosition
+            // Mapping of Degree to JobPosition
             Dictionary<Degree, List<JobPosition>> degreeToJobMap = new Dictionary<Degree, List<JobPosition>>
             {
                 { Degree.ComputerScience, new List<JobPosition> { JobPosition.SoftwareEngineer, JobPosition.DataScientist, JobPosition.ITManager, JobPosition.CyberSecurityAnalyst } },
@@ -152,7 +152,7 @@ namespace UserCreationScript
                 { Degree.NoDegree, new List<JobPosition> { JobPosition.ContentCreator, JobPosition.GraphicDesigner } }
             };
 
-            // Χαρτογράφηση JobIndustry σε εταιρείες
+            // Mapping of JobPosition to JobIndustry
             Dictionary<JobIndustry, List<string>> industryToCompanyMap = new Dictionary<JobIndustry, List<string>>
             {
                 { JobIndustry.Technology, technologyCompanies },
@@ -184,17 +184,17 @@ namespace UserCreationScript
                 Address = "Admin Address",
                 Admin = true,
                 PublicFields = new List<string> { "FirstName", "LastName", "Email" },
-                Education = new List<Education>(), // Κενή λίστα εκπαίδευσης
-                Jobs = new List<Job>(), // Κενή λίστα εργασιών
-                Skills = new List<Skill>(), // Κενή λίστα δεξιοτήτων
-                Advertisements = new List<Advertisement>() // Κενή λίστα διαφημίσεων
+                Education = new List<Education>(), // Empty list of educations
+                Jobs = new List<Job>(), // Empty list of jobs
+                Skills = new List<Skill>(), // Empty list of skills
+                Advertisements = new List<Advertisement>() // Empty list of advertisements
             };
 
-            // Τυχαία επιλογή εικόνας προφίλ για τον admin
+            // random selection of profile picture for admin
             adminUser.PhotoData = LoadRadomProfilePicture(stockProfilePictures, stockProfilesPath, random);
             adminUser.PhotoMimeType = "image/jpeg";
 
-            // Προσθήκη του admin στη λίστα των χρηστών
+            // Add the admin user to the list of users
             users.Add(adminUser);
 
             // regular user creation
@@ -229,14 +229,14 @@ namespace UserCreationScript
                     Education = GenerateRandomEducation(universities, random, degree, age),
                     Jobs = GenerateRandomJobs(position, industry, companyList, age), 
                     Skills = GenerateRandomSkills(random),
-                    Advertisements = new List<Advertisement>() // Αρχικοποιούμε τη λίστα των διαφημίσεων
+                    Advertisements = new List<Advertisement>()
                 };
                 
-                // Τυχαία επιλογή εικόνας προφίλ για τον χρήστη
+                // Random selection of profile picture for the user
                 user.PhotoData = LoadRadomProfilePicture(stockProfilePictures, stockProfilesPath, random);
                 user.PhotoMimeType = "image/jpeg";
 
-                // Δημιουργία διαφημίσεων για τον χρήστη
+                // Create advertisements for the user
                 if (user.Jobs.Any())
                 {
                     var lastJob = user.Jobs.Last();
@@ -246,7 +246,7 @@ namespace UserCreationScript
                     {
                         //Console.WriteLine("Creating advertisement for user: " + user.Email);
                         Advertisement advertisement = CreateAdvertisementForUser(user, random);
-                        user.Advertisements.Add(advertisement); // Προσθήκη αγγελίας στη λίστα του χρήστη
+                        user.Advertisements.Add(advertisement); // Add the advertisement to the user's list
                     }
                 }
                 else
@@ -257,7 +257,7 @@ namespace UserCreationScript
                 users.Add(user);
             }
 
-            // Αποθήκευση χρηστών μαζί με τις διαφημίσεις τους στη βάση δεδομένων
+            // Add all users to the database
             context.Users.AddRange(users);
             return users;
         }
@@ -267,7 +267,7 @@ namespace UserCreationScript
             var educationList = new List<Education>();
             int currentAge = age;
 
-            // Περίπτωση NoDegree - Προσθέτει μόνο εκπαίδευση λυκείου
+            // Possibility of not having a degree, only high school education
             if (random.NextDouble() >= 0.9)
             {
                 var education = new Education
@@ -283,13 +283,13 @@ namespace UserCreationScript
                 return educationList;
             }
 
-            // Υπολογισμός ημερομηνιών από το παλαιότερο προς το νεότερο επίπεδο σπουδών
+            // Calculate the dates from the oldest to the newest level of education
             DateTime currentDate = DateTime.Now;
 
-            // Προπτυχιακό επίπεδο (Bachelor) - 80% πιθανότητα να το έχει ολοκληρώσει
+            // Bachelor level (80% probability to have completed it)
             if (random.NextDouble() < 0.89)
             {
-                int bachelorDuration = random.Next(3, 6); // Διάρκεια 3-5 χρόνια
+                int bachelorDuration = random.Next(3, 6); // Duration 3-5 years
                 var bachelor = new Education
                 {
                     Degree = degree,
@@ -304,7 +304,7 @@ namespace UserCreationScript
                 
             }
 
-            // Μεταπτυχιακό επίπεδο (Master) - 50% πιθανότητα αν έχει ολοκληρώσει το Bachelor
+            // Master level (50% probability if Bachelor is completed)
             if (educationList.Any(e => e.Level == EducationLevel.Bachelor) && random.NextDouble() < 0.4 && currentAge >= 26)
             {
                 int masterDuration = random.Next(1, 4); // Διάρκεια 1-3 χρόνια
@@ -324,10 +324,10 @@ namespace UserCreationScript
                 
             }
 
-            // Διδακτορικό επίπεδο (Doctorate) - 10% πιθανότητα αν έχει ολοκληρώσει το Master
+            // Doctorate level (10% probability if Master is completed)
             if (educationList.Any(e => e.Level == EducationLevel.Bachelor) && random.NextDouble() < 0.07 && currentAge >= 31)
             {
-                int doctorateDuration = random.Next(4, 8); // Διάρκεια 4-7 χρόνια
+                int doctorateDuration = random.Next(4, 8); // Duration 4-7 years
                 int ageStart = random.Next(1,4);
 
                 var doctorate = new Education
@@ -470,7 +470,7 @@ namespace UserCreationScript
             DateTime endDate = DateTime.Now;
             int range = (endDate - startDate).Days;
             DateTime randomDate = startDate.AddDays(random.Next(range));    
-            // Βρείτε το τελευταίο Job του χρήστη
+            
             var lastJob = user.Jobs.Last();
 
             // Δημιουργία θέσης για ένα μικρότερο επίπεδο από το τρέχον επίπεδο
@@ -530,60 +530,6 @@ namespace UserCreationScript
             }
         }
     
-        
-        // static void GenerateSampleConnections(AppDbContext context, List<User> users, int leastConnectionCount, int mostConnectionCount)
-        // {
-        //     Random random = new Random();
-        //     var friendships = new List<Friendship>();
-
-        //     foreach (var user in users)
-        //     {
-        //         // determine the number of connections to create for the user
-        //         int connectionsCount = random.Next(leastConnectionCount, mostConnectionCount + 1);
-
-        //         var potentialConnections = users
-        //             .Where(u => u.UserId != user.UserId && // exclude the user itself
-        //                         (u.Jobs.Any(job => user.Jobs.Any(uj => uj.Industry == job.Industry)) || // same industry
-        //                         u.Education.Any(ed => user.Education.Any(ue => ed.Degree == ue.Degree)) || // same degree
-        //                         u.Skills.Any(skill => user.Skills.Contains(skill)))) // same skills
-        //             .ToList();
-
-        //         if (potentialConnections.Count < connectionsCount)
-        //         {
-        //             connectionsCount = potentialConnections.Count;
-        //         }
-        //         if (connectionsCount == 0)
-        //         {
-        //             // connect to 2 random users if no potential connections found
-        //             potentialConnections = users
-        //                 .Where(u => u.UserId != user.UserId) // exclude user itself
-        //                 .OrderBy(u => random.Next()) // shuffle the users
-        //                 .Take(2)
-        //                 .ToList();
-
-        //             connectionsCount = potentialConnections.Count; // == 2 
-        //         }
-            
-        //         for (int i = 0; i < connectionsCount; i++)
-        //         {
-        //             var connection = potentialConnections[random.Next(potentialConnections.Count)];
-
-        //             friendships.Add(new Friendship
-        //             {
-        //                 UserId = user.UserId,
-        //                 FriendId = connection.UserId,
-        //                 FriendshipDate = DateTime.Now.AddDays(-random.Next(1, 365)),
-        //                 IsAccepted = true // Automatically accept the connection
-        //             });
-
-        //             // Remove the connected user from the list to prevent duplicate connections
-        //             potentialConnections.Remove(connection);
-        //         }
-        //     }
-            
-        //     context.Friendships.AddRange(friendships);
-        // }
-
         static void GenerateSampleConnections(AppDbContext context, List<User> users, int leastConnectionCount, int mostConnectionCount)
         {
             Random random = new Random();

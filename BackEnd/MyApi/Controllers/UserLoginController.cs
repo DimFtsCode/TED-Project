@@ -37,8 +37,8 @@ namespace MyApi.Controllers
             {
                 userId = user.UserId,
                 email = user.Email,
-                firstName = user.FirstName, // Επιστροφή του FirstName
-                isAdmin = user.Admin // Ενημέρωση για τη χρήση της ιδιότητας Admin
+                firstName = user.FirstName,
+                isAdmin = user.Admin 
                 
             });
         }

@@ -30,22 +30,22 @@ namespace MyApi.Services
 
         public List<Advertisement> GetRecommendedAdvertisements(int userId)
         {
-            // Φόρτωση διανυσμάτων διαφημίσεων για τον χρήστη
+            // Load advertisement vectors for the user
             var interactionVectors = _context.AdvertisementVectors
                                             .Where(v => v.UserId == userId)
                                             .ToList();
 
-            // Φόρτωση όλων των διαφημίσεων
+            // Load all advertisements
             var advertisements = _context.Advertisements.ToList();
 
-            // Βεβαιώσου ότι υπάρχουν διανύσματα και διαφημίσεις
+            // Make sure there are vectors and advertisements
             if (interactionVectors.Count < 15 || advertisements.Count == 0)
             {
-                return new List<Advertisement>(); // Αν δεν υπάρχουν, επιστρέφουμε κενή λίστα
+                return new List<Advertisement>(); // If there are none, return an empty list
             }
 
             int numItems = advertisements.Count;
-            double[,] ratings = new double[1, numItems]; // Δημιουργία μήτρας βαθμολογίας για έναν χρήστη
+            double[,] ratings = new double[1, numItems]; // Create a rating matrix for a user
             List<(Advertisement ad, double totalCommonFeatures)> adswithCommonFeatures = new List<(Advertisement, double)>();
 
             for (int i = 0; i < numItems; i++)
@@ -64,7 +64,7 @@ namespace MyApi.Services
                 adswithCommonFeatures.Add((ad, totalCommonFeatures));
             }
 
-            // Κανονικοποίηση των αποτελεσμάτων (0-1)
+            // Normalize the results (0-1)
             double maxScore = ratings.Cast<double>().Max();
             if (maxScore > 0)
             {
@@ -76,20 +76,20 @@ namespace MyApi.Services
 
             // WriteCommonFeatures(adswithCommonFeatures, ratings, maxScore);
 
-            // Δημιουργία αντικειμένου για το Matrix Factorization
+            // Create an object for Matrix Factorization
             int numLatentFeatures = 10;
             double learningRate = 0.01;
             double regularization = 0.1;
             int numIterations = 5000;
             var mf = new MatrixFactorization(1, numItems, numLatentFeatures, learningRate, regularization, numIterations);
 
-            // Εκπαίδευση του μοντέλου με χρήση των βαθμολογιών
+            // Train the model using the ratings
             mf.Train(ratings);
 
-            // Υπολογισμός των προβλεπόμενων βαθμολογιών
+            // Calculate the predicted ratings
             var predictedRatings = mf.GetPredictedRatings();
 
-            // Επιλογή των διαφημίσεων με τις υψηλότερες προβλεπόμενες βαθμολογίες
+            // Select the advertisements with the highest predicted ratings
             var recommendedAds = advertisements
                 .Select((ad, index) => new { Ad = ad, Rating = predictedRatings[0, index] })
                 .OrderByDescending(x => x.Rating)
@@ -100,7 +100,7 @@ namespace MyApi.Services
             return recommendedAds;
         }
 
-        // Μέθοδος για υπολογισμό των κοινών χαρακτηριστικών
+        // Method to calculate common features
         private double CalculateCommonFeatures(Advertisement ad, AdvertisementVector vector)
         {
             double commonFeatures = 0;
@@ -115,7 +115,7 @@ namespace MyApi.Services
             return commonFeatures;
         }
 
-        // Μέθοδος για εμφάνιση των κοινών χαρακτηριστικών
+        // Method to write common features
         private void WriteCommonFeatures(List<(Advertisement ad, double totalCommonFeatures)> adswithCommonFeatures, double[,] ratings, double maxScore)
         {
             string filePath = "ads_common_features.txt";
@@ -127,7 +127,7 @@ namespace MyApi.Services
 
             using (StreamWriter writer = new StreamWriter(filePath, false))
             {
-                writer.WriteLine("Advertisement common featrues and normalized ratings");
+                writer.WriteLine("Advertisement common features and normalized ratings");
                 writer.WriteLine("maxScore: " + maxScore);
 
                 foreach (var adWithIndex in indexedAdsWithCommonFeatures )

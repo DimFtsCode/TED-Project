@@ -32,7 +32,7 @@ namespace MyApi.Services
                     {
                         photo.CopyTo(memoryStream);
                         user.PhotoData = memoryStream.ToArray();
-                        user.PhotoMimeType = photo.ContentType; // Αποθήκευση του τύπου της φωτογραφίας
+                        user.PhotoMimeType = photo.ContentType;
                     }
                 }
 

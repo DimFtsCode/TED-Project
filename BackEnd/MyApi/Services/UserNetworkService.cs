@@ -22,15 +22,15 @@ namespace MyApi.Services
 
         public async Task<List<User>> SearchUsersAsync(string query, int currentUserId)
         {
-            // Ανάκτηση των IDs των φίλων του τρέχοντος χρήστη
+            // Retrieve the IDs of the current user's friends
             var friendIds = await _context.Friendships
                 .Where(f => f.UserId == currentUserId && f.IsAccepted)
                 .Select(f => f.FriendId)
                 .ToListAsync();
 
             return await _context.Users
-                .Where(u => u.UserId != currentUserId && // Φιλτράρει τον εαυτό
-                            !friendIds.Contains(u.UserId) && // Φιλτράρει τους ήδη φίλους
+                .Where(u => u.UserId != currentUserId && // Filter out the current user
+                            !friendIds.Contains(u.UserId) && // Filter out already friends
                             ((u.FirstName != null && u.FirstName.Contains(query)) ||
                             (u.LastName != null && u.LastName.Contains(query)) ||
                             (u.Email != null && u.Email.Contains(query))))
@@ -110,7 +110,7 @@ namespace MyApi.Services
                 .Where(f => f.UserId == userId && f.IsAccepted)
                 .ToListAsync();
 
-            // Εκτύπωση των αποτελεσμάτων για διάγνωση
+            // Print the results to the console for debugging
             foreach (var friendship in friendships)
             {
                 Console.WriteLine($"UserId: {friendship.UserId}, FriendId: {friendship.FriendId}, Friend: {friendship.Friend.FirstName} {friendship.Friend.LastName}");
