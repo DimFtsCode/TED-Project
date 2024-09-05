@@ -33,8 +33,8 @@ namespace UserCreationScript
             
             // Σύνδεση με τη βάση δεδομένων
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            optionsBuilder.UseSqlite("Data Source=D:/desktop/TED/Project/backend/MyApi/database.db");
-            // optionsBuilder.UseSqlite(@"Data Source=C:\Users\ziziz\Documents\DI\6ο εξάμηνο\ΤΕΔΙ\TED-Project\BackEnd\MyApi\database.db");
+            // optionsBuilder.UseSqlite("Data Source=D:/desktop/TED/Project/backend/MyApi/database.db");
+            optionsBuilder.UseSqlite(@"Data Source=C:\Users\ziziz\Documents\DI\6ο εξάμηνο\ΤΕΔΙ\TED-Project\BackEnd\MyApi\database.db");
 
             using (var context = new AppDbContext(optionsBuilder.Options))
             {
@@ -531,28 +531,89 @@ namespace UserCreationScript
         }
     
         
+        // static void GenerateSampleConnections(AppDbContext context, List<User> users, int leastConnectionCount, int mostConnectionCount)
+        // {
+        //     Random random = new Random();
+        //     var friendships = new List<Friendship>();
+
+        //     foreach (var user in users)
+        //     {
+        //         // determine the number of connections to create for the user
+        //         int connectionsCount = random.Next(leastConnectionCount, mostConnectionCount + 1);
+
+        //         var potentialConnections = users
+        //             .Where(u => u.UserId != user.UserId && // exclude the user itself
+        //                         (u.Jobs.Any(job => user.Jobs.Any(uj => uj.Industry == job.Industry)) || // same industry
+        //                         u.Education.Any(ed => user.Education.Any(ue => ed.Degree == ue.Degree)) || // same degree
+        //                         u.Skills.Any(skill => user.Skills.Contains(skill)))) // same skills
+        //             .ToList();
+
+        //         if (potentialConnections.Count < connectionsCount)
+        //         {
+        //             connectionsCount = potentialConnections.Count;
+        //         }
+        //         if (connectionsCount == 0)
+        //         {
+        //             // connect to 2 random users if no potential connections found
+        //             potentialConnections = users
+        //                 .Where(u => u.UserId != user.UserId) // exclude user itself
+        //                 .OrderBy(u => random.Next()) // shuffle the users
+        //                 .Take(2)
+        //                 .ToList();
+
+        //             connectionsCount = potentialConnections.Count; // == 2 
+        //         }
+            
+        //         for (int i = 0; i < connectionsCount; i++)
+        //         {
+        //             var connection = potentialConnections[random.Next(potentialConnections.Count)];
+
+        //             friendships.Add(new Friendship
+        //             {
+        //                 UserId = user.UserId,
+        //                 FriendId = connection.UserId,
+        //                 FriendshipDate = DateTime.Now.AddDays(-random.Next(1, 365)),
+        //                 IsAccepted = true // Automatically accept the connection
+        //             });
+
+        //             // Remove the connected user from the list to prevent duplicate connections
+        //             potentialConnections.Remove(connection);
+        //         }
+        //     }
+            
+        //     context.Friendships.AddRange(friendships);
+        // }
+
         static void GenerateSampleConnections(AppDbContext context, List<User> users, int leastConnectionCount, int mostConnectionCount)
         {
             Random random = new Random();
             var friendships = new List<Friendship>();
+            
+            // Dictionary to keep track of how many connections each user has
+            var userConnectionCounts = users.ToDictionary(u => u.UserId, u => 0);
 
             foreach (var user in users)
             {
                 // determine the number of connections to create for the user
-                int connectionsCount = random.Next(leastConnectionCount, mostConnectionCount + 1);
+                int remainingConnectionsCount = random.Next(leastConnectionCount, mostConnectionCount + 1) - userConnectionCounts[user.UserId];
 
+                if (remainingConnectionsCount == 0) continue;
+                
                 var potentialConnections = users
                     .Where(u => u.UserId != user.UserId && // exclude the user itself
+                                userConnectionCounts[u.UserId] < mostConnectionCount && // check if the other user has reached the maximum connections
                                 (u.Jobs.Any(job => user.Jobs.Any(uj => uj.Industry == job.Industry)) || // same industry
                                 u.Education.Any(ed => user.Education.Any(ue => ed.Degree == ue.Degree)) || // same degree
                                 u.Skills.Any(skill => user.Skills.Contains(skill)))) // same skills
                     .ToList();
 
-                if (potentialConnections.Count < connectionsCount)
+
+                if (potentialConnections.Count < remainingConnectionsCount)
                 {
-                    connectionsCount = potentialConnections.Count;
+                    remainingConnectionsCount = potentialConnections.Count;
                 }
-                if (connectionsCount == 0)
+
+                if (remainingConnectionsCount == 0)
                 {
                     // connect to 2 random users if no potential connections found
                     potentialConnections = users
@@ -561,20 +622,42 @@ namespace UserCreationScript
                         .Take(2)
                         .ToList();
 
-                    connectionsCount = potentialConnections.Count; // == 2 
+                    remainingConnectionsCount = potentialConnections.Count; // == 2 
                 }
             
-                for (int i = 0; i < connectionsCount; i++)
+                for (int i = 0; i < remainingConnectionsCount; i++)
                 {
                     var connection = potentialConnections[random.Next(potentialConnections.Count)];
 
-                    friendships.Add(new Friendship
+                    // Create friendship from user to connection
+                    var friendshipDate = DateTime.Now.AddDays(-random.Next(1, 365));
+                    if (!FriendshipExists(friendships, user.UserId, connection.UserId))
                     {
-                        UserId = user.UserId,
-                        FriendId = connection.UserId,
-                        FriendshipDate = DateTime.Now.AddDays(-random.Next(1, 365)),
-                        IsAccepted = true // Automatically accept the connection
-                    });
+                        friendships.Add(new Friendship
+                        {
+                            UserId = user.UserId,
+                            FriendId = connection.UserId,
+                            FriendshipDate = friendshipDate,
+                            IsAccepted = true // Automatically accept the connection
+                        });
+                    
+                        // Create friendship from connection to user
+                        if (!FriendshipExists(friendships, connection.UserId, user.UserId))
+                        {
+                            friendships.Add(new Friendship
+                            {
+                                UserId = connection.UserId,
+                                FriendId = user.UserId,
+                                FriendshipDate = friendshipDate,
+                                IsAccepted = true // Automatically accept the connection
+                            });
+
+                            userConnectionCounts[user.UserId]++;
+                            userConnectionCounts[connection.UserId]++;
+                        }
+                    
+                    }
+
 
                     // Remove the connected user from the list to prevent duplicate connections
                     potentialConnections.Remove(connection);
@@ -583,7 +666,13 @@ namespace UserCreationScript
             
             context.Friendships.AddRange(friendships);
         }
-        
+
+        // Helper method to check if a friendship already exists
+        static bool FriendshipExists(List<Friendship> friendships, int userId, int friendId)
+        {
+            return friendships.Any(f => f.UserId == userId && f.FriendId == friendId);
+        }
+
         static List<Article> GenerateSampleArticles(AppDbContext context, List<User> users, int leastArticleCount, int mostArticleCount)
         {
             var articles = new List<Article>();
