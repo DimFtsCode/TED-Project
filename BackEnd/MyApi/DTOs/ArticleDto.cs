@@ -1,7 +1,5 @@
 // Data Transfer Object for Articles
 
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
-
 namespace MyApi.DTOs
 {
     public class ArticleDto

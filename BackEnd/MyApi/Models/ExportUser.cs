@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace MyApi.Models
 {
     public class ExportUser
