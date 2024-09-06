@@ -1,7 +1,0 @@
-delete from users where userid > 9;
-UPDATE sqlite_sequence SET seq = 9 WHERE name = 'Users';
-UPDATE sqlite_sequence SET seq = 9 WHERE name = 'Jobs';
-UPDATE sqlite_sequence SET seq = 9 WHERE name = 'Educations';
-UPDATE sqlite_sequence SET seq = 9 WHERE name = 'Skills';
-UPDATE sqlite_sequence SET seq = 9 WHERE name = 'Advertismens';
-
