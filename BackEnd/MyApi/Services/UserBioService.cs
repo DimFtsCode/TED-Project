@@ -38,7 +38,7 @@ namespace MyApi.Services
                         EndDate = education.EndDate,
                         IsPublic = education.IsPublic,
                         UserId = user.UserId,
-                        Level = education.Level  // Προσθήκη του επιπέδου μόρφωσης
+                        Level = education.Level 
                     };
                     user.Education.Add(newEducation);
                     _logger.LogInformation($"Added Education: {education.Degree}, {education.Institution}");
@@ -54,8 +54,8 @@ namespace MyApi.Services
                         EndDate = job.EndDate,
                         IsPublic = job.IsPublic,
                         UserId = user.UserId,
-                        Level = job.Level, // Προσθήκη του επιπέδου της θέσης εργασίας
-                        Industry = job.Industry // Προσθήκη της βιομηχανίας
+                        Level = job.Level, 
+                        Industry = job.Industry 
                     };
                     user.Jobs.Add(newJob);
                     _logger.LogInformation($"Added Job: {job.Position}, {job.Company}");
@@ -88,13 +88,13 @@ namespace MyApi.Services
                                     .SingleOrDefault(u => u.UserId == request.UserId);
             if (user != null)
             {
-                // Διαγραφή των παλιών δεδομένων
+                // Remove the old data
                 _context.Educations.RemoveRange(user.Education);
                 _context.Jobs.RemoveRange(user.Jobs);
                 _context.Skills.RemoveRange(user.Skills);
                 _context.SaveChanges();
 
-                // Προσθήκη των νέων δεδομένων
+                // Add new data
                 foreach (var education in request.Educations)
                 {
                     var updatedEducation = new Education
@@ -105,7 +105,7 @@ namespace MyApi.Services
                         EndDate = education.EndDate,
                         IsPublic = education.IsPublic,
                         UserId = user.UserId,
-                        Level = education.Level  // Προσθήκη του επιπέδου μόρφωσης
+                        Level = education.Level  
                     };
                     user.Education.Add(updatedEducation);
                     _logger.LogInformation($"Updated Education: {education.Degree}, {education.Institution}");
@@ -121,8 +121,8 @@ namespace MyApi.Services
                         EndDate = job.EndDate,
                         IsPublic = job.IsPublic,
                         UserId = user.UserId,
-                        Level = job.Level, // Προσθήκη του επιπέδου της θέσης εργασίας
-                        Industry = job.Industry // Προσθήκη της βιομηχανίας
+                        Level = job.Level, 
+                        Industry = job.Industry 
                     };
                     user.Jobs.Add(updatedJob);
                     _logger.LogInformation($"Updated Job: {job.Position}, {job.Company}");

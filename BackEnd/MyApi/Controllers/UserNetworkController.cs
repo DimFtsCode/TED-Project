@@ -87,7 +87,7 @@ namespace MyApi.Controllers
         {
             var friends = await _userNetworkService.GetFriendsAsync(userId);
 
-            // Εκτύπωση των φίλων για διάγνωση
+            // Print friends for debugging
             foreach (var friend in friends)
             {
                 Console.WriteLine($"FriendId: {friend.UserId}, Friend: {friend.FirstName} {friend.LastName}");

@@ -15,8 +15,8 @@ const RegisterBio = () => {
         degree: enums.Degree[0] || '',
         level: enums.EducationLevel[0] || '',
         institution: '',
-        startDate: null,  // Τώρα αποθηκεύεται ως Date object
-        endDate: null,    // Τώρα αποθηκεύεται ως Date object
+        startDate: null,  
+        endDate: null,    
         isPublic: false
     });
     const [job, setJob] = useState({
@@ -24,8 +24,8 @@ const RegisterBio = () => {
         industry: enums.JobIndustry[0] || '',
         level: enums.JobLevel[0] || '',
         company: '',
-        startDate: null,  // Τώρα αποθηκεύεται ως Date object
-        endDate: null,    // Τώρα αποθηκεύεται ως Date object
+        startDate: null,  
+        endDate: null, 
         isPublic: false
     });
     const [skill, setSkill] = useState({
@@ -140,7 +140,7 @@ const RegisterBio = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
     
-        // Μορφοποίηση των ημερομηνιών
+        
         const formattedEducation = educationList.map(ed => ({
             ...ed,
             startDate: ed.startDate ? ed.startDate.toISOString().split('T')[0] : null,
@@ -249,8 +249,8 @@ const RegisterBio = () => {
                                 className="form-control" 
                                 placeholderText="Select Start Date"
                                 locale={enUS}
-                                showYearDropdown        // Προσθέτει dropdown για επιλογή έτους
-                                showMonthDropdown       // Προσθέτει dropdown για επιλογή μήνα
+                                showYearDropdown   
+                                showMonthDropdown 
                                 dropdownMode="select"
                             />
                         </div>
@@ -263,8 +263,8 @@ const RegisterBio = () => {
                                 className="form-control" 
                                 placeholderText="Select End Date"
                                 locale={enUS}
-                                showYearDropdown        // Προσθέτει dropdown για επιλογή έτους
-                                showMonthDropdown       // Προσθέτει dropdown για επιλογή μήνα
+                                showYearDropdown  
+                                showMonthDropdown 
                                 dropdownMode="select"
                                 
                             />
@@ -371,8 +371,8 @@ const RegisterBio = () => {
                                 className="form-control" 
                                 placeholderText="Select Start Date"
                                 locale={enUS}
-                                showYearDropdown        // Προσθέτει dropdown για επιλογή έτους
-                                showMonthDropdown       // Προσθέτει dropdown για επιλογή μήνα
+                                showYearDropdown  
+                                showMonthDropdown  
                                 dropdownMode="select"
                             />
                         </div>
@@ -385,8 +385,8 @@ const RegisterBio = () => {
                                 className="form-control" 
                                 placeholderText="Select End Date"
                                 locale={enUS}
-                                showYearDropdown        // Προσθέτει dropdown για επιλογή έτους
-                                showMonthDropdown       // Προσθέτει dropdown για επιλογή μήνα
+                                showYearDropdown 
+                                showMonthDropdown  
                                 dropdownMode="select"
                             />
                         </div>

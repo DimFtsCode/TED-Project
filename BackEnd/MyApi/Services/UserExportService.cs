@@ -31,8 +31,8 @@ namespace MyApi.Services
                     Educations = u.Education.Select(e => new Education
                     {
                         EducationId = e.EducationId,
-                        Degree = e.Degree,  // Χρήση του Degree enum
-                        Level = e.Level,    // Χρήση του EducationLevel enum
+                        Degree = e.Degree,  // Use of Degree enum
+                        Level = e.Level,    // Use of EducationLevel enum
                         Institution = e.Institution ?? string.Empty,
                         StartDate = e.StartDate,
                         EndDate = e.EndDate,
@@ -42,9 +42,9 @@ namespace MyApi.Services
                     Jobs = u.Jobs.Select(j => new Job
                     {
                         JobId = j.JobId,
-                        Position = j.Position,  // Χρήση του JobPosition enum
-                        Industry = j.Industry,  // Χρήση του JobIndustry enum
-                        Level = j.Level,        // Χρήση του JobLevel enum
+                        Position = j.Position,  // Use of JobPosition enum
+                        Industry = j.Industry,  // Use of JobIndustry enum
+                        Level = j.Level,        // Use of JobLevel enum
                         Company = j.Company ?? string.Empty,
                         StartDate = j.StartDate,
                         EndDate = j.EndDate,
@@ -54,7 +54,7 @@ namespace MyApi.Services
                     Skills = u.Skills.Select(s => new Skill
                     {
                         SkillId = s.SkillId,
-                        SkillName = s.SkillName,  // Χρήση του SkillCategory enum
+                        SkillName = s.SkillName,  // Use of  SkillCategory enum
                         Proficiency = s.Proficiency ?? string.Empty,
                         UserId = s.UserId,
                         IsPublic = s.IsPublic

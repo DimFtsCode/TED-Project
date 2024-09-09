@@ -135,7 +135,7 @@ namespace MyApi.Services
             }
 
             // write total common featuers and normalized ratings to a file
-            WriteCommonFeaturesToFile(articlesWithCommonFeatures, ratings, maxScore);
+            // WriteCommonFeaturesToFile(articlesWithCommonFeatures, ratings, maxScore);
 
             int numLatentFeatures = 5;
             double learningRate = 0.01;
@@ -154,7 +154,7 @@ namespace MyApi.Services
                 .ToList();
 
             // Write the recommendations to a file
-            WriteRecommendationsToFile(recommendedArticles);
+            // WriteRecommendationsToFile(recommendedArticles);
 
             return recommendedArticles
                 .Select(x => new ArticleDto

@@ -10,24 +10,24 @@ namespace MyApi.Models
         public string Description { get; set; } = string.Empty;
         public DateTime PostedDate { get; set; }
 
-        // Ελάχιστες απαιτήσεις εκπαίδευσης για την αγγελία
+        // Minimum education requirements for the advertisement
         public Degree RequiredDegree { get; set; } 
         public EducationLevel RequiredEducationLevel { get; set; }
 
-        // Ελάχιστες απαιτήσεις εργασιακής εμπειρίας για την αγγελία
+        // Minimum work experience requirements for the advertisement
         public JobPosition RequiredPosition { get; set; } 
         public JobIndustry RequiredIndustry { get; set; } 
         public JobLevel RequiredJobLevel { get; set; } 
         public int MinimumYearsExperience { get; set; }
 
-        // Ελάχιστες απαιτήσεις δεξιοτήτων για την αγγελία
+        // Minimum skill requirements for the advertisement
         public SkillCategory RequiredSkill { get; set; }
 
-        // Συσχέτιση με τον χρήστη που δημοσίευσε την αγγελία
-        public int UserId { get; set; } // Συσχέτιση με τον χρήστη
+        // Association with the user who posted the advertisement
+        public int UserId { get; set; } // Association with the user
         public User? User { get; set; }
 
-        // Λίστα των UserId των χρηστών που έχουν κάνει αίτηση
+        // List of UserIds of users who have applied
         public List<int> ApplicantUserIds { get; set; } = new List<int>();
     }
 }
